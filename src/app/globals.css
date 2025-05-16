@@ -14,7 +14,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #ffffff;
     --foreground: #ededed;
   }
 }
@@ -30,3 +30,27 @@ body {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+.hero-section {
+  position: relative;
+  background-image: url('/assets/images/event_banner_001.jpg'); /* Use your image path */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 400px; /* adjust height as needed */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+.hero-section .overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0,0,0,0.6);
+  z-index: 0;
+}
+.hero-section > div.relative {
+  position: relative;
+  z-index: 1;
+}

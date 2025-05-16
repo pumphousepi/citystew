@@ -1,16 +1,29 @@
-import Navbar from './components/Navbar';
+import HeroSection from './components/HeroSection';
+import Header from './components/Header'; // or Navbar
+import Categories from './components/Categories';
+import Sponsors from './components/Sponsors';
+import AboutSection from './components/AboutSection';
+import Footer from './components/Footer';
 import EventList from './events/page';
 
 export default function HomePage() {
   return (
     <>
-      <Navbar />
-      <main className="max-w-4xl mx-auto p-6 bg-white min-h-screen">
-        <h1 className="text-3xl font-extrabold mb-6 text-center text-gray-900">
-          Live Music Near You
-        </h1>
-        <EventList />
+      <Header />
+      <main className="bg-white text-gray-900">
+        <HeroSection />
+        <Categories />
+
+        {/* Event List Section */}
+        <section className="max-w-5xl mx-auto px-4 py-10">
+          <h2 className="text-2xl font-bold mb-6 text-center">Live Music Near You</h2>
+          <EventList />
+        </section>
+
+        <Sponsors />
+        <AboutSection />
       </main>
+      <Footer />
     </>
   );
 }

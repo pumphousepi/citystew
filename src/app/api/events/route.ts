@@ -6,7 +6,7 @@ export async function GET() {
   const BASE_URL = 'https://app.ticketmaster.com/discovery/v2/events.json';
 
   try {
-    const res = await fetch(`${BASE_URL}?apikey=${API_KEY}&size=10&city=New York`);
+    const res = await fetch(`${BASE_URL}?apikey=${API_KEY}&size=10&city=Austin`);
     const data = await res.json();
 
     return NextResponse.json(data);
