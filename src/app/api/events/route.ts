@@ -11,7 +11,9 @@ export async function GET() {
 
     return NextResponse.json(data);
   }
-  catch {
-    return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 });
-  }
+  catch (error) {
+  console.error(error); // this line makes 'error' used
+  return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
+}
+
 }
