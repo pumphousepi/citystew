@@ -1,40 +1,52 @@
-// src/app/events/[id]/page.tsx
-import { notFound } from 'next/navigation';
+'use client';
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 
-interface Params {
-  params: {
-    id: string;
-  };
-}
+export default function EventDetailPage() {
+  const { id } = useParams();
+  const [event, setEvent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-async function fetchEventDetails(id: string) {
-  try {
-    const res = await fetch(`http://localhost:5000/api/event-details/${id}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data;
-  } catch {
-    return null;
-  }
-}
+  useEffect(() => {
+    const fetchEventDetails = async () => {
+      const baseURL =
+        process.env.NODE_ENV === 'development'
+          ? 'http://localhost:3000'
+          : 'https://www.citystew.com';
 
-export default async function EventDetailsPage({ params }: Params) {
-  const event = await fetchEventDetails(params.id);
+      try {
+        const res = await fetch(`${baseURL}/api/event-details/${id}`);
+        const data = await res.json();
+        setEvent(data);
+      } catch (error) {
+        console.error('Failed to fetch event details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!event) return notFound();
+    if (id) {
+      fetchEventDetails();
+    }
+  }, [id]);
+
+  if (loading) return <p>Loading event details...</p>;
+  if (!event) return <p>No event found.</p>;
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">{event.name}</h1>
-      {event.image && (
-        <img
-          src={event.image}
-          alt={event.name}
-          className="w-full h-64 object-cover mb-4 rounded"
-        />
-      )}
-      <p className="text-gray-600 mb-2">{event.date}</p>
-      <p className="text-gray-700">{event.description || 'No description available.'}</p>
+      <h1 className="text-3xl font-bold mb-4">{event.name}</h1>
+      <p className="mb-2">{event.dates?.start?.localDate}</p>
+      <p className="mb-2">{event._embedded?.venues?.[0]?.name}</p>
+      <p className="mb-2">{event.info || 'No description available.'}</p>
+      <a
+        href={event.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 underline"
+      >
+        Buy Tickets
+      </a>
     </div>
   );
 }
