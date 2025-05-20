@@ -2,9 +2,8 @@ import HeroSection from './components/HeroSection';
 import TrendingEvents from './components/TrendingEvents';
 import Categories from './components/Categories';
 import Sponsors from './components/Sponsors';
-import AboutSection from './components/AboutSection';
 import Footer from './components/Footer';
-import EventList from './events/page';
+import EventList from './components/EventList';
 import Navbar from './components/Navbar';
 
 export default function HomePage() {
@@ -23,7 +22,6 @@ export default function HomePage() {
         </section>
 
         <Sponsors />
-        <AboutSection />
       </main>
       <Footer />
     </>

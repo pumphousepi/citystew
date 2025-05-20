@@ -43,12 +43,15 @@ export default function EventList() {
   if (events.length === 0) return <p>No events found.</p>;
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div
+      className="flex space-x-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 px-2"
+      style={{ scrollSnapType: 'x mandatory' }}
+    >
       {events.map(event => (
         <Link
           key={event.id}
           href={`/events/${event.id}`}
-          className="block border rounded-lg p-4 shadow-md hover:shadow-xl transition-shadow duration-300"
+          className="flex-shrink-0 w-60 rounded-lg border p-4 shadow-md hover:shadow-xl transition-shadow duration-300 scroll-snap-align-start"
         >
           {event.images && event.images.length > 0 && (
             <div className="relative w-full h-36 mb-3 rounded-md overflow-hidden">
