@@ -5,11 +5,12 @@ import Sponsors from './components/Sponsors';
 import AboutSection from './components/AboutSection';
 import Footer from './components/Footer';
 import EventList from './events/page';
+import Navbar from './components/Navbar';
 
 export default function HomePage() {
   return (
     <>
-      <Header />
+      <Navbar />
       <main className="bg-white text-gray-900">
         <HeroSection />
         <Categories />
