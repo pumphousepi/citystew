@@ -1,0 +1,25 @@
+/* Navbar.module.css */
+
+.navButton {
+  @apply font-semibold text-[#999] hover:text-[#777] transition-colors duration-300;
+}
+
+.navButtonActive {
+  @apply font-semibold text-[#333] hover:text-[#111] transition-colors duration-300;
+}
+
+.dropdownContainer {
+  @apply absolute left-0 mt-1 w-[600px] bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 z-50;
+}
+
+.dropdownTabs {
+  @apply flex border-b border-gray-200 px-6 py-2 space-x-6 font-semibold text-sm;
+}
+
+.dropdownLinks {
+  @apply px-6 py-4 grid grid-cols-3 gap-y-2 gap-x-8 text-blue-600 text-sm font-normal;
+}
+
+.viewAllLink {
+  @apply px-6 py-2 border-t border-gray-200 text-right text-blue-600 font-semibold hover:underline;
+}

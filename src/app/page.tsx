@@ -1,4 +1,5 @@
 import HeroSection from './components/HeroSection';
+import TrendingEvents from './components/TrendingEvents';
 import Categories from './components/Categories';
 import Sponsors from './components/Sponsors';
 import AboutSection from './components/AboutSection';
@@ -12,6 +13,7 @@ export default function HomePage() {
       <Navbar />
       <main className="bg-white text-gray-900">
         <HeroSection />
+        <TrendingEvents/>
         <Categories />
 
         {/* Event List Section */}

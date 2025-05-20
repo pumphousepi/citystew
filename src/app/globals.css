@@ -34,16 +34,16 @@ body {
 
 .hero-section {
   position: relative;
-  background-image: url('/assets/images/event_banner_001.jpg'); /* your image */
+  background-image: url('/assets/images/event_banner_001.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  min-height: 100vh;
+  min-height: 32rem;       /* smaller height (288px) */
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8rem 1rem; /* adjust top/bottom padding */
+  padding: 3rem 1rem;      /* reduced vertical padding */
 }
 
 .hero-overlay {
@@ -63,50 +63,44 @@ body {
 }
 
 .hero-title {
-  font-size: 2.25rem; /* text-4xl */
-  font-weight: 800; /* font-extrabold */
+  font-size: 1.875rem;  /* text-3xl */
+  font-weight: 800;     /* font-extrabold */
   margin-bottom: 1rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
 }
 
 @media (min-width: 640px) {
   .hero-title {
-    font-size: 3rem; /* sm:text-5xl */
+    font-size: 2.25rem; /* sm:text-4xl */
   }
 }
 
 .hero-subtitle {
-  font-size: 1.125rem; /* text-lg */
+  font-size: 1rem;  /* text-base */
   margin-bottom: 1.5rem;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 @media (min-width: 640px) {
   .hero-subtitle {
-    font-size: 1.25rem; /* sm:text-xl */
+    font-size: 1.125rem; /* sm:text-lg */
   }
 }
 
 .hero-search-form {
   display: flex;
-  flex-direction: row; /* keep horizontal layout on all screen sizes */
-  max-width: 24rem; /* smaller width for the search bar */
+  flex-direction: row;
+  max-width: 24rem;
   margin: 0 auto;
-  border-radius: 0.5rem; /* slight rounding instead of full circle */
+  border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   background-color: white;
 }
 
-@media (min-width: 640px) {
-  .hero-search-form {
-    flex-direction: row;
-  }
-}
-
 .hero-search-input {
   flex-grow: 1;
-  padding: 0.75rem 1rem; /* smaller padding for a more compact input */
+  padding: 0.75rem 1rem;
   font-size: 1rem;
   color: #1f2937;
   border: none;
