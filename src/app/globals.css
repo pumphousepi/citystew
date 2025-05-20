@@ -89,12 +89,12 @@ body {
 
 .hero-search-form {
   display: flex;
-  flex-direction: column;
-  max-width: 32rem; /* max-w-2xl ~ 512px */
+  flex-direction: row; /* keep horizontal layout on all screen sizes */
+  max-width: 24rem; /* smaller width for the search bar */
   margin: 0 auto;
-  border-radius: 9999px; /* rounded-full */
+  border-radius: 0.5rem; /* slight rounding instead of full circle */
   overflow: hidden;
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   background-color: white;
 }
 
@@ -106,24 +106,27 @@ body {
 
 .hero-search-input {
   flex-grow: 1;
-  padding: 1rem 1.5rem;
-  font-size: 1.125rem; /* text-lg */
-  color: #1f2937; /* gray-900 */
+  padding: 0.75rem 1rem; /* smaller padding for a more compact input */
+  font-size: 1rem;
+  color: #1f2937;
   border: none;
   outline: none;
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
 }
 
 .hero-search-button {
-  background-color: #4f46e5; /* indigo-600 */
+  background-color: #4f46e5;
   color: white;
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s ease;
   border: none;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
 }
 
 .hero-search-button:hover {
-  background-color: #4338ca; /* indigo-700 */
+  background-color: #4338ca;
 }
-
