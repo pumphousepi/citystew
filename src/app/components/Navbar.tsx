@@ -1,114 +1,149 @@
-'use client'; // React client component for hooks
+'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isSticky, setIsSticky] = useState(false);
+  const [openCities, setOpenCities] = useState(false);
+  const [openSports, setOpenSports] = useState(false);
+  const [openConcerts, setOpenConcerts] = useState(false);
+  const [openTheater, setOpenTheater] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  // Sticky navbar on scroll
   useEffect(() => {
-    const handleScroll = () => {
-      setIsSticky(window.scrollY > 50);
-    };
+    function handleScroll() {
+      setIsScrolled(window.scrollY > 50);
+    }
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const navClasses = `sticky top-0 z-50 transition-colors duration-500 ${
+    isScrolled ? 'bg-white/40 backdrop-blur-md shadow-md' : 'bg-transparent'
+  }`;
+
+  const buttonBaseClasses = 'font-semibold transition-colors duration-300';
+  const buttonColorClasses = 'text-[#999] hover:text-[#777]';
+
   return (
-    <header
-      className={`fixed w-full top-0 left-0 z-50 transition-all duration-300 ${
-        isSticky ? 'bg-white shadow-md' : 'bg-transparent'
-      }`}
-    >
-      <nav className="max-w-6xl mx-auto flex justify-between items-center px-4 py-4">
-        {/* Logo */}
-        <a href="/" className={`text-2xl font-bold ${isSticky ? 'text-indigo-600' : 'text-white'}`}>
-          CityStew
-        </a>
+    <nav className={navClasses}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16 items-center">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <Link href="/" className="text-2xl font-bold text-indigo-600">
+              CityStew
+            </Link>
+          </div>
 
-        {/* Desktop Nav */}
-        <ul
-          className={`hidden md:flex space-x-8 font-semibold transition-colors duration-300 ${
-            isSticky ? 'text-gray-700' : 'text-white'
-          }`}
-        >
-          <li>
-            <a href="#categories" className="hover:text-indigo-600">
-              Categories
-            </a>
-          </li>
-          <li>
-            <a href="#sponsors" className="hover:text-indigo-600">
-              Sponsors
-            </a>
-          </li>
-          <li>
-            <a href="#about" className="hover:text-indigo-600">
-              About
-            </a>
-          </li>
-        </ul>
+          {/* Nav buttons */}
+          <div className="flex space-x-6">
+            {/* Cities */}
+            <div className="relative">
+              <button
+                onClick={() => setOpenCities(!openCities)}
+                className={`${buttonBaseClasses} ${buttonColorClasses}`}
+                aria-haspopup="true"
+                aria-expanded={openCities}
+                type="button"
+              >
+                CITIES
+              </button>
+              {openCities && (
+                <div className="absolute mt-2 w-40 bg-white border rounded shadow-lg z-50">
+                  <Link href="/cities/new-york" className="block px-4 py-2 hover:bg-indigo-100">
+                    New York
+                  </Link>
+                  <Link href="/cities/los-angeles" className="block px-4 py-2 hover:bg-indigo-100">
+                    Los Angeles
+                  </Link>
+                  <Link href="/cities/chicago" className="block px-4 py-2 hover:bg-indigo-100">
+                    Chicago
+                  </Link>
+                </div>
+              )}
+            </div>
 
-        {/* Mobile Hamburger */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden flex flex-col justify-center items-center w-8 h-8 space-y-1 focus:outline-none"
-          aria-label="Toggle menu"
-          aria-expanded={isOpen}
-        >
-          <span
-            className={`block w-6 h-0.5 transform transition duration-300 ease-in-out ${
-              isOpen ? 'rotate-45 translate-y-1.5 bg-gray-800' : isSticky ? 'bg-gray-800' : 'bg-white'
-            }`}
-          />
-          <span
-            className={`block w-6 h-0.5 transition duration-300 ease-in-out ${
-              isOpen ? 'opacity-0' : isSticky ? 'bg-gray-800' : 'bg-white'
-            }`}
-          />
-          <span
-            className={`block w-6 h-0.5 transform transition duration-300 ease-in-out ${
-              isOpen ? '-rotate-45 -translate-y-1.5 bg-gray-800' : isSticky ? 'bg-gray-800' : 'bg-white'
-            }`}
-          />
-        </button>
-      </nav>
+            {/* Sports */}
+            <div className="relative">
+              <button
+                onClick={() => setOpenSports(!openSports)}
+                className={`${buttonBaseClasses} ${buttonColorClasses}`}
+                aria-haspopup="true"
+                aria-expanded={openSports}
+                type="button"
+              >
+                SPORTS
+              </button>
+              {openSports && (
+                <div className="absolute mt-2 w-40 bg-white border rounded shadow-lg z-50">
+                  <Link href="/sports/basketball" className="block px-4 py-2 hover:bg-indigo-100">
+                    Basketball
+                  </Link>
+                  <Link href="/sports/football" className="block px-4 py-2 hover:bg-indigo-100">
+                    Football
+                  </Link>
+                  <Link href="/sports/baseball" className="block px-4 py-2 hover:bg-indigo-100">
+                    Baseball
+                  </Link>
+                </div>
+              )}
+            </div>
 
-      {/* Mobile Menu */}
-      {isOpen && (
-        <nav className="md:hidden bg-white shadow-md">
-          <ul className="flex flex-col items-center py-4 space-y-4 font-semibold text-gray-700">
-            <li>
-              <a
-                href="#categories"
-                onClick={() => setIsOpen(false)}
-                className="hover:text-indigo-600"
+            {/* Concerts */}
+            <div className="relative">
+              <button
+                onClick={() => setOpenConcerts(!openConcerts)}
+                className={`${buttonBaseClasses} ${buttonColorClasses}`}
+                aria-haspopup="true"
+                aria-expanded={openConcerts}
+                type="button"
               >
-                Categories
-              </a>
-            </li>
-            <li>
-              <a
-                href="#sponsors"
-                onClick={() => setIsOpen(false)}
-                className="hover:text-indigo-600"
+                CONCERTS
+              </button>
+              {openConcerts && (
+                <div className="absolute mt-2 w-40 bg-white border rounded shadow-lg z-50">
+                  <Link href="/concerts/rock" className="block px-4 py-2 hover:bg-indigo-100">
+                    Rock
+                  </Link>
+                  <Link href="/concerts/pop" className="block px-4 py-2 hover:bg-indigo-100">
+                    Pop
+                  </Link>
+                  <Link href="/concerts/jazz" className="block px-4 py-2 hover:bg-indigo-100">
+                    Jazz
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Theater */}
+            <div className="relative">
+              <button
+                onClick={() => setOpenTheater(!openTheater)}
+                className={`${buttonBaseClasses} ${buttonColorClasses}`}
+                aria-haspopup="true"
+                aria-expanded={openTheater}
+                type="button"
               >
-                Sponsors
-              </a>
-            </li>
-            <li>
-              <a
-                href="#about"
-                onClick={() => setIsOpen(false)}
-                className="hover:text-indigo-600"
-              >
-                About
-              </a>
-            </li>
-          </ul>
-        </nav>
-      )}
-    </header>
+                THEATER
+              </button>
+              {openTheater && (
+                <div className="absolute mt-2 w-40 bg-white border rounded shadow-lg z-50">
+                  <Link href="/theater/broadway" className="block px-4 py-2 hover:bg-indigo-100">
+                    Broadway
+                  </Link>
+                  <Link href="/theater/plays" className="block px-4 py-2 hover:bg-indigo-100">
+                    Plays
+                  </Link>
+                  <Link href="/theater/musicals" className="block px-4 py-2 hover:bg-indigo-100">
+                    Musicals
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
   );
 }

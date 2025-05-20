@@ -4,12 +4,16 @@ export default function HeroSection() {
   return (
     <section
       className="hero-section relative h-screen bg-cover bg-center text-white"
+      style={{
+        backgroundImage:
+          "url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1470&q=80')",
+      }}
     >
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black bg-opacity-50 z-0" />
 
       {/* Hero content */}
-      <div className="relative z-10 text-center px-4 max-w-3xl mx-auto py-32">
+      <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
         <h1 className="text-4xl sm:text-5xl font-extrabold mb-4 drop-shadow-lg">
           Discover Local Events Near You
         </h1>

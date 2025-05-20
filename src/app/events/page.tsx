@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Event {
   id: string;
@@ -13,6 +14,8 @@ interface Event {
   };
   images?: {
     url: string;
+    width?: number;
+    height?: number;
   }[];
 }
 
@@ -48,11 +51,16 @@ export default function EventList() {
           className="block border rounded-lg p-4 shadow-md hover:shadow-xl transition-shadow duration-300"
         >
           {event.images && event.images.length > 0 && (
-            <img
-              src={event.images[0].url}
-              alt={event.name}
-              className="w-full h-36 object-cover rounded-md mb-3"
-            />
+            <div className="relative w-full h-36 mb-3 rounded-md overflow-hidden">
+              <Image
+                src={event.images[0].url}
+                alt={event.name}
+                fill
+                style={{ objectFit: 'cover' }}
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority={false}
+              />
+            </div>
           )}
           <h3 className="font-semibold text-lg">{event.name}</h3>
           <p className="text-sm text-gray-500">
