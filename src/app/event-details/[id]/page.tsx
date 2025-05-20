@@ -1,49 +1,34 @@
-// src/app/event-details/[id]/page.tsx
+import { notFound } from 'next/navigation';
 
-interface EventResponse {
-  name: string;
-  dates: { start: { localDate: string; localTime?: string } };
-  _embedded?: { venues?: { name: string; city?: { name: string } }[] };
+export const dynamic = 'force-dynamic'; // ensure server-side rendering on each request (optional)
+export const revalidate = 60;          // revalidate/cache for 60 seconds (optional)
+
+interface EventPageProps {
+  params: Promise<{ id: string }>;
 }
 
-type PageProps = {
-  params: {
-    id: string;
-  };
-};
+export default async function EventDetailPage({ params }: EventPageProps) {
+  // Next.js 15 passes params as a Promise, so we await it
+  const { id } = await params;
 
-async function getEvent(id: string): Promise<EventResponse | null> {
-  try {
-    const res = await fetch(
-      `https://app.ticketmaster.com/discovery/v2/events/${id}.json?apikey=${process.env.TICKETMASTER_API_KEY}`,
-      { cache: 'no-store' }
-    );
+  // Fetch event data from Ticketmaster Discovery API (server-side)
+  const apiKey = process.env.TICKETMASTER_API_KEY;
+  const res = await fetch(
+    `https://app.ticketmaster.com/discovery/v2/events/${id}.json?apikey=${apiKey}`
+  );
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error('Error fetching event:', error);
-    return null;
+  if (!res.ok) {
+    // If the event is not found or an error occurs, render Next.js 404
+    notFound();
   }
-}
 
-export default async function EventPage({ params }: PageProps) {
-  const event = await getEvent(params.id);
-
-  if (!event) return <div>Event not found</div>;
+  const event = await res.json();
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">{event.name}</h1>
-      <p className="mt-2">
-        📅 {event.dates.start.localDate} {event.dates.start.localTime ? `at ${event.dates.start.localTime}` : ''}
-      </p>
-      <p className="mt-1">
-        📍 {event._embedded?.venues?.[0]?.name}, {event._embedded?.venues?.[0]?.city?.name}
-      </p>
+    <div>
+      <h1>{event.name}</h1>
+      <p>{event.dates?.start?.localDate} at {event._embedded?.venues?.[0]?.name}</p>
+      {/* Render more event details as needed */}
     </div>
   );
 }
