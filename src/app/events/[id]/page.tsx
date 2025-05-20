@@ -1,10 +1,28 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 
+// Define interface for event data
+interface EventData {
+  name: string;
+  dates?: {
+    start?: {
+      localDate?: string;
+    };
+  };
+  _embedded?: {
+    venues?: Array<{ name?: string }>;
+  };
+  info?: string;
+  url?: string;
+}
+
 export default function EventDetailPage() {
-  const { id } = useParams();
-  const [event, setEvent] = useState<any>(null);
+  const params = useParams();
+  const id = typeof params?.id === 'string' ? params.id : Array.isArray(params?.id) ? params.id[0] : '';
+  
+  const [event, setEvent] = useState<EventData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
