@@ -34,16 +34,13 @@ body {
 
 .hero-section {
   position: relative;
-  min-height: 400px; /* adjust height as needed */
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
 }
 .hero-section .overlay {
   position: absolute;
   inset: 0;
-  background-color: rgba(0,0,0,0.6);
   z-index: 0;
 }
 .hero-section > div.relative {
@@ -51,8 +48,5 @@ body {
   z-index: 1;
 }
 .bg-hero-banner {
-  background-image: url('/your-image.jpg'); /* Replace with correct path */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-image: url('/assets/images/event_banner_001.jpg'); /* Use your image path */
 }
