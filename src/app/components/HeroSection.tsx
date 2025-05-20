@@ -1,34 +1,29 @@
-'use client';
-
 export default function HeroSection() {
   return (
-    <section className="relative bg-hero-banner bg-cover bg-center text-white text-center h-[80vh] flex items-center justify-center">
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-60 z-0"></div>
-
-      {/* Content */}
-      <div className="relative z-10 px-4 max-w-3xl text-center">
-        <h1 className="text-4xl sm:text-5xl font-bold mb-4">
-          Find Tickets for Concerts, Sports & More
+    <section className="hero-section">
+      <div className="overlay"></div>
+      <div className="relative z-10 text-center px-4 max-w-3xl mx-auto py-20 text-white">
+        <h1 className="text-4xl sm:text-5xl font-extrabold mb-4 drop-shadow-lg">
+          Discover Local Events Near You
         </h1>
-        <p className="text-lg sm:text-xl mb-6">
-          Search thousands of events happening near you
+        <p className="text-lg sm:text-xl mb-6 drop-shadow-md">
+          Music, food, sports, and more — happening in your city now.
         </p>
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            alert('Search coming soon!');
+            alert("Search feature coming soon!");
           }}
           className="flex flex-col sm:flex-row max-w-2xl mx-auto rounded-full overflow-hidden shadow-lg bg-white"
         >
           <input
             type="text"
-            placeholder="Search artists, teams, or venues"
-            className="flex-grow px-6 py-3 text-gray-900 text-base focus:outline-none"
+            placeholder="Search events, cities, or categories"
+            className="flex-grow px-6 py-4 text-gray-900 text-lg focus:outline-none"
           />
           <button
             type="submit"
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 font-semibold transition"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 font-semibold transition"
           >
             Search
           </button>
