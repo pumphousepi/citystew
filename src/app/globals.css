@@ -34,10 +34,6 @@ body {
 
 .hero-section {
   position: relative;
-  background-image: url('/assets/images/event_banner_001.jpg'); /* Use your image path */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   min-height: 400px; /* adjust height as needed */
   display: flex;
   align-items: center;
@@ -53,4 +49,10 @@ body {
 .hero-section > div.relative {
   position: relative;
   z-index: 1;
+}
+.bg-hero-banner {
+  background-image: url('/your-image.jpg'); /* Replace with correct path */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
