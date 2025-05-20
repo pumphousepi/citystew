@@ -16,7 +16,7 @@ export default function HomePage() {
 
         {/* Event List Section */}
         <section className="max-w-5xl mx-auto px-4 py-10">
-          <h2 className="text-2xl font-bold mb-6 text-center">Live Music Near You</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center">Events Near You</h2>
           <EventList />
         </section>
 
