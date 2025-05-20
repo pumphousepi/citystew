@@ -1,5 +1,4 @@
 import HeroSection from './components/HeroSection';
-import Header from './components/Header'; // or Navbar
 import Categories from './components/Categories';
 import Sponsors from './components/Sponsors';
 import AboutSection from './components/AboutSection';
