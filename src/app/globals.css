@@ -5,7 +5,6 @@
   --foreground: #171717;
 }
 
-/* Light theme */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -13,7 +12,6 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Dark theme override */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #ffffff;
@@ -21,69 +19,111 @@
   }
 }
 
-/* Base font and color setup */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Tailwind directives */
+/*tailwind*/
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ============ Hero Section Styling ============ */
+
 .hero-section {
   position: relative;
-  background-image: url('/assets/images/event_banner_001.jpg'); /* Your actual image path */
+  background-image: url('/assets/images/event_banner_001.jpg'); /* your image */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  min-height: 400px; /* Can be overridden with Tailwind height classes like h-[80vh] */
+  min-height: 100vh;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  padding: 8rem 1rem; /* adjust top/bottom padding */
 }
 
-.hero-section .overlay {
+.hero-overlay {
   position: absolute;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 0;
 }
 
-.hero-section > div.relative {
+.hero-content {
   position: relative;
   z-index: 1;
+  max-width: 48rem; /* max-w-3xl ~ 768px */
+  margin: 0 auto;
+  padding: 0 1rem;
+  text-align: center;
 }
 
-/* ============ Additional Custom Styles ============ */
-
-/* Sticky navbar box shadow */
-.sticky-nav {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.hero-title {
+  font-size: 2.25rem; /* text-4xl */
+  font-weight: 800; /* font-extrabold */
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
 }
 
-/* Smooth scroll */
-html {
-  scroll-behavior: smooth;
+@media (min-width: 640px) {
+  .hero-title {
+    font-size: 3rem; /* sm:text-5xl */
+  }
 }
 
-/* Responsive image logo if needed */
-.logo-img {
-  max-height: 40px;
-  height: auto;
-  width: auto;
+.hero-subtitle {
+  font-size: 1.125rem; /* text-lg */
+  margin-bottom: 1.5rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
-/* Utility overrides (optional) */
-.input-focus {
+@media (min-width: 640px) {
+  .hero-subtitle {
+    font-size: 1.25rem; /* sm:text-xl */
+  }
+}
+
+.hero-search-form {
+  display: flex;
+  flex-direction: column;
+  max-width: 32rem; /* max-w-2xl ~ 512px */
+  margin: 0 auto;
+  border-radius: 9999px; /* rounded-full */
+  overflow: hidden;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+@media (min-width: 640px) {
+  .hero-search-form {
+    flex-direction: row;
+  }
+}
+
+.hero-search-input {
+  flex-grow: 1;
+  padding: 1rem 1.5rem;
+  font-size: 1.125rem; /* text-lg */
+  color: #1f2937; /* gray-900 */
+  border: none;
   outline: none;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4); /* Indigo-500 */
 }
 
-.transition-hover {
-  transition: all 0.3s ease;
+.hero-search-button {
+  background-color: #4f46e5; /* indigo-600 */
+  color: white;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border: none;
 }
+
+.hero-search-button:hover {
+  background-color: #4338ca; /* indigo-700 */
+}
+

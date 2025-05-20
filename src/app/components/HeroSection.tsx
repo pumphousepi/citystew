@@ -2,9 +2,14 @@
 
 export default function HeroSection() {
   return (
-    <section className="hero-section">
-      <div className="overlay"></div>
-      <div className="relative z-10 text-center px-4 max-w-3xl mx-auto py-20 text-white">
+    <section
+      className="hero-section relative h-screen bg-cover bg-center text-white"
+    >
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black bg-opacity-50 z-0" />
+
+      {/* Hero content */}
+      <div className="relative z-10 text-center px-4 max-w-3xl mx-auto py-32">
         <h1 className="text-4xl sm:text-5xl font-extrabold mb-4 drop-shadow-lg">
           Discover Local Events Near You
         </h1>
@@ -14,7 +19,7 @@ export default function HeroSection() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            alert("Search feature coming soon!");
+            alert('Search feature coming soon!');
           }}
           className="flex flex-col sm:flex-row max-w-2xl mx-auto rounded-full overflow-hidden shadow-lg bg-white"
         >

@@ -17,18 +17,22 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed w-full top-0 left-0 z-30 transition-shadow bg-white ${
-        isSticky ? 'shadow-md' : ''
+      className={`fixed w-full top-0 left-0 z-50 transition-all duration-300 ${
+        isSticky ? 'bg-white shadow-md' : 'bg-transparent'
       }`}
     >
-      <nav className="max-w-6xl mx-auto flex justify-between items-center p-4">
+      <nav className="max-w-6xl mx-auto flex justify-between items-center px-4 py-4">
         {/* Logo */}
-        <a href="/" className="text-2xl font-bold text-indigo-600">
+        <a href="/" className={`text-2xl font-bold ${isSticky ? 'text-indigo-600' : 'text-white'}`}>
           CityStew
         </a>
 
         {/* Desktop Nav */}
-        <ul className="hidden md:flex space-x-8 font-semibold text-gray-700">
+        <ul
+          className={`hidden md:flex space-x-8 font-semibold transition-colors duration-300 ${
+            isSticky ? 'text-gray-700' : 'text-white'
+          }`}
+        >
           <li>
             <a href="#categories" className="hover:text-indigo-600">
               Categories
@@ -54,18 +58,18 @@ export default function Navbar() {
           aria-expanded={isOpen}
         >
           <span
-            className={`block w-6 h-0.5 bg-gray-800 transform transition duration-300 ease-in-out ${
-              isOpen ? 'rotate-45 translate-y-1.5' : ''
+            className={`block w-6 h-0.5 transform transition duration-300 ease-in-out ${
+              isOpen ? 'rotate-45 translate-y-1.5 bg-gray-800' : isSticky ? 'bg-gray-800' : 'bg-white'
             }`}
           />
           <span
-            className={`block w-6 h-0.5 bg-gray-800 transition duration-300 ease-in-out ${
-              isOpen ? 'opacity-0' : ''
+            className={`block w-6 h-0.5 transition duration-300 ease-in-out ${
+              isOpen ? 'opacity-0' : isSticky ? 'bg-gray-800' : 'bg-white'
             }`}
           />
           <span
-            className={`block w-6 h-0.5 bg-gray-800 transform transition duration-300 ease-in-out ${
-              isOpen ? '-rotate-45 -translate-y-1.5' : ''
+            className={`block w-6 h-0.5 transform transition duration-300 ease-in-out ${
+              isOpen ? '-rotate-45 -translate-y-1.5 bg-gray-800' : isSticky ? 'bg-gray-800' : 'bg-white'
             }`}
           />
         </button>
