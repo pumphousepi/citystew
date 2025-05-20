@@ -1,3 +1,5 @@
+'use client';
+
 export default function HeroSection() {
   return (
     <section className="relative bg-hero-banner bg-cover bg-center text-white text-center h-[80vh] flex items-center justify-center">
