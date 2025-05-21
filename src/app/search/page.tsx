@@ -46,7 +46,7 @@ export default function SearchPage() {
       </h2>
 
       {loading && <p>Loading...</p>}
-      {!loading && events.length === 0 && <p>No events found for "{query}".</p>}
+      {!loading && events.length === 0 && <p>No events found for &quot;{query}&quot;.</p>}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
         {events.map((event) => (
