@@ -21,7 +21,7 @@ export default function EventCard({
   href,
 }: EventCardProps) {
   const content = (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden w-60 flex-shrink-0 flex flex-col h-[360px]">
+    <div className="bg-white rounded-xl shadow-md overflow-hidden w-60 flex-shrink-0 flex flex-col h-[250px]">
       {/* Fixed height image container */}
       <div className="relative w-full h-40 flex-shrink-0">
         <Image
