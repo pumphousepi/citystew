@@ -12,14 +12,17 @@ interface ApiEvent {
   images?: { url: string }[];
 }
 
-export default function SearchContent() {
+export default function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get('query') || '';
   const [events, setEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!query) return;
+    if (!query) {
+      setEvents([]);
+      return;
+    }
 
     const fetchResults = async () => {
       setLoading(true);
@@ -39,7 +42,7 @@ export default function SearchContent() {
   }, [query]);
 
   return (
-    <section className="p-8 min-h-screen bg-gray-50">
+    <>
       <h2 className="text-2xl font-bold mb-4">
         Search Results for: <em className="text-blue-600">{query}</em>
       </h2>
@@ -66,6 +69,6 @@ export default function SearchContent() {
           );
         })}
       </div>
-    </section>
+    </>
   );
 }
