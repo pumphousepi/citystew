@@ -1,6 +1,5 @@
 import HeroSection from './components/HeroSection';
 import TrendingEvents from './components/TrendingEvents';
-import CategoryCard from './components/CategoryCard';
 import Sponsors from './components/Sponsors';
 import Footer from './components/Footer';
 import EventList from './components/EventList';

@@ -4,7 +4,7 @@ import Link from 'next/link';
 interface EventCardProps {
   id?: string;
   title: string;
-  image: string;
+  image?: string;  // optional to avoid errors if missing
   date?: string;
   venue?: string;
   description?: string;
@@ -22,17 +22,25 @@ export default function EventCard({
 }: EventCardProps) {
   const content = (
     <div className="bg-white rounded-xl shadow-md overflow-hidden w-60 flex-shrink-0 flex flex-col h-[250px]">
-      {/* Fixed height image container */}
+      {/* Image container */}
       <div className="relative w-full h-40 flex-shrink-0">
-        <Image
-          src={image}
-          alt={title}
-          fill
-          className="object-cover"
-        />
+        {image ? (
+          <Image
+            src={image}
+            alt={title || 'Event image'}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 240px"
+            priority={false}
+          />
+        ) : (
+          <div className="bg-gray-200 w-full h-full flex items-center justify-center text-gray-500">
+            No Image
+          </div>
+        )}
       </div>
 
-      {/* Text content area */}
+      {/* Text content */}
       <div className="p-4 flex flex-col flex-grow justify-between min-h-[140px]">
         <div>
           <h3 className="text-lg font-semibold mb-1">{title}</h3>

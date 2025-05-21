@@ -2,8 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import EventCard from '../components/EventCard';
 
 interface ApiEvent {
   id: string;
@@ -48,34 +47,24 @@ export default function SearchPage() {
       {loading && <p>Loading...</p>}
       {!loading && events.length === 0 && <p>No events found for &quot;{query}&quot;.</p>}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
-        {events.map((event) => (
-          <Link
-            key={event.id}
-            href={`/events/${event.id}`}
-            className="bg-white rounded-lg shadow hover:shadow-lg transition"
-          >
-            <div className="relative w-full h-40">
-              {event.images?.[0]?.url && (
-                <Image
-                  src={event.images[0].url}
-                  alt={event.name}
-                  fill
-                  className="object-cover rounded-t-lg"
-                />
-              )}
-            </div>
-            <div className="p-4">
-              <h3 className="text-lg font-semibold text-gray-900">{event.name}</h3>
-              <p className="text-sm text-gray-600">
-                {event.dates?.start?.localDate || 'Date TBD'}
-              </p>
-              <p className="text-sm text-gray-600">
-                {event._embedded?.venues?.[0]?.name || 'Venue TBD'}
-              </p>
-            </div>
-          </Link>
-        ))}
+      <div className="flex gap-6 overflow-x-auto py-4">
+        {events.map((event) => {
+          const venueName = event._embedded?.venues?.[0]?.name || 'Venue TBD';
+          const eventDate = event.dates?.start?.localDate || 'Date TBD';
+          const eventImage = event.images?.[0]?.url || '';
+
+          return (
+            <EventCard
+              key={event.id}
+              id={event.id}
+              title={event.name}
+              date={eventDate}
+              venue={venueName}
+              image={eventImage}
+              href={`/events/${event.id}`}
+            />
+          );
+        })}
       </div>
     </section>
   );
