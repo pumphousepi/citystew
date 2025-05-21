@@ -10,19 +10,21 @@ export default function HomePage() {
   return (
     <>
       <Navbar />
-      <main className="bg-white text-gray-900">
-        <HeroSection />
-        <TrendingEvents/>
-        <Categories />
-
-        {/* Event List Section */}
-        <section className="max-w-5xl mx-auto px-4 py-10">
-          <h2 className="text-2xl font-bold mb-6 text-center">Events Near You</h2>
-          <EventList />
-        </section>
-
-        <Sponsors />
-      </main>
+<main className="bg-white text-gray-900">
+  <HeroSection />
+  <TrendingEvents />
+  
+  {/* Full width Events Near You Section */}
+<section className="py-12">
+  <div className="max-w-7xl mx-auto px-4">
+    <h2 className="text-2xl font-bold text-gray-800 mb-4">Events Near You</h2>
+    <EventList />
+  </div>
+</section>
+  
+  <Categories />
+  <Sponsors />
+</main>
       <Footer />
     </>
   );
