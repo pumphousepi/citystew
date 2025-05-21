@@ -24,7 +24,7 @@ const sponsors = [
 export default function Sponsors() {
   return (
     <section id="sponsors" className="py-12">
-      <h2 className="text-2xl font-bold text-center mb-6">Free Directory Ads</h2>
+      <h2 className="text-2xl font-bold text-center mb-6"></h2>
       <div className="flex justify-center space-x-4 overflow-x-auto px-4">
         {sponsors.map(({ img, title, desc, url }) => (
           <a

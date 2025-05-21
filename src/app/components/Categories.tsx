@@ -15,24 +15,23 @@ const categories = [
 
 export default function Categories() {
   return (
-<section id="categories" className="py-12 bg-gray-50">
-  <h2 className="text-2xl font-bold text-center mb-6">Popular Categories</h2>
-
-  <div className="max-w-7xl mx-auto px-4"> {/* Match your page content max width & horizontal padding */}
-    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-      <div className="flex space-x-4"> {/* Slightly smaller gap, adjust as needed */}
-        {categories.map(({ image, title }) => (
-          <div key={title} className="flex-shrink-0 w-60"> {/* Fixed width cards, adjust as you want */}
-            <CategoryCard
-              title={title}
-              image={image}
-              href={`/categories/${title.toLowerCase()}`}
-            />
+    <section id="categories" className="py-12 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-6">
+        <h2 className="text-2xl font-bold text-left mb-6">Popular Categories</h2>
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+          <div className="flex space-x-4">
+            {categories.map(({ image, title }) => (
+              <div key={title} className="flex-shrink-0 w-1/4">
+                <CategoryCard
+                  title={title}
+                  image={image}
+                  href={`/categories/${title.toLowerCase()}`}
+                />
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
   );
 }
