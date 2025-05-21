@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import EventCard from './EventCard'; // Adjust the import path if needed
+import EventCard from './EventCard';
+import TrendingEventsFilter from './TrendingEventsFilter';
 
 interface ApiEvent {
   id: string;
@@ -11,14 +12,26 @@ interface ApiEvent {
   images?: { url: string }[];
 }
 
+interface Filters {
+  location: string;
+  dateRange: string;
+}
+
 export default function TrendingEvents() {
   const [events, setEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<Filters>({ location: 'San Antonio', dateRange: 'any' });
 
   useEffect(() => {
     async function fetchTrending() {
+      setLoading(true);
       try {
-        const res = await fetch('/api/events?trending=true');
+        const params = new URLSearchParams();
+        params.append('trending', 'true');
+        if (filters.location) params.append('location', filters.location);
+        if (filters.dateRange && filters.dateRange !== 'any') params.append('dateRange', filters.dateRange);
+
+        const res = await fetch(`/api/events?${params.toString()}`);
         if (!res.ok) throw new Error('Failed to fetch trending events');
         const data = await res.json();
         setEvents(data._embedded?.events || []);
@@ -29,22 +42,27 @@ export default function TrendingEvents() {
       }
     }
     fetchTrending();
-  }, []);
-
-  if (loading) return <p>Loading trending events...</p>;
-  if (events.length === 0) return <p>No trending events found.</p>;
+  }, [filters]);
 
   return (
     <section className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Trending Events</h2>
+        <TrendingEventsFilter onFilterChange={setFilters} />
+
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">
+          Trending Events in {filters.location}
+        </h2>
+
+        {loading && <p>Loading trending events...</p>}
+        {!loading && events.length === 0 && <p>No trending events found.</p>}
+
         <div className="flex space-x-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 px-2">
           {events.map((event) => (
             <EventCard
               key={event.id}
               id={event.id}
               title={event.name}
-              image={event.images?.[0]?.url || '/placeholder.jpg'} // Fallback image if needed
+              image={event.images?.[0]?.url || '/placeholder.jpg'}
               date={event.dates?.start?.localDate}
               venue={event._embedded?.venues?.[0]?.name}
               href={`/events/${event.id}`}
