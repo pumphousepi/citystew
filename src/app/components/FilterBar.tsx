@@ -19,6 +19,7 @@ interface FilterBarProps {
   setSelectedCity: (value: string) => void;
   timeFilter: string;
   setTimeFilter: (value: string) => void;
+  loadingStates: boolean;
 }
 
 export default function FilterBar({
