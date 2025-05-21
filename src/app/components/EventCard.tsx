@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 interface EventCardProps {
-  id?: string;
+  id?: string; // still optional, but not destructured or used to avoid unused var error
   title: string;
   image?: string;  // optional to avoid errors if missing
   date?: string;
@@ -12,7 +12,6 @@ interface EventCardProps {
 }
 
 export default function EventCard({
-  id,
   title,
   image,
   date,
