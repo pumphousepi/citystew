@@ -1,25 +1,29 @@
 'use client';
 
-import EventCard from './EventCard'; // Adjust the import path
+import CategoryCard from './CategoryCard';
 
 const categories = [
-  { img: '/assets/images/fork_icon.jpg', title: 'Food', desc: 'Find local food events and more!' },
-  { img: '/assets/images/music-note_icon.jpg', title: 'Music', desc: 'Explore music events in your area!' },
-  { img: '/assets/images/soccer-ball_icon.jpg', title: 'Sports', desc: 'Catch the latest sports events!' },
+  { image: '/assets/images/NHL_card.jpg', title: 'NHL' },
+  { image: '/assets/images/NCVVFB_card.jpg', title: 'NCAAFB' },
+  { image: '/assets/images/NCAABB_card.jpg', title: 'NCAABB' },
+  { image: '/assets/images/MLB_card.jpg', title: 'MLB' },
+  { image: '/assets/images/MLS_card.jpg', title: 'MLS' },
+  { image: '/assets/images/NFL_card.jpg', title: 'NFL' },
+  { image: '/assets/images/NBA_card.jpg', title: 'NBA' },
+  { image: '/assets/images/concert_card', title: 'Concerts' },
 ];
 
 export default function Categories() {
   return (
     <section id="categories" className="py-12 bg-gray-50">
       <h2 className="text-2xl font-bold text-center mb-6">Popular Categories</h2>
-      <div className="flex justify-center space-x-6 overflow-x-auto px-4">
-        {categories.map(({ img, title, desc }) => (
-          <EventCard
+      <div className="flex space-x-6 overflow-x-auto px-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+        {categories.map(({ image, title }) => (
+          <CategoryCard
             key={title}
             title={title}
-            image={img}
-            description={desc}
-            href={`/categories/${title.toLowerCase()}`} // Optional link if you want
+            image={image}
+            href={`/categories/${title.toLowerCase()}`}
           />
         ))}
       </div>
