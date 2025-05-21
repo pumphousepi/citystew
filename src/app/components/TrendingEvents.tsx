@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import EventCard from './EventCard';
-import TrendingEventsFilter from './TrendingEventsFilter';
 
 interface ApiEvent {
   id: string;
@@ -12,15 +11,13 @@ interface ApiEvent {
   images?: { url: string }[];
 }
 
-interface Filters {
-  location: string;
-  dateRange: string;
+interface TrendingEventsProps {
+  location: string;  // location passed from parent
 }
 
-export default function TrendingEvents() {
+export default function TrendingEvents({ location }: TrendingEventsProps) {
   const [events, setEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState<Filters>({ location: 'San Antonio', dateRange: 'any' });
 
   useEffect(() => {
     async function fetchTrending() {
@@ -28,8 +25,7 @@ export default function TrendingEvents() {
       try {
         const params = new URLSearchParams();
         params.append('trending', 'true');
-        if (filters.location) params.append('location', filters.location);
-        if (filters.dateRange && filters.dateRange !== 'any') params.append('dateRange', filters.dateRange);
+        if (location) params.append('location', location);
 
         const res = await fetch(`/api/events?${params.toString()}`);
         if (!res.ok) throw new Error('Failed to fetch trending events');
@@ -41,16 +37,15 @@ export default function TrendingEvents() {
         setLoading(false);
       }
     }
+
     fetchTrending();
-  }, [filters]);
+  }, [location]); // refetch when location changes
 
   return (
     <section className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
-        <TrendingEventsFilter onFilterChange={setFilters} />
-
         <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          Trending Events in {filters.location}
+          Trending Events in {location}
         </h2>
 
         {loading && <p>Loading trending events...</p>}

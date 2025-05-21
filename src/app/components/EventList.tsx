@@ -18,7 +18,7 @@ export default function EventList() {
   useEffect(() => {
     async function fetchEvents() {
       try {
-        const res = await fetch('/api/events');  // No ?trending=true here
+        const res = await fetch('/api/events');
         if (!res.ok) throw new Error('Failed to fetch events');
         const data = await res.json();
         setEvents(data._embedded?.events || []);
@@ -28,6 +28,7 @@ export default function EventList() {
         setLoading(false);
       }
     }
+
     fetchEvents();
   }, []);
 
