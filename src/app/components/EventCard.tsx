@@ -2,9 +2,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 interface EventCardProps {
-  id?: string; // still optional, but not destructured or used to avoid unused var error
+  id?: string; // keep in interface if needed but not used inside component
   title: string;
-  image?: string;  // optional to avoid errors if missing
+  image?: string;
   date?: string;
   venue?: string;
   description?: string;
@@ -12,6 +12,7 @@ interface EventCardProps {
 }
 
 export default function EventCard({
+  // no id here!
   title,
   image,
   date,
@@ -21,7 +22,6 @@ export default function EventCard({
 }: EventCardProps) {
   const content = (
     <div className="bg-white rounded-xl shadow-md overflow-hidden w-60 flex-shrink-0 flex flex-col h-[250px]">
-      {/* Image container */}
       <div className="relative w-full h-40 flex-shrink-0">
         {image ? (
           <Image
@@ -39,7 +39,6 @@ export default function EventCard({
         )}
       </div>
 
-      {/* Text content */}
       <div className="p-4 flex flex-col flex-grow justify-between min-h-[140px]">
         <div>
           <h3 className="text-lg font-semibold mb-1">{title}</h3>
