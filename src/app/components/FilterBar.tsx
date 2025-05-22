@@ -31,7 +31,6 @@ export default function FilterBar({
   const [cities, setCities] = useState<string[]>([]);
   const [loadingCities, setLoadingCities] = useState(false);
 
-  // Memoize sorted states to avoid sorting on every render
   const sortedStates = useMemo(() => {
     return states.slice().sort((a, b) => a.name.localeCompare(b.name));
   }, [states]);
@@ -61,7 +60,7 @@ export default function FilterBar({
     }
 
     fetchCities();
-  }, [selectedState, setSelectedCity]); // added setSelectedCity here per warning
+  }, [selectedState]); // ✅ safe to exclude setSelectedCity — it doesn't change or affect fetch
 
   return (
     <section className="bg-gray-100 py-4 px-6">
@@ -113,4 +112,14 @@ export default function FilterBar({
             onChange={(e) => setTimeFilter(e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
           >
-            <option value="
+            <option value="">All Time</option>
+            <option value="today">Today</option>
+            <option value="weekend">This Weekend</option>
+            <option value="next7days">Next 7 Days</option>
+            <option value="next30days">Next 30 Days</option>
+          </select>
+        </div>
+      </div>
+    </section>
+  );
+}
