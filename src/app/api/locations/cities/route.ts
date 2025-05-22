@@ -1,46 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server';
+// /src/app/api/locations/cities/route.ts
+import { NextResponse } from 'next/server';
 
-const BACK4APP_APP_ID = 'XnjprAHf1ZhwzEOltO5ZyXB2JKJtjLkUEvUbwcGJ';
-const BACK4APP_REST_API_KEY = 'LDZBZPRTmO2jD9H60Fdl2bosTVD7JV7sqyigBonz';
+const BACK4APP_APP_ID = 'xtWVtCxyoMM9DRH8rphh7avA50Yo1PVHYfUFrPHm';
+const BACK4APP_REST_API_KEY = 'Fgq1hIHc0BzQ7pTUQH83OJ2aFx98gzr43gnZlbIc';
 
-interface City {
-  name: string;
-  [key: string]: unknown;
-}
-
-export async function GET(request: NextRequest) {
-  const url = new URL(request.url);
-  const state = url.searchParams.get('state');
-
-  if (!state) {
-    return NextResponse.json({ error: 'Missing state parameter' }, { status: 400 });
-  }
-
-  const whereQuery = encodeURIComponent(JSON.stringify({ stateAbbreviation: state }));
-  const fetchUrl = `https://parseapi.back4app.com/classes/Cities?where=${whereQuery}`;
-
+export async function GET() {
   try {
-    const response = await fetch(fetchUrl, {
+    const res = await fetch('https://parseapi.back4app.com/classes/City?limit=10000', {
       headers: {
         'X-Parse-Application-Id': BACK4APP_APP_ID,
         'X-Parse-REST-API-Key': BACK4APP_REST_API_KEY,
-        'Content-Type': 'application/json',
       },
     });
 
-    if (!response.ok) {
-      return NextResponse.json({ error: 'Failed to fetch cities' }, { status: 500 });
-    }
+    const data = await res.json();
 
-    const data: { results: City[] } = await response.json();
-
-    const cities = data.results.map((city) => ({
-      name: city.name,
+    const cities = data.results.map((item: any) => ({
+      name: item.name,
+      state: item.adminCode, // this is the abbreviation
+      label: `${item.name}, ${item.adminCode}`, // for search display
     }));
 
     return NextResponse.json(cities);
   } catch (error) {
-    console.error('Error fetching cities:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('Failed to fetch cities:', error);
+    return NextResponse.json({ error: 'Failed to fetch cities' }, { status: 500 });
   }
 }

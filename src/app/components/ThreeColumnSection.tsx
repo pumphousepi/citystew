@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import EventCard from './EventCard';
 
 interface ApiEvent {
   id: string;

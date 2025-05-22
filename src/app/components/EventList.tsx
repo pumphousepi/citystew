@@ -11,26 +11,40 @@ interface ApiEvent {
   images?: { url: string }[];
 }
 
-export default function EventList() {
+interface EventListProps {
+  city?: string;
+  state?: string;
+  timeFilter?: string;
+}
+
+export default function EventList({ city, state, timeFilter }: EventListProps) {
   const [events, setEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchEvents() {
+      setLoading(true);
       try {
-        const res = await fetch('/api/events');
+        // Build query parameters based on props
+        const params = new URLSearchParams();
+        if (city) params.append('location', city);
+        if (state) params.append('state', state);
+        if (timeFilter) params.append('dateRange', timeFilter); // You may need to map to actual dates in backend
+
+        const res = await fetch(`/api/events?${params.toString()}`);
         if (!res.ok) throw new Error('Failed to fetch events');
         const data = await res.json();
         setEvents(data._embedded?.events || []);
       } catch (error) {
         console.error(error);
+        setEvents([]);
       } finally {
         setLoading(false);
       }
     }
 
     fetchEvents();
-  }, []);
+  }, [city, state, timeFilter]);
 
   if (loading) return <p>Loading events...</p>;
   if (events.length === 0) return <p>No events found.</p>;

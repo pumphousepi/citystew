@@ -62,15 +62,15 @@ export default function HighlightsSection() {
           <h3 className="text-xl font-semibold mb-4">Customer Satisfaction</h3>
           <ul className="space-y-4">
             <li className="bg-gray-100 p-4 rounded">
-              <p className="italic">"Easy to use and tickets were legit!"</p>
+              <p className="italic">Easy to use and tickets were legit!</p>
               <p className="text-sm text-gray-500 mt-1">– Ashley M.</p>
             </li>
             <li className="bg-gray-100 p-4 rounded">
-              <p className="italic">"Found last-minute tickets and had the best night."</p>
+              <p className="italic">Found last-minute tickets and had the best night.</p>
               <p className="text-sm text-gray-500 mt-1">– Daniel R.</p>
             </li>
             <li className="bg-gray-100 p-4 rounded">
-              <p className="italic">"CityStew made planning my weekend so simple."</p>
+              <p className="italic">CityStew made planning my weekend so simple.</p>
               <p className="text-sm text-gray-500 mt-1">– Maria S.</p>
             </li>
           </ul>

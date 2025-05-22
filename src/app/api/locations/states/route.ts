@@ -1,40 +1,34 @@
 import { NextResponse } from 'next/server';
 
-const BACK4APP_APP_ID = 'XnjprAHf1ZhwzEOltO5ZyXB2JKJtjLkUEvUbwcGJ';
-const BACK4APP_REST_API_KEY = 'LDZBZPRTmO2jD9H60Fdl2bosTVD7JV7sqyigBonz';
-
-interface State {
-  name: string;
-  abbreviation: string;
-  [key: string]: unknown;
-}
+const BACK4APP_APP_ID = 'xtWVtCxyoMM9DRH8rphh7avA50Yo1PVHYfUFrPHm';
+const BACK4APP_REST_API_KEY = 'Fgq1hIHc0BzQ7pTUQH83OJ2aFx98gzr43gnZlbIc';
 
 export async function GET() {
-  const url = 'https://parseapi.back4app.com/classes/States';
-
   try {
-    const response = await fetch(url, {
+    const res = await fetch('https://parseapi.back4app.com/classes/States?limit=100', {
       headers: {
         'X-Parse-Application-Id': BACK4APP_APP_ID,
         'X-Parse-REST-API-Key': BACK4APP_REST_API_KEY,
-        'Content-Type': 'application/json',
       },
     });
 
-    if (!response.ok) {
-      return NextResponse.json({ error: 'Failed to fetch states' }, { status: 500 });
+    const data = await res.json();
+
+    if (!data.results) {
+      return NextResponse.json([], { status: 200 });
     }
 
-    const data: { results: State[] } = await response.json();
-
-    const states = data.results.map((state) => ({
-      name: state.name,
-      abbreviation: state.abbreviation,
-    }));
+    // Alphabetize the states
+    const states = data.results
+      .map((state: any) => ({
+        name: state.name,
+        abbreviation: state.abbreviation,
+      }))
+      .sort((a: any, b: any) => a.name.localeCompare(b.name));
 
     return NextResponse.json(states);
-  } catch (error) {
-    console.error('Error fetching states:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  } catch (err) {
+    console.error('Error fetching states:', err);
+    return NextResponse.json({ error: 'Failed to fetch states' }, { status: 500 });
   }
 }
