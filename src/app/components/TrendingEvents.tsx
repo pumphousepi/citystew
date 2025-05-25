@@ -12,7 +12,7 @@ interface ApiEvent {
 }
 
 interface TrendingEventsProps {
-  location: string;  // location passed from parent
+  location: string; // location passed from parent
 }
 
 export default function TrendingEvents({ location }: TrendingEventsProps) {
@@ -25,7 +25,8 @@ export default function TrendingEvents({ location }: TrendingEventsProps) {
       try {
         const params = new URLSearchParams();
         params.append('trending', 'true');
-        if (location) params.append('location', location);
+
+        if (location) params.append('city', location);
 
         const res = await fetch(`/api/events?${params.toString()}`);
         if (!res.ok) throw new Error('Failed to fetch trending events');
@@ -33,19 +34,20 @@ export default function TrendingEvents({ location }: TrendingEventsProps) {
         setEvents(data._embedded?.events || []);
       } catch (error) {
         console.error(error);
+        setEvents([]);
       } finally {
         setLoading(false);
       }
     }
 
     fetchTrending();
-  }, [location]); // refetch when location changes
+  }, [location]);
 
   return (
     <section className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          Trending Events in {location}
+          Trending Events in {location || 'your area'}
         </h2>
 
         {loading && <p>Loading trending events...</p>}

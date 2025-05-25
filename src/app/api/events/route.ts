@@ -6,58 +6,76 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const location = searchParams.get('location'); // city
-    const state = searchParams.get('state');
-    const dateRange = searchParams.get('dateRange'); // expected format: "YYYY-MM-DD,YYYY-MM-DD" or keywords
+    const city = searchParams.get('city') || 'Austin';
+    const state = searchParams.get('stateCode') || ''; // Optional
+    const timeFilter = searchParams.get('timeFilter') || 'Today'; // e.g. Today, This Week
+    const category = searchParams.get('category');
+    const trending = searchParams.get('trending');
 
     const params = new URLSearchParams({
       apikey: API_KEY || '',
       size: '20',
+      city,
     });
 
-    // Add location filters
-    if (location) {
-      params.append('city', location);
-    }
     if (state) {
-      params.append('stateCode', state);
+      params.append('stateCode', state); // Ticketmaster expects 'stateCode' param
     }
 
-    // Handle dateRange filter, e.g. "Today", "This Week", or explicit range
-    if (dateRange) {
-      if (dateRange.toLowerCase() === 'today') {
-        const today = new Date();
-        const start = today.toISOString().split('T')[0];
-        const end = start;
-        params.append('startDateTime', `${start}T00:00:00Z`);
-        params.append('endDateTime', `${end}T23:59:59Z`);
-      } else if (dateRange.toLowerCase() === 'this week') {
-        const now = new Date();
-        const dayOfWeek = now.getUTCDay();
-        // Calculate start of week (Sunday)
-        const sunday = new Date(now);
-        sunday.setUTCDate(now.getUTCDate() - dayOfWeek);
-        // Calculate end of week (Saturday)
-        const saturday = new Date(sunday);
-        saturday.setUTCDate(sunday.getUTCDate() + 6);
+    // Time filtering
+    const now = new Date();
+    let startDate = new Date(now);
+    let endDate = new Date(now);
 
-        const start = sunday.toISOString().split('T')[0];
-        const end = saturday.toISOString().split('T')[0];
-        params.append('startDateTime', `${start}T00:00:00Z`);
-        params.append('endDateTime', `${end}T23:59:59Z`);
-      } else if (dateRange.includes(',')) {
-        // explicit date range, e.g. "2023-05-22,2023-05-28"
-        const [startDate, endDate] = dateRange.split(',');
-        params.append('startDateTime', `${startDate}T00:00:00Z`);
-        params.append('endDateTime', `${endDate}T23:59:59Z`);
+    switch (timeFilter.toLowerCase()) {
+      case 'today':
+        endDate.setHours(23, 59, 59);
+        break;
+      case 'this week':
+        endDate.setDate(now.getDate() + 7);
+        break;
+      case 'this weekend':
+        const day = now.getDay();
+        const saturday = new Date(now);
+        const sunday = new Date(now);
+        saturday.setDate(now.getDate() + ((6 - day + 7) % 7)); // Next Saturday
+        sunday.setDate(saturday.getDate() + 1); // Sunday
+        startDate = saturday;
+        endDate = sunday;
+        break;
+      case 'this month':
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        break;
+      default:
+        // If no valid filter, default to today
+        endDate.setHours(23, 59, 59);
+        break;
+    }
+
+    params.append('startDateTime', startDate.toISOString().split('.')[0] + 'Z');
+    params.append('endDateTime', endDate.toISOString().split('.')[0] + 'Z');
+
+    // Handle category filter
+    if (category) {
+      const categoryMap: Record<string, string> = {
+        music: 'KZFzniwnSyZfZ7v7nJ',
+        sports: 'KZFzniwnSyZfZ7v7nE',
+        theater: 'KZFzniwnSyZfZ7v7na',
+        family: 'KZFzniwnSyZfZ7v7n1', // added family segmentId example
+      };
+      const segmentId = categoryMap[category.toLowerCase()];
+      if (segmentId) {
+        params.append('segmentId', segmentId);
       }
     }
 
-    const res = await fetch(`${BASE_URL}?${params.toString()}`);
-    if (!res.ok) {
-      const text = await res.text();
-      return NextResponse.json({ error: `Ticketmaster API error: ${text}` }, { status: res.status });
+    // Handle trending filter if needed (example: sort by popularity)
+    if (trending === 'true') {
+      params.append('sort', 'relevance,desc');
     }
+
+    const res = await fetch(`${BASE_URL}?${params.toString()}`);
+    if (!res.ok) throw new Error('Ticketmaster API error');
     const data = await res.json();
 
     return NextResponse.json(data);

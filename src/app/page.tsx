@@ -5,7 +5,6 @@ import { useState } from 'react';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import LocationSearchBar from './components/LocationSearchBar';
-import TimeFilter from './components/TimeFilter';
 import TrendingEvents from './components/TrendingEvents';
 import Categories from './components/Categories';
 import ThreeColumnSection from './components/ThreeColumnSection';
@@ -13,9 +12,8 @@ import Sponsors from './components/Sponsors';
 import Footer from './components/Footer';
 
 export default function HomePage() {
-  const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
-  const [timeFilter, setTimeFilter] = useState('Today');
+  const [selectedState, setSelectedState] = useState('');
 
   return (
     <>
@@ -30,13 +28,11 @@ export default function HomePage() {
           }}
         />
 
-        <TimeFilter selected={timeFilter} onChange={setTimeFilter} />
-
-        <TrendingEvents location={selectedCity} timeFilter={timeFilter} />
+        <TrendingEvents location={selectedCity} />
 
         <Categories />
 
-        <ThreeColumnSection location={selectedCity} timeFilter={timeFilter} />
+        <ThreeColumnSection city={selectedCity} state={selectedState} />
 
         <Sponsors />
       </main>

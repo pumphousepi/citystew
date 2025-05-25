@@ -5,8 +5,8 @@ import Select from 'react-select';
 
 interface CityOption {
   name: string;
-  state: string;
-  label: string; // e.g., "Austin, TX"
+  abbreviation: string; // state abbreviation
+  label: string;        // e.g. "Austin, TX"
 }
 
 interface LocationSearchBarProps {
@@ -15,27 +15,29 @@ interface LocationSearchBarProps {
 
 export default function LocationSearchBar({ onSelectLocation }: LocationSearchBarProps) {
   const [options, setOptions] = useState<CityOption[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    async function fetchCities() {
+    const fetchCitiesWithDelay = async () => {
       try {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
         const res = await fetch('/api/locations/cities');
-        const data = await res.json();
-        setOptions(data);
+        if (!res.ok) throw new Error('Failed to fetch cities');
+        const rawData: CityOption[] = await res.json();
+        setOptions(rawData);
       } catch (error) {
-        console.error('Failed to fetch city options:', error);
+        console.error('Error fetching city options:', error);
       } finally {
         setLoading(false);
       }
-    }
+    };
 
-    fetchCities();
+    fetchCitiesWithDelay();
   }, []);
 
   const handleChange = (selectedOption: CityOption | null) => {
     if (selectedOption) {
-      onSelectLocation(selectedOption.name, selectedOption.state);
+      onSelectLocation(selectedOption.name, selectedOption.abbreviation);
     }
   };
 
@@ -44,6 +46,8 @@ export default function LocationSearchBar({ onSelectLocation }: LocationSearchBa
       <Select
         isLoading={loading}
         options={options}
+        getOptionLabel={(option) => option.label}
+        getOptionValue={(option) => `${option.name},${option.abbreviation}`}
         onChange={handleChange}
         placeholder="Search cities (e.g. Austin, TX)"
         className="text-black"

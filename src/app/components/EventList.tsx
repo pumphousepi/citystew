@@ -14,10 +14,9 @@ interface ApiEvent {
 interface EventListProps {
   city?: string;
   state?: string;
-  timeFilter?: string;
 }
 
-export default function EventList({ city, state, timeFilter }: EventListProps) {
+export default function EventList({ city, state,}: EventListProps) {
   const [events, setEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,9 +26,8 @@ export default function EventList({ city, state, timeFilter }: EventListProps) {
       try {
         // Build query parameters based on props
         const params = new URLSearchParams();
-        if (city) params.append('location', city);
-        if (state) params.append('state', state);
-        if (timeFilter) params.append('dateRange', timeFilter); // You may need to map to actual dates in backend
+        if (city) params.append('city', city);
+        if (state) params.append('stateCode', state);
 
         const res = await fetch(`/api/events?${params.toString()}`);
         if (!res.ok) throw new Error('Failed to fetch events');
@@ -44,7 +42,7 @@ export default function EventList({ city, state, timeFilter }: EventListProps) {
     }
 
     fetchEvents();
-  }, [city, state, timeFilter]);
+  }, [city, state,]);
 
   if (loading) return <p>Loading events...</p>;
   if (events.length === 0) return <p>No events found.</p>;

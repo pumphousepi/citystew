@@ -8,33 +8,36 @@ interface ApiEvent {
   dates?: { start?: { localDate?: string } };
   _embedded?: { 
     venues?: { name?: string; city?: { name?: string } }[];
-    attractions?: { name: string }[];
+    attractions?: { name: string }[]; 
   };
   images?: { url: string }[];
 }
 
 interface Props {
-  location: string;
+  city: string;
+  state: string;
 }
 
-export default function ThreeColumnSection({ location }: Props) {
+export default function ThreeColumnSection({ city, state }: Props) {
   const [upcomingEvents, setUpcomingEvents] = useState<ApiEvent[]>([]);
   const [topSellers, setTopSellers] = useState<ApiEvent[]>([]);
   const [familyEvents, setFamilyEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!city || !state) return;
+
     async function fetchEvents() {
       setLoading(true);
 
       try {
-        const upcomingRes = await fetch(`/api/events?date=upcoming&location=${location}`);
+        const upcomingRes = await fetch(`/api/events?date=upcoming&city=${city}&stateCode=${state}`);
         const upcomingData = await upcomingRes.json();
 
-        const topSellersRes = await fetch(`/api/events?sort=relevance&location=${location}`);
+        const topSellersRes = await fetch(`/api/events?sort=relevance&city=${city}&stateCode=${state}`);
         const topSellersData = await topSellersRes.json();
 
-        const familyRes = await fetch(`/api/events?category=family&location=${location}`);
+        const familyRes = await fetch(`/api/events?category=family&city=${city}&stateCode=${state}`);
         const familyData = await familyRes.json();
 
         setUpcomingEvents(upcomingData._embedded?.events || []);
@@ -48,7 +51,7 @@ export default function ThreeColumnSection({ location }: Props) {
     }
 
     fetchEvents();
-  }, [location]);
+  }, [city, state]);
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
