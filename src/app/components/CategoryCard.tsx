@@ -1,15 +1,13 @@
 import Image from 'next/image';
-import Link from 'next/link';
 
 interface CategoryCardProps {
   title: string;
   image: string;
-  href?: string;
 }
 
-export default function CategoryCard({ title, image, href }: CategoryCardProps) {
-  const content = (
-    <div className="relative w-full h-40 rounded-xl overflow-hidden shadow-md flex-shrink-0">
+export default function CategoryCard({ title, image }: CategoryCardProps) {
+  return (
+    <div className="relative w-full h-40 rounded-xl overflow-hidden shadow-md flex-shrink-0 cursor-default hover:brightness-90 transition">
       <Image
         src={image}
         alt={title}
@@ -17,11 +15,10 @@ export default function CategoryCard({ title, image, href }: CategoryCardProps) 
         className="object-cover"
       />
       {/* Banner overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white/70 text-black text-center py-2 font-bold text-lg">
+      <div className="absolute bottom-0 left-0 right-0 bg-white/70 text-black text-center py-2 font-bold text-lg">
         {title}
-        </div>
+      </div>
     </div>
   );
-
-  return href ? <Link href={href}>{content}</Link> : content;
 }
+
