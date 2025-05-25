@@ -22,11 +22,7 @@ export default function Categories() {
           <div className="flex space-x-4">
             {categories.map(({ image, title }) => (
               <div key={title} className="flex-shrink-0 w-1/4">
-                <CategoryCard
-                  title={title}
-                  image={image}
-                  href={`/categories/${title.toLowerCase()}`}
-                />
+                <CategoryCard title={title} image={image} />
               </div>
             ))}
           </div>
