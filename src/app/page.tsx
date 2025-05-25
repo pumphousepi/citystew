@@ -12,8 +12,7 @@ import Sponsors from './components/Sponsors';
 import Footer from './components/Footer';
 
 export default function HomePage() {
-  const [selectedCity, setSelectedCity] = useState('');
-  const [selectedState, setSelectedState] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
 
   return (
     <>
@@ -22,17 +21,16 @@ export default function HomePage() {
         <HeroSection />
 
         <LocationSearchBar
-          onSelectLocation={(city, state) => {
-            setSelectedCity(city);
-            setSelectedState(state);
+          onSelectLocation={(location) => {
+            setSelectedLocation(location); // location = "Seattle, WA"
           }}
         />
 
-        <TrendingEvents location={selectedCity} />
+        <TrendingEvents location={selectedLocation} />
 
         <Categories />
 
-        <ThreeColumnSection city={selectedCity} state={selectedState} />
+        <ThreeColumnSection location={selectedLocation} />
 
         <Sponsors />
       </main>

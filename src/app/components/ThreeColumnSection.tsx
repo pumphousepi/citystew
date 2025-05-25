@@ -14,15 +14,17 @@ interface ApiEvent {
 }
 
 interface Props {
-  city: string;
-  state: string;
+  location: string; // "City, ST"
 }
 
-export default function ThreeColumnSection({ city, state }: Props) {
+export default function ThreeColumnSection({ location }: Props) {
   const [upcomingEvents, setUpcomingEvents] = useState<ApiEvent[]>([]);
   const [topSellers, setTopSellers] = useState<ApiEvent[]>([]);
   const [familyEvents, setFamilyEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Split "Austin, TX" into city = "Austin", state = "TX"
+  const [city, state] = location.split(',').map(part => part.trim());
 
   useEffect(() => {
     if (!city || !state) return;
@@ -56,6 +58,7 @@ export default function ThreeColumnSection({ city, state }: Props) {
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
         {/* Upcoming Events */}
         <div className="flex flex-col rounded-2xl shadow-lg bg-white p-4 max-h-[600px]">
           <h3 className="text-xl font-bold text-blue-600 mb-3 flex-shrink-0">Upcoming Events</h3>
@@ -147,6 +150,7 @@ export default function ThreeColumnSection({ city, state }: Props) {
             )}
           </div>
         </div>
+
       </div>
     </section>
   );
