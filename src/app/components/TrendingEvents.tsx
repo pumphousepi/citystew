@@ -12,7 +12,7 @@ interface ApiEvent {
 }
 
 interface TrendingEventsProps {
-  location: string; // location passed from parent
+  location: string; // e.g. "Austin, TX"
 }
 
 export default function TrendingEvents({ location }: TrendingEventsProps) {
@@ -26,7 +26,11 @@ export default function TrendingEvents({ location }: TrendingEventsProps) {
         const params = new URLSearchParams();
         params.append('trending', 'true');
 
-        if (location) params.append('city', location);
+        if (location) {
+          const [city, stateCode] = location.split(',').map((s) => s.trim());
+          if (city) params.append('city', city);
+          if (stateCode) params.append('stateCode', stateCode);
+        }
 
         const res = await fetch(`/api/events?${params.toString()}`);
         if (!res.ok) throw new Error('Failed to fetch trending events');
