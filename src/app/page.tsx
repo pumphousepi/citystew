@@ -22,7 +22,7 @@ export default function HomePage() {
 
         <LocationSearchBar
           onSelectLocation={(location) => {
-            setSelectedLocation(location); // location = "Seattle, WA"
+            setSelectedLocation(location); // e.g. "New Braunfels, TX"
           }}
         />
 
@@ -30,7 +30,13 @@ export default function HomePage() {
 
         <Categories />
 
-        <ThreeColumnSection location={selectedLocation} />
+        {selectedLocation && selectedLocation.includes(',') ? (
+          <ThreeColumnSection location={selectedLocation} />
+        ) : (
+          <div className="text-center py-10 text-gray-500">
+            Please select a location to view more events.
+          </div>
+        )}
 
         <Sponsors />
       </main>

@@ -4,13 +4,13 @@ import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 
 interface CityOption {
-  name: string;
-  abbreviation: string; // state abbreviation
-  label: string;        // e.g. "Austin, TX"
+  name: string;           // e.g. "New Braunfels"
+  abbreviation: string;   // e.g. "TX"
+  label: string;          // e.g. "New Braunfels, TX"
 }
 
 interface LocationSearchBarProps {
-  onSelectLocation: (city: string, state: string) => void;
+  onSelectLocation: (location: string) => void;  // single string "City, ST"
 }
 
 export default function LocationSearchBar({ onSelectLocation }: LocationSearchBarProps) {
@@ -20,7 +20,7 @@ export default function LocationSearchBar({ onSelectLocation }: LocationSearchBa
   useEffect(() => {
     const fetchCitiesWithDelay = async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        await new Promise((resolve) => setTimeout(resolve, 1500)); // simulate delay
         const res = await fetch('/api/locations/cities');
         if (!res.ok) throw new Error('Failed to fetch cities');
         const rawData: CityOption[] = await res.json();
@@ -37,7 +37,9 @@ export default function LocationSearchBar({ onSelectLocation }: LocationSearchBa
 
   const handleChange = (selectedOption: CityOption | null) => {
     if (selectedOption) {
-      onSelectLocation(selectedOption.name, selectedOption.abbreviation);
+      // Combine city and state into a single string "City, ST"
+      const location = `${selectedOption.name}, ${selectedOption.abbreviation}`;
+      onSelectLocation(location);
     }
   };
 
