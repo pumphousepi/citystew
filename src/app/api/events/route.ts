@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const city = searchParams.get('city') || 'Austin';
+    const city = searchParams.get('city') || 'New Braunfels';
     const state = searchParams.get('stateCode') || ''; // Optional
     const timeFilter = searchParams.get('timeFilter') || 'Today'; // e.g. Today, This Week
     const category = searchParams.get('category');
