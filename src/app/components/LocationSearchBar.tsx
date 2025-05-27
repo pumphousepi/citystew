@@ -1,12 +1,10 @@
-'use client';
-
 import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 
 interface CityOption {
   name: string;
-  abbreviation: string; // state abbreviation
-  label: string;        // e.g. "Austin, TX"
+  abbreviation: string;
+  label: string;
 }
 
 interface LocationSearchBarProps {
@@ -20,7 +18,7 @@ export default function LocationSearchBar({ onSelectLocation }: LocationSearchBa
   useEffect(() => {
     const fetchCitiesWithDelay = async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        await new Promise((resolve) => setTimeout(resolve, 1500)); // Optional UX delay
         const res = await fetch('/api/locations/cities');
         if (!res.ok) throw new Error('Failed to fetch cities');
         const rawData: CityOption[] = await res.json();
@@ -46,12 +44,18 @@ export default function LocationSearchBar({ onSelectLocation }: LocationSearchBa
       <Select
         isLoading={loading}
         options={options}
-        getOptionLabel={(option) => option.label}
-        getOptionValue={(option) => `${option.name},${option.abbreviation}`}
         onChange={handleChange}
         placeholder="Search cities (e.g. Austin, TX)"
+        isClearable
         className="text-black"
-        noOptionsMessage={() => 'No matches found'}
+        styles={{
+          control: (provided) => ({
+            ...provided,
+            borderRadius: '0.5rem',
+            borderColor: '#ccc',
+            padding: '2px'
+          })
+        }}
       />
     </div>
   );
