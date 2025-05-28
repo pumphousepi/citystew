@@ -1,4 +1,3 @@
-// src/app/components/TrendingEvents.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -18,22 +17,31 @@ interface TrendingEventsProps {
 
 export default function TrendingEvents({ location }: TrendingEventsProps) {
   const [events, setEvents] = useState<ApiEvent[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Only run when location is in "City, ST" form
+    if (!location.includes(',')) {
+      setEvents([]);
+      setLoading(false);
+      return;
+    }
+
+    const [city, stateCode] = location.split(',').map((s) => s.trim());
+    if (!city || !stateCode) {
+      setEvents([]);
+      setLoading(false);
+      return;
+    }
+
     async function fetchTrending() {
       setLoading(true);
       try {
         const params = new URLSearchParams();
+        params.append('city', city);
+        params.append('stateCode', stateCode);
         params.append('trending', 'true');
-
-        if (location) {
-          const [city, stateCode] = location
-            .split(',')
-            .map((s) => s.trim());
-          if (city) params.append('city', city);
-          if (stateCode) params.append('stateCode', stateCode);
-        }
+        params.append('date', 'upcoming');
 
         const res = await fetch(`/api/events?${params.toString()}`);
         if (!res.ok) throw new Error('Failed to fetch trending events');
@@ -50,15 +58,28 @@ export default function TrendingEvents({ location }: TrendingEventsProps) {
     fetchTrending();
   }, [location]);
 
+  // Prompt the user until they pick a location
+  if (!location.includes(',')) {
+    return (
+      <section className="py-12 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 text-center text-gray-500">
+          Select a location above to see trending events.
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          Trending Events in {location || 'your area'}
+          Trending Events in {location}
         </h2>
 
-        {loading && <p>Loading trending events...</p>}
-        {!loading && events.length === 0 && <p>No trending events found.</p>}
+        {loading && <p>Loading trending events…</p>}
+        {!loading && events.length === 0 && (
+          <p>No trending events found for {location}.</p>
+        )}
 
         <div className="flex space-x-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 px-2">
           {events.map((event) => (
