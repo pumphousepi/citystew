@@ -16,6 +16,7 @@ interface EventCardProps {
 }
 
 export default function EventCard({
+  id,
   title,
   image,
   date,
@@ -26,29 +27,21 @@ export default function EventCard({
 }: EventCardProps) {
   const isHorizontal = layout === 'horizontal';
 
-  // Generic Unsplash fallback for "event"
-  const placeholderUrl = 'https://source.unsplash.com/400x300/?event';
+  // Unsplash fallback with unique signature per card
+  const placeholderUrl = `https://source.unsplash.com/400x300/?event&sig=${encodeURIComponent(
+    id ?? title
+  )}`;
 
   const content = isHorizontal ? (
     <div className="flex items-center space-x-4 p-3 rounded-md hover:bg-gray-100 transition cursor-pointer">
       <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gray-200">
-        {image ? (
-          <Image
-            src={image}
-            alt={title}
-            fill
-            className="object-cover"
-            sizes="96px"
-          />
-        ) : (
-          <Image
-            src={placeholderUrl}
-            alt="Event placeholder"
-            fill
-            className="object-cover"
-            sizes="96px"
-          />
-        )}
+        <Image
+          src={image ?? placeholderUrl}
+          alt={title}
+          fill
+          className="object-cover"
+          sizes="96px"
+        />
       </div>
       <div className="flex flex-col justify-between flex-grow min-h-[96px]">
         <h3 className="text-md font-semibold text-gray-900">{title}</h3>
@@ -62,23 +55,13 @@ export default function EventCard({
   ) : (
     <div className="bg-white rounded-xl shadow-md overflow-hidden w-60 flex-shrink-0 flex flex-col h-[250px]">
       <div className="relative w-full h-40 flex-shrink-0">
-        {image ? (
-          <Image
-            src={image}
-            alt={title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 240px"
-          />
-        ) : (
-          <Image
-            src={placeholderUrl}
-            alt="Event placeholder"
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 240px"
-          />
-        )}
+        <Image
+          src={image ?? placeholderUrl}
+          alt={title}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 240px"
+        />
       </div>
       <div className="p-4 flex flex-col flex-grow justify-between min-h-[140px]">
         <div>
@@ -87,7 +70,9 @@ export default function EventCard({
           {venue && <p className="text-sm text-gray-600">{venue}</p>}
         </div>
         {description && (
-          <p className="text-sm text-gray-600 mt-2 line-clamp-3">{description}</p>
+          <p className="text-sm text-gray-600 mt-2 line-clamp-3">
+            {description}
+          </p>
         )}
       </div>
     </div>
