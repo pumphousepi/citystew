@@ -84,18 +84,30 @@ export default function TrendingEvents({
           <p>No trending events found for {location}.</p>
         )}
 
-        <div className="flex space-x-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 px-2">
-          {events.map((event) => (
-            <EventCard
-              key={event.id}
-              title={event.name}
-              image={event.images?.[0]?.url}
-              date={event.dates?.start?.localDate}
-              venue={event._embedded?.venues?.[0]?.name}
-              href={`/events/${event.id}`}
-            />
-          ))}
-        </div>
+<div className="flex space-x-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 px-2">
+  {(() => {
+    const seen = new Set<string>();
+    return events.map((event) => {
+      const rawUrl = event.images?.[0]?.url;
+      let imageUrl: string | undefined;
+      if (rawUrl && !seen.has(rawUrl)) {
+        seen.add(rawUrl);
+        imageUrl = rawUrl;
+      }
+      return (
+        <EventCard
+          key={event.id}
+          title={event.name}
+          image={imageUrl}
+          date={event.dates?.start?.localDate}
+          venue={event._embedded?.venues?.[0]?.name}
+          href={`/events/${event.id}`}
+        />
+      );
+    });
+  })()}
+</div>
+
       </div>
     </section>
   );

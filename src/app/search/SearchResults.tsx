@@ -55,26 +55,30 @@ export default function SearchResults() {
         <p>No events found for &quot;{query}&quot;.</p>
       )}
 
-      <div className="flex gap-6 overflow-x-auto py-4">
-        {events.map((event) => {
-          const venueName =
-            event._embedded?.venues?.[0]?.name || 'Venue TBD';
-          const eventDate =
-            event.dates?.start?.localDate || 'Date TBD';
-          const eventImage = event.images?.[0]?.url || '';
+<div className="flex space-x-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 px-2">
+  {(() => {
+    const seen = new Set<string>();
+    return events.map((event) => {
+      const rawUrl = event.images?.[0]?.url;
+      let imageUrl: string | undefined;
+      if (rawUrl && !seen.has(rawUrl)) {
+        seen.add(rawUrl);
+        imageUrl = rawUrl;
+      }
+      return (
+        <EventCard
+          key={event.id}
+          title={event.name}
+          image={imageUrl}
+          date={event.dates?.start?.localDate}
+          venue={event._embedded?.venues?.[0]?.name}
+          href={`/events/${event.id}`}
+        />
+      );
+    });
+  })()}
+</div>
 
-          return (
-            <EventCard
-              key={event.id}
-              title={event.name}
-              date={eventDate}
-              venue={venueName}
-              image={eventImage}
-              href={`/events/${event.id}`}
-            />
-          );
-        })}
-      </div>
     </>
   );
 }

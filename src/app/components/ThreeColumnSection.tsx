@@ -17,7 +17,7 @@ interface ApiEvent {
 interface ThreeColumnSectionProps {
   location: string;      // "City, ST"
   category?: string;
-  genre?: string;        // for music or theater subtype
+  genre?: string;
 }
 
 export default function ThreeColumnSection({
@@ -26,7 +26,6 @@ export default function ThreeColumnSection({
   genre,
 }: ThreeColumnSectionProps) {
   const [upcomingEvents, setUpcomingEvents] = useState<ApiEvent[]>([]);
-  const [topSellers, setTopSellers] = useState<ApiEvent[]>([]);
   const [familyEvents, setFamilyEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +42,6 @@ export default function ThreeColumnSection({
       const baseParams = new URLSearchParams();
       baseParams.append('city', city);
       baseParams.append('stateCode', state);
-
       if (category) baseParams.append('category', category);
       if (genre)    baseParams.append('genre', genre);
 
@@ -51,16 +49,8 @@ export default function ThreeColumnSection({
         // Upcoming Events
         const upcomingParams = new URLSearchParams(baseParams);
         upcomingParams.append('date', 'upcoming');
-        const upcomingRes = await fetch(
-          `/api/events?${upcomingParams.toString()}`
-        );
+        const upcomingRes = await fetch(`/api/events?${upcomingParams.toString()}`);
         const upcomingData = await upcomingRes.json();
-
-        // Top Sellers: sort by popularity descending
-        const topParams = new URLSearchParams(baseParams);
-        topParams.append('sort', 'popularity,desc');
-        const topRes = await fetch(`/api/events?${topParams.toString()}`);
-        const topData = await topRes.json();
 
         // Family Events
         const familyParams = new URLSearchParams(baseParams);
@@ -69,12 +59,10 @@ export default function ThreeColumnSection({
         const familyData = await familyRes.json();
 
         setUpcomingEvents(upcomingData._embedded?.events || []);
-        setTopSellers(topData._embedded?.events || []);
         setFamilyEvents(familyData._embedded?.events || []);
       } catch (error) {
         console.error('Failed to fetch events:', error);
         setUpcomingEvents([]);
-        setTopSellers([]);
         setFamilyEvents([]);
       } finally {
         setLoading(false);
@@ -89,71 +77,35 @@ export default function ThreeColumnSection({
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Upcoming Events */}
         <div className={columnClass}>
           <h2 className={headerClass}>Upcoming Events</h2>
           <div className="overflow-y-auto flex-grow space-y-4">
-            {loading ? (
-              <p>Loading...</p>
-            ) : upcomingEvents.length === 0 ? (
-              <p>No upcoming events found.</p>
-            ) : (
-              upcomingEvents.map((event) => (
-                <div key={event.id} className="border-b pb-3 last:border-none">
-                  <a
-                    href={`/events/${event.id}`}
-                    className="font-semibold text-gray-900 hover:underline"
-                  >
-                    {event.name}
-                  </a>
-                  <p className="text-sm text-gray-600">
-                    {event.dates?.start?.localDate || 'Date TBD'}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {event._embedded?.venues?.[0]?.name || 'Venue TBD'}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {event._embedded?.venues?.[0]?.city?.name || 'City TBD'}
-                  </p>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Top Sellers */}
-        <div className={columnClass}>
-          <h2 className={headerClass}>Top Sellers</h2>
-          <div className="overflow-y-auto flex-grow space-y-6">
-            {loading ? (
-              <p>Loading...</p>
-            ) : topSellers.length === 0 ? (
-              <p>No top sellers found.</p>
-            ) : (
-              topSellers.map((event) => {
-                const performer = event._embedded?.attractions?.[0]?.name || 'Featured Performer';
-                return (
-                  <div
-                    key={event.id}
-                    className="flex flex-col border-b pb-4 last:border-none"
-                  >
-                    <img
-                      src={event.images?.[0]?.url || '/placeholder.jpg'}
-                      alt={event.name}
-                      className="rounded-lg mb-2 object-cover w-full h-40"
-                    />
-                    <p className="font-semibold text-gray-900">{performer}</p>
-                    <a
-                      href={`/events/${event.id}`}
-                      className="mt-2 inline-block bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700 text-center"
-                    >
-                      View Tickets
-                    </a>
-                  </div>
-                );
-              })
-            )}
+            {loading
+              ? <p>Loading...</p>
+              : upcomingEvents.length === 0
+                ? <p>No upcoming events found.</p>
+                : upcomingEvents.map((event) => (
+                    <div key={event.id} className="border-b pb-3 last:border-none">
+                      <a
+                        href={`/events/${event.id}`}
+                        className="font-semibold text-gray-900 hover:underline"
+                      >
+                        {event.name}
+                      </a>
+                      <p className="text-sm text-gray-600">
+                        {event.dates?.start?.localDate || 'Date TBD'}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {event._embedded?.venues?.[0]?.name || 'Venue TBD'}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {event._embedded?.venues?.[0]?.city?.name || 'City TBD'}
+                      </p>
+                    </div>
+                  ))
+            }
           </div>
         </div>
 
@@ -161,33 +113,36 @@ export default function ThreeColumnSection({
         <div className={columnClass}>
           <h2 className={headerClass}>Family Events</h2>
           <div className="overflow-y-auto flex-grow space-y-6">
-            {loading ? (
-              <p>Loading...</p>
-            ) : familyEvents.length === 0 ? (
-              <p>No family events found.</p>
-            ) : (
-              familyEvents.map((event) => (
-                <div key={event.id} className="border-b pb-4 last:border-none">
-                  <a
-                    href={`/events/${event.id}`}
-                    className="font-semibold text-gray-900 hover:underline block mb-2"
-                  >
-                    {event.name}
-                  </a>
-                  <img
-                    src={event.images?.[0]?.url || '/placeholder.jpg'}
-                    alt={event.name}
-                    className="rounded-lg object-cover w-full h-40 mb-2"
-                  />
-                  <a
-                    href={`/events/${event.id}`}
-                    className="inline-block bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
-                  >
-                    View Tickets
-                  </a>
-                </div>
-              ))
-            )}
+            {loading
+              ? <p>Loading...</p>
+              : familyEvents.length === 0
+                ? <p>No family events found.</p>
+                : familyEvents.map((event) => {
+                    const raw = event.images?.[0]?.url;
+                    const imgSrc = raw ?? '/placeholder.jpg';
+                    return (
+                      <div key={event.id} className="border-b pb-4 last:border-none">
+                        <a
+                          href={`/events/${event.id}`}
+                          className="font-semibold text-gray-900 hover:underline block mb-2"
+                        >
+                          {event.name}
+                        </a>
+                        <img
+                          src={imgSrc}
+                          alt={event.name}
+                          className="rounded-lg object-cover w-full h-40 mb-2"
+                        />
+                        <a
+                          href={`/events/${event.id}`}
+                          className="inline-block bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
+                        >
+                          View Tickets
+                        </a>
+                      </div>
+                    );
+                  })
+            }
           </div>
         </div>
       </div>
