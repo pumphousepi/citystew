@@ -1,9 +1,7 @@
 // src/app/components/EventCard.tsx
 'use client';
 
-/* eslint-disable @next/next/no-img-element */
-
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -18,9 +16,6 @@ interface EventCardProps {
   layout?: 'vertical' | 'horizontal';
 }
 
-// Keep track of previously used placeholder URLs
-const usedPlaceholders = new Set<string>();
-
 export default function EventCard({
   id,
   title,
@@ -32,50 +27,56 @@ export default function EventCard({
   layout = 'vertical',
 }: EventCardProps) {
   const isHorizontal = layout === 'horizontal';
-  const [seed, setSeed] = useState(id);
-  const [fallbackSrc, setFallbackSrc] = useState(
-    `https://source.unsplash.com/400x300/?event&sig=${encodeURIComponent(seed)}`
-  );
-  const attemptsRef = useRef(0);
 
-  // Whenever seed changes, recalc the placeholder URL
+  // Local state for our fallback
+  const [fallback, setFallback] = useState<string | null>(null);
+
   useEffect(() => {
-    setFallbackSrc(
-      `https://source.unsplash.com/400x300/?event&sig=${encodeURIComponent(seed)}`
-    );
-  }, [seed]);
+    // only fetch when no TM image
+    if (image) return;
 
-  // When a fallback <img> loads, check for duplicates
-  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const src = e.currentTarget.currentSrc;
-    if (usedPlaceholders.has(src)) {
-      // Already used → bump seed to get a new random image
-      attemptsRef.current += 1;
-      setSeed(`${id}-${attemptsRef.current}`);
-    } else {
-      usedPlaceholders.add(src);
+    async function fetchPexels() {
+      try {
+        const res = await fetch(
+          `https://api.pexels.com/v1/search?query=${encodeURIComponent(
+            title
+          )}&per_page=5`,
+          {
+            headers: {
+              Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY!,
+            },
+          }
+        );
+        const data = await res.json();
+        // pick a random photo from the results
+        if (data.photos?.length) {
+          const photo = data.photos[Math.floor(Math.random() * data.photos.length)];
+          setFallback(photo.src.medium);
+        }
+      } catch (err) {
+        console.error('Pexels search failed', err);
+      }
     }
-  };
+
+    fetchPexels();
+  }, [image, title]);
+
+  const imgSrc = image ?? fallback ?? '/assets/images/placeholder.jpg';
+
+  const Img = (
+    <Image
+      src={imgSrc}
+      alt={title}
+      fill
+      className="object-cover"
+      sizes={isHorizontal ? '96px' : '(max-width: 768px) 100vw, 240px'}
+    />
+  );
 
   const content = isHorizontal ? (
     <div className="flex items-center space-x-4 p-3 rounded-md hover:bg-gray-100 transition cursor-pointer">
       <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gray-200">
-        {image ? (
-          <Image
-            src={image}
-            alt={title}
-            fill
-            className="object-cover"
-            sizes="96px"
-          />
-        ) : (
-          <img
-            src={fallbackSrc}
-            alt="Event placeholder"
-            className="w-full h-full object-cover"
-            onLoad={handleImageLoad}
-          />
-        )}
+        {Img}
       </div>
       <div className="flex flex-col justify-between flex-grow min-h-[96px]">
         <h3 className="text-md font-semibold text-gray-900">{title}</h3>
@@ -88,24 +89,7 @@ export default function EventCard({
     </div>
   ) : (
     <div className="bg-white rounded-xl shadow-md overflow-hidden w-60 flex-shrink-0 flex flex-col h-[250px]">
-      <div className="relative w-full h-40 flex-shrink-0">
-        {image ? (
-          <Image
-            src={image}
-            alt={title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 240px"
-          />
-        ) : (
-          <img
-            src={fallbackSrc}
-            alt="Event placeholder"
-            className="w-full h-full object-cover"
-            onLoad={handleImageLoad}
-          />
-        )}
-      </div>
+      <div className="relative w-full h-40 flex-shrink-0">{Img}</div>
       <div className="p-4 flex flex-col flex-grow justify-between min-h-[140px]">
         <div>
           <h3 className="text-lg font-semibold mb-1">{title}</h3>
