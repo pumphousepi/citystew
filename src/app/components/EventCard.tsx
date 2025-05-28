@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 interface EventCardProps {
@@ -25,22 +24,22 @@ export default function EventCard({
   layout = 'vertical',
 }: EventCardProps) {
   const isHorizontal = layout === 'horizontal';
-  const placeholder = '/assets/images/placeholder.jpg';
+
+  const placeholder = '/placeholder.jpg';  // make sure this lives in /public
   const [aiSrc, setAiSrc] = useState<string | null>(null);
 
-  // AI fallback only if TM image is missing
+  // AI fallback if no TM image
   useEffect(() => {
     if (image) return;
-
-    (async () => {
+    ;(async () => {
       try {
         const res = await fetch(
           `/api/generate-image?prompt=${encodeURIComponent(
             `A vibrant photo of a live ${title} event`
           )}`
         );
-        const data = await res.json();
-        if (data.url) setAiSrc(data.url);
+        const { url } = await res.json();
+        if (url) setAiSrc(url);
       } catch (err) {
         console.error('AI image generation failed:', err);
       }
@@ -49,25 +48,23 @@ export default function EventCard({
 
   const finalSrc = image || aiSrc || placeholder;
 
-  console.log('EventCard using image →', finalSrc);
+  // fall back to placeholder on any load error
+  const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src = placeholder;
+  };
 
   const Img = (
-    <Image
+    <img
       src={finalSrc}
       alt={title}
-      fill
-      className="object-cover"
-      sizes={isHorizontal ? '96px' : '(max-width:768px) 100vw,240px'}
-      onError={(e) => {
-        const imgEl = e.currentTarget as HTMLImageElement;
-        imgEl.src = placeholder;
-      }}
+      onError={handleError}
+      className="w-full h-full object-cover"
     />
   );
 
   const content = isHorizontal ? (
     <div className="flex items-center space-x-4 p-3 rounded-md hover:bg-gray-100 transition cursor-pointer">
-      <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gray-200">
+      <div className="w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gray-200">
         {Img}
       </div>
       <div className="flex flex-col justify-between flex-grow min-h-[96px]">
@@ -81,7 +78,7 @@ export default function EventCard({
     </div>
   ) : (
     <div className="bg-white rounded-xl shadow-md overflow-hidden w-60 flex-shrink-0 flex flex-col h-[250px]">
-      <div className="relative w-full h-40 flex-shrink-0">{Img}</div>
+      <div className="w-full h-40 flex-shrink-0">{Img}</div>
       <div className="p-4 flex flex-col flex-grow justify-between min-h-[140px]">
         <div>
           <h3 className="text-lg font-semibold mb-1">{title}</h3>
