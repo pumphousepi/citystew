@@ -10,7 +10,7 @@ export default function Footer() {
 
             <Link href="/" className="inline-block mb-4">
               <img
-                src="/public/assets/images/logo.png"
+                src="/assets/images/logo.png"
                 alt="CityStew Logo"
                 width={160}
                 height={40}
