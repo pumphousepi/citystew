@@ -1,6 +1,8 @@
 // src/app/components/EventCard.tsx
 'use client';
 
+/* eslint-disable @next/next/no-img-element */
+
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -16,7 +18,7 @@ interface EventCardProps {
   layout?: 'vertical' | 'horizontal';
 }
 
-// Track used placeholder URLs across all cards
+// Keep track of previously used placeholder URLs
 const usedPlaceholders = new Set<string>();
 
 export default function EventCard({
@@ -30,35 +32,30 @@ export default function EventCard({
   layout = 'vertical',
 }: EventCardProps) {
   const isHorizontal = layout === 'horizontal';
-
-  // Generate a unique seed per card, increment if needed
   const [seed, setSeed] = useState(id);
   const [fallbackSrc, setFallbackSrc] = useState(
     `https://source.unsplash.com/400x300/?event&sig=${encodeURIComponent(seed)}`
   );
   const attemptsRef = useRef(0);
 
-  // Reset fallbackSrc whenever the seed changes
+  // Whenever seed changes, recalc the placeholder URL
   useEffect(() => {
     setFallbackSrc(
       `https://source.unsplash.com/400x300/?event&sig=${encodeURIComponent(seed)}`
     );
   }, [seed]);
 
-  // Handle <img> load to detect duplicates
-  const handleImgLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const finalUrl = e.currentTarget.currentSrc;
-    if (usedPlaceholders.has(finalUrl)) {
-      // Duplicate found: bump seed and retry
+  // When a fallback <img> loads, check for duplicates
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const src = e.currentTarget.currentSrc;
+    if (usedPlaceholders.has(src)) {
+      // Already used → bump seed to get a new random image
       attemptsRef.current += 1;
       setSeed(`${id}-${attemptsRef.current}`);
     } else {
-      usedPlaceholders.add(finalUrl);
+      usedPlaceholders.add(src);
     }
   };
-
-  // Choose src: real image or fallback
-  const imgSrc = image || fallbackSrc;
 
   const content = isHorizontal ? (
     <div className="flex items-center space-x-4 p-3 rounded-md hover:bg-gray-100 transition cursor-pointer">
@@ -76,7 +73,7 @@ export default function EventCard({
             src={fallbackSrc}
             alt="Event placeholder"
             className="w-full h-full object-cover"
-            onLoad={handleImgLoad}
+            onLoad={handleImageLoad}
           />
         )}
       </div>
@@ -105,7 +102,7 @@ export default function EventCard({
             src={fallbackSrc}
             alt="Event placeholder"
             className="w-full h-full object-cover"
-            onLoad={handleImgLoad}
+            onLoad={handleImageLoad}
           />
         )}
       </div>
