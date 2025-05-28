@@ -1,11 +1,12 @@
+// src/app/components/Navbar.tsx
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 
 interface CityOption {
-  name: string;           // e.g. "New Braunfels"
-  abbreviation: string;   // e.g. "TX"
-  label: string;          // e.g. "New Braunfels, TX"
+  name: string;
+  abbreviation: string;
+  label: string;  // e.g. "New Braunfels, TX"
 }
 
 interface NavbarProps {
@@ -21,11 +22,11 @@ export default function Navbar({
 }: NavbarProps) {
   const [cities, setCities] = useState<CityOption[]>([]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
-  const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
 
-  // Load cities
+  // Load cities once
   useEffect(() => {
     fetch('/api/locations/cities')
       .then((r) => r.json())
@@ -33,7 +34,7 @@ export default function Navbar({
       .catch(console.error);
   }, []);
 
-  // Close any desktop dropdown on outside click
+  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (navRef.current && !navRef.current.contains(e.target as Node)) {
@@ -46,18 +47,18 @@ export default function Navbar({
 
   const toggleDropdown = (menu: string) =>
     setOpenDropdown((prev) => (prev === menu ? null : menu));
-
   const toggleMobile = () => {
-    setMobileOpen((prev) => !prev);
-    setMobileSubmenuOpen(null);
+    setMobileOpen((p) => !p);
+    setMobileSubmenu(null);
   };
-
   const toggleMobileSubmenu = (menu: string) =>
-    setMobileSubmenuOpen((prev) => (prev === menu ? null : menu));
+    setMobileSubmenu((prev) => (prev === menu ? null : menu));
 
-  // Static lists
   const categoryList = ['Food', 'Sports'];
-  const genreList = ['Rock', 'Pop', 'Jazz', 'Country', 'Hip Hop', 'Electronic', 'Classical', 'R&B'];
+  const genreList = [
+    'Rock', 'Pop', 'Jazz', 'Country',
+    'Hip Hop','Electronic','Classical','R&B',
+  ];
   const theaterList = ['Movies', 'Live Performances'];
 
   return (
@@ -66,14 +67,11 @@ export default function Navbar({
       className="fixed top-0 left-0 w-full bg-black bg-opacity-60 backdrop-blur-md z-50"
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between text-white">
-        {/* Logo */}
-        <a href="/" className="text-2xl font-bold">
-          CityStew
-        </a>
+        <a href="/" className="text-2xl font-bold">CityStew</a>
 
-        {/* Desktop menu */}
+        {/* Desktop */}
         <ul className="hidden md:flex space-x-8">
-          {/* Cities */}
+          {/** CITIES **/}
           <li className="relative">
             <button onClick={() => toggleDropdown('cities')} className="hover:text-gray-300">
               CITIES
@@ -97,7 +95,7 @@ export default function Navbar({
             )}
           </li>
 
-          {/* Categories */}
+          {/** CATEGORIES **/}
           <li className="relative">
             <button onClick={() => toggleDropdown('categories')} className="hover:text-gray-300">
               CATEGORIES
@@ -121,7 +119,7 @@ export default function Navbar({
             )}
           </li>
 
-          {/* Concerts */}
+          {/** CONCERTS **/}
           <li className="relative">
             <button onClick={() => toggleDropdown('concerts')} className="hover:text-gray-300">
               CONCERTS
@@ -146,7 +144,7 @@ export default function Navbar({
             )}
           </li>
 
-          {/* Theater */}
+          {/** THEATER **/}
           <li className="relative">
             <button onClick={() => toggleDropdown('theater')} className="hover:text-gray-300">
               THEATER
@@ -172,35 +170,25 @@ export default function Navbar({
           </li>
         </ul>
 
-        {/* Mobile menu toggle */}
+        {/* Mobile toggle */}
         <button
           className="md:hidden p-2 rounded bg-gray-800 hover:bg-gray-700"
-          aria-label="Toggle menu"
           onClick={toggleMobile}
+          aria-label="Toggle menu"
         >
           {mobileOpen ? (
-            <svg
-              className="h-6 w-6 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
+            <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           ) : (
-            <svg
-              className="h-6 w-6 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
+            <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           )}
         </button>
       </div>
 
-      {/* Mobile dropdown panel */}
+      {/* Mobile panel */}
       {mobileOpen && (
         <div className="md:hidden bg-white text-black shadow-lg">
           <div className="px-4 pt-2 pb-4 space-y-4">
@@ -212,7 +200,7 @@ export default function Navbar({
               >
                 CITIES
               </button>
-              {mobileSubmenuOpen === 'cities' && (
+              {mobileSubmenu === 'cities' && (
                 <div className="pl-4 space-y-1">
                   {cities.map((c) => (
                     <button
@@ -238,7 +226,7 @@ export default function Navbar({
               >
                 CATEGORIES
               </button>
-              {mobileSubmenuOpen === 'categories' && (
+              {mobileSubmenu === 'categories' && (
                 <div className="pl-4 space-y-1">
                   {categoryList.map((cat) => (
                     <button
@@ -264,7 +252,7 @@ export default function Navbar({
               >
                 CONCERTS
               </button>
-              {mobileSubmenuOpen === 'concerts' && (
+              {mobileSubmenu === 'concerts' && (
                 <div className="pl-4 space-y-1">
                   {genreList.map((g) => (
                     <button
@@ -291,7 +279,7 @@ export default function Navbar({
               >
                 THEATER
               </button>
-              {mobileSubmenuOpen === 'theater' && (
+              {mobileSubmenu === 'theater' && (
                 <div className="pl-4 space-y-1">
                   {theaterList.map((t) => (
                     <button
