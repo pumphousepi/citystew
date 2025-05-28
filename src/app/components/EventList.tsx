@@ -52,7 +52,6 @@ export default function EventList({ city, state }: EventListProps) {
       {events.map((event) => (
         <EventCard
           key={event.id}
-          id={event.id}
           title={event.name}
           image={event.images?.[0]?.url || '/placeholder.jpg'}
           date={event.dates?.start?.localDate}
