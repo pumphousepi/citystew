@@ -12,11 +12,12 @@ export async function GET(request: Request) {
     const response = await openai.images.generate({
       prompt,
       n: 1,
-      size: '256x256',   // valid options: "256x256" | "512x512" | "1024x1024"
+      size: '256x256',   // must be one of "256x256" | "512x512" | "1024x1024"
     });
 
-    // TS may not know about .data, so cast to any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const url = (response as any).data?.[0]?.url ?? null;
+
     return NextResponse.json({ url });
   } catch (err) {
     console.error('AI image generation failed', err);
