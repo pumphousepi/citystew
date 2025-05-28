@@ -17,7 +17,7 @@ interface ApiEvent {
 interface ThreeColumnSectionProps {
   location: string;      // "City, ST"
   category?: string;
-  genre?: string;
+  genre?: string;        // for music or theater subtype
 }
 
 export default function ThreeColumnSection({
@@ -48,22 +48,24 @@ export default function ThreeColumnSection({
       if (genre)    baseParams.append('genre', genre);
 
       try {
-        // Upcoming
+        // Upcoming Events
         const upcomingParams = new URLSearchParams(baseParams);
         upcomingParams.append('date', 'upcoming');
-        const upcomingRes = await fetch(`/api/events?${upcomingParams}`);
+        const upcomingRes = await fetch(
+          `/api/events?${upcomingParams.toString()}`
+        );
         const upcomingData = await upcomingRes.json();
 
-        // Top Sellers
+        // Top Sellers: sort by popularity descending
         const topParams = new URLSearchParams(baseParams);
-        topParams.append('sort', 'relevance');
-        const topRes = await fetch(`/api/events?${topParams}`);
+        topParams.append('sort', 'popularity,desc');
+        const topRes = await fetch(`/api/events?${topParams.toString()}`);
         const topData = await topRes.json();
 
-        // Family
+        // Family Events
         const familyParams = new URLSearchParams(baseParams);
         familyParams.append('category', 'family');
-        const familyRes = await fetch(`/api/events?${familyParams}`);
+        const familyRes = await fetch(`/api/events?${familyParams.toString()}`);
         const familyData = await familyRes.json();
 
         setUpcomingEvents(upcomingData._embedded?.events || []);
@@ -82,10 +84,7 @@ export default function ThreeColumnSection({
     fetchEvents();
   }, [city, state, category, genre]);
 
-  // unified column container style
   const columnClass = "flex flex-col rounded-2xl shadow-lg bg-gray-100 p-4 max-h-[600px]";
-
-  // unified header style matching TrendingEvents
   const headerClass = "text-2xl font-bold text-gray-800 mb-4";
 
   return (
@@ -133,10 +132,12 @@ export default function ThreeColumnSection({
               <p>No top sellers found.</p>
             ) : (
               topSellers.map((event) => {
-                const performer =
-                  event._embedded?.attractions?.[0]?.name || 'Featured Performer';
+                const performer = event._embedded?.attractions?.[0]?.name || 'Featured Performer';
                 return (
-                  <div key={event.id} className="flex flex-col border-b pb-4 last:border-none">
+                  <div
+                    key={event.id}
+                    className="flex flex-col border-b pb-4 last:border-none"
+                  >
                     <img
                       src={event.images?.[0]?.url || '/placeholder.jpg'}
                       alt={event.name}
