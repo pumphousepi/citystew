@@ -13,43 +13,65 @@ interface LocationSearchBarProps {
   onSelectLocation: (location: string) => void;  // single string "City, ST"
 }
 
-export default function LocationSearchBar({ onSelectLocation }: LocationSearchBarProps) {
+export default function LocationSearchBar({
+  onSelectLocation,
+}: LocationSearchBarProps) {
   const [options, setOptions] = useState<CityOption[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [selectedOption, setSelectedOption] = useState<CityOption | null>(
+    null
+  );
 
   useEffect(() => {
-    const fetchCitiesWithDelay = async () => {
+    let isMounted = true;
+    const fetchCities = async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1500)); // simulate delay
+        // simulate network delay
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
         const res = await fetch('/api/locations/cities');
         if (!res.ok) throw new Error('Failed to fetch cities');
         const rawData: CityOption[] = await res.json();
+
+        if (!isMounted) return;
         setOptions(rawData);
-      } catch (error) {
-        console.error('Error fetching city options:', error);
+
+        // pick the default only once
+        const defaultOpt = rawData.find(
+          (opt) => opt.name === 'New Braunfels' && opt.abbreviation === 'TX'
+        );
+        if (defaultOpt) {
+          setSelectedOption(defaultOpt);
+          onSelectLocation(defaultOpt.label);
+        }
+      } catch (err) {
+        console.error('Error fetching city options:', err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
-    fetchCitiesWithDelay();
-  }, []);
+    fetchCities();
+    return () => {
+      isMounted = false;
+    };
+  }, []); // <-- empty deps so this runs only once
 
-  const handleChange = (selectedOption: CityOption | null) => {
-    if (selectedOption) {
-      // Combine city and state into a single string "City, ST"
-      const location = `${selectedOption.name}, ${selectedOption.abbreviation}`;
-      onSelectLocation(location);
+  const handleChange = (opt: CityOption | null) => {
+    setSelectedOption(opt);
+    if (opt) {
+      onSelectLocation(`${opt.name}, ${opt.abbreviation}`);
     }
   };
 
   return (
     <div className="w-full max-w-md mx-auto my-4">
-      <Select
+      <Select<CityOption>
+        value={selectedOption}
         isLoading={loading}
         options={options}
-        getOptionLabel={(option) => option.label}
-        getOptionValue={(option) => `${option.name},${option.abbreviation}`}
+        getOptionLabel={(o) => o.label}
+        getOptionValue={(o) => `${o.name},${o.abbreviation}`}
         onChange={handleChange}
         placeholder="Search cities (e.g. Austin, TX)"
         className="text-black"
