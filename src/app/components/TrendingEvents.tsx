@@ -44,13 +44,11 @@ export default function TrendingEvents({
           trending: 'true',
           date: 'upcoming',
         });
-
         if (category) params.append('category', category);
         if (genre)    params.append('genre', genre);
 
-        const res = await fetch(`/api/events?${params}`);
+        const res = await fetch(`/api/events?${params.toString()}`);
         if (!res.ok) throw new Error('Failed to fetch trending events');
-
         const data = await res.json();
         setEvents(data._embedded?.events || []);
       } catch (error) {
@@ -89,6 +87,7 @@ export default function TrendingEvents({
         <div className="flex space-x-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 px-2">
           {events.map((event) => (
             <EventCard
+              key={event.id}
               title={event.name}
               image={event.images?.[0]?.url}
               date={event.dates?.start?.localDate}
