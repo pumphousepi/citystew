@@ -1,8 +1,11 @@
+// src/app/components/EventCard.tsx
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 
 interface EventCardProps {
-  id?: string; // keep in interface if needed but not used inside component
+  id?: string;
   title: string;
   image?: string;
   date?: string;
@@ -19,9 +22,12 @@ export default function EventCard({
   venue,
   description,
   href,
-  layout = 'vertical', // default to vertical
+  layout = 'vertical',
 }: EventCardProps) {
   const isHorizontal = layout === 'horizontal';
+
+  // Generic Unsplash fallback for "event"
+  const placeholderUrl = 'https://source.unsplash.com/400x300/?event';
 
   const content = isHorizontal ? (
     <div className="flex items-center space-x-4 p-3 rounded-md hover:bg-gray-100 transition cursor-pointer">
@@ -29,13 +35,19 @@ export default function EventCard({
         {image ? (
           <Image
             src={image}
-            alt={title || 'Event image'}
+            alt={title}
             fill
             className="object-cover"
             sizes="96px"
           />
         ) : (
-          <div className="flex items-center justify-center w-full h-full text-gray-500">No Image</div>
+          <Image
+            src={placeholderUrl}
+            alt="Event placeholder"
+            fill
+            className="object-cover"
+            sizes="96px"
+          />
         )}
       </div>
       <div className="flex flex-col justify-between flex-grow min-h-[96px]">
@@ -53,15 +65,19 @@ export default function EventCard({
         {image ? (
           <Image
             src={image}
-            alt={title || 'Event image'}
+            alt={title}
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 240px"
           />
         ) : (
-          <div className="bg-gray-200 w-full h-full flex items-center justify-center text-gray-500">
-            No Image
-          </div>
+          <Image
+            src={placeholderUrl}
+            alt="Event placeholder"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 240px"
+          />
         )}
       </div>
       <div className="p-4 flex flex-col flex-grow justify-between min-h-[140px]">
@@ -85,4 +101,3 @@ export default function EventCard({
     content
   );
 }
-
