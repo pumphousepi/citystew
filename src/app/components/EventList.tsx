@@ -1,3 +1,4 @@
+// src/app/components/EventList.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -16,7 +17,7 @@ interface EventListProps {
   state?: string;
 }
 
-export default function EventList({ city, state,}: EventListProps) {
+export default function EventList({ city, state }: EventListProps) {
   const [events, setEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,7 +25,6 @@ export default function EventList({ city, state,}: EventListProps) {
     async function fetchEvents() {
       setLoading(true);
       try {
-        // Build query parameters based on props
         const params = new URLSearchParams();
         if (city) params.append('city', city);
         if (state) params.append('stateCode', state);
@@ -42,7 +42,7 @@ export default function EventList({ city, state,}: EventListProps) {
     }
 
     fetchEvents();
-  }, [city, state,]);
+  }, [city, state]);
 
   if (loading) return <p>Loading events...</p>;
   if (events.length === 0) return <p>No events found.</p>;

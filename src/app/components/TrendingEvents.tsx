@@ -1,3 +1,4 @@
+// src/app/components/TrendingEvents.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -27,7 +28,9 @@ export default function TrendingEvents({ location }: TrendingEventsProps) {
         params.append('trending', 'true');
 
         if (location) {
-          const [city, stateCode] = location.split(',').map((s) => s.trim());
+          const [city, stateCode] = location
+            .split(',')
+            .map((s) => s.trim());
           if (city) params.append('city', city);
           if (stateCode) params.append('stateCode', stateCode);
         }

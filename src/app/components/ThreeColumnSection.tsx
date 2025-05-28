@@ -1,3 +1,4 @@
+// src/app/components/ThreeColumnSection.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -6,9 +7,9 @@ interface ApiEvent {
   id: string;
   name: string;
   dates?: { start?: { localDate?: string } };
-  _embedded?: { 
+  _embedded?: {
     venues?: { name?: string; city?: { name?: string } }[];
-    attractions?: { name: string }[]; 
+    attractions?: { name: string }[];
   };
   images?: { url: string }[];
 }
@@ -23,8 +24,7 @@ export default function ThreeColumnSection({ location }: Props) {
   const [familyEvents, setFamilyEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Split "Austin, TX" into city = "Austin", state = "TX"
-  const [city, state] = location.split(',').map(part => part.trim());
+  const [city, state] = location.split(',').map((part) => part.trim());
 
   useEffect(() => {
     if (!city || !state) return;
@@ -33,13 +33,19 @@ export default function ThreeColumnSection({ location }: Props) {
       setLoading(true);
 
       try {
-        const upcomingRes = await fetch(`/api/events?date=upcoming&city=${city}&stateCode=${state}`);
+        const upcomingRes = await fetch(
+          `/api/events?date=upcoming&city=${city}&stateCode=${state}`
+        );
         const upcomingData = await upcomingRes.json();
 
-        const topSellersRes = await fetch(`/api/events?sort=relevance&city=${city}&stateCode=${state}`);
+        const topSellersRes = await fetch(
+          `/api/events?sort=relevance&city=${city}&stateCode=${state}`
+        );
         const topSellersData = await topSellersRes.json();
 
-        const familyRes = await fetch(`/api/events?category=family&city=${city}&stateCode=${state}`);
+        const familyRes = await fetch(
+          `/api/events?category=family&city=${city}&stateCode=${state}`
+        );
         const familyData = await familyRes.json();
 
         setUpcomingEvents(upcomingData._embedded?.events || []);
@@ -58,10 +64,11 @@ export default function ThreeColumnSection({ location }: Props) {
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
         {/* Upcoming Events */}
         <div className="flex flex-col rounded-2xl shadow-lg bg-white p-4 max-h-[600px]">
-          <h3 className="text-xl font-bold text-blue-600 mb-3 flex-shrink-0">Upcoming Events</h3>
+          <h3 className="text-xl font-bold text-blue-600 mb-3 flex-shrink-0">
+            Upcoming Events
+          </h3>
           <div className="overflow-y-auto flex-grow space-y-4">
             {loading ? (
               <p>Loading...</p>
@@ -69,8 +76,14 @@ export default function ThreeColumnSection({ location }: Props) {
               <p>No upcoming events found.</p>
             ) : (
               upcomingEvents.map((event) => (
-                <div key={event.id} className="border-b pb-3 last:border-none">
-                  <a href={`/events/${event.id}`} className="font-semibold text-gray-900 hover:underline">
+                <div
+                  key={event.id}
+                  className="border-b pb-3 last:border-none"
+                >
+                  <a
+                    href={`/events/${event.id}`}
+                    className="font-semibold text-gray-900 hover:underline"
+                  >
                     {event.name}
                   </a>
                   <p className="text-sm text-gray-600">
@@ -80,7 +93,8 @@ export default function ThreeColumnSection({ location }: Props) {
                     {event._embedded?.venues?.[0]?.name || 'Venue TBD'}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {event._embedded?.venues?.[0]?.city?.name || 'City TBD'}
+                    {event._embedded?.venues?.[0]?.city?.name ||
+                      'City TBD'}
                   </p>
                 </div>
               ))
@@ -90,7 +104,9 @@ export default function ThreeColumnSection({ location }: Props) {
 
         {/* Top Sellers */}
         <div className="flex flex-col rounded-2xl shadow-lg bg-gray-100 p-4 max-h-[600px]">
-          <h3 className="text-xl font-bold text-red-600 mb-3 flex-shrink-0">Top Sellers</h3>
+          <h3 className="text-xl font-bold text-red-600 mb-3 flex-shrink-0">
+            Top Sellers
+          </h3>
           <div className="overflow-y-auto flex-grow space-y-6">
             {loading ? (
               <p>Loading...</p>
@@ -98,15 +114,24 @@ export default function ThreeColumnSection({ location }: Props) {
               <p>No top sellers found.</p>
             ) : (
               topSellers.map((event) => {
-                const performerName = event._embedded?.attractions?.[0]?.name || 'Featured Performer';
+                const performerName =
+                  event._embedded?.attractions?.[0]?.name ||
+                  'Featured Performer';
                 return (
-                  <div key={event.id} className="flex flex-col border-b pb-4 last:border-none">
+                  <div
+                    key={event.id}
+                    className="flex flex-col border-b pb-4 last:border-none"
+                  >
                     <img
-                      src={event.images?.[0]?.url || '/placeholder.jpg'}
+                      src={
+                        event.images?.[0]?.url || '/placeholder.jpg'
+                      }
                       alt={event.name}
                       className="rounded-lg mb-2 object-cover w-full h-40"
                     />
-                    <p className="font-semibold text-gray-900">{performerName}</p>
+                    <p className="font-semibold text-gray-900">
+                      {performerName}
+                    </p>
                     <a
                       href={`/events/${event.id}`}
                       className="mt-2 inline-block bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700 text-center"
@@ -122,7 +147,9 @@ export default function ThreeColumnSection({ location }: Props) {
 
         {/* Family Events */}
         <div className="flex flex-col rounded-2xl shadow-lg bg-yellow-50 p-4 max-h-[600px]">
-          <h3 className="text-xl font-bold text-green-600 mb-3 flex-shrink-0">Family Events</h3>
+          <h3 className="text-xl font-bold text-green-600 mb-3 flex-shrink-0">
+            Family Events
+          </h3>
           <div className="overflow-y-auto flex-grow space-y-6">
             {loading ? (
               <p>Loading...</p>
@@ -130,12 +157,20 @@ export default function ThreeColumnSection({ location }: Props) {
               <p>No family events found.</p>
             ) : (
               familyEvents.map((event) => (
-                <div key={event.id} className="border-b pb-4 last:border-none">
-                  <a href={`/events/${event.id}`} className="font-semibold text-gray-900 hover:underline block mb-2">
+                <div
+                  key={event.id}
+                  className="border-b pb-4 last:border-none"
+                >
+                  <a
+                    href={`/events/${event.id}`}
+                    className="font-semibold text-gray-900 hover:underline block mb-2"
+                  >
                     {event.name}
                   </a>
                   <img
-                    src={event.images?.[0]?.url || '/placeholder.jpg'}
+                    src={
+                      event.images?.[0]?.url || '/placeholder.jpg'
+                    }
                     alt={event.name}
                     className="rounded-lg object-cover w-full h-40 mb-2"
                   />
@@ -150,7 +185,6 @@ export default function ThreeColumnSection({ location }: Props) {
             )}
           </div>
         </div>
-
       </div>
     </section>
   );
