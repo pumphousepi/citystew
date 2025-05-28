@@ -1,11 +1,6 @@
 // src/app/api/events/route.ts
 import { NextResponse } from 'next/server';
 
-console.log(
-  '🔑 TICKETMASTER_API_KEY is set?',
-  Boolean(process.env.TICKETMASTER_API_KEY)
-);
-
 
 export async function GET(request: Request) {
   const API_KEY = process.env.TICKETMASTER_API_KEY;
