@@ -6,8 +6,17 @@ export default function Footer() {
     <footer className="bg-gray-900 text-gray-300">
       <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Logo and Description */}
-        <div>
-          <h2 className="text-white text-2xl font-bold mb-4">CityStew</h2>
+        <div>            
+
+            <Link href="/" className="inline-block mb-4">
+              <img
+                src="/public/assets/images/logo.png"
+                alt="CityStew Logo"
+                width={160}
+                height={40}
+                className="object-contain"/>
+            </Link>
+          
           <p className="text-gray-400">
             Discover the best events, concerts, and shows happening near you.
           </p>
