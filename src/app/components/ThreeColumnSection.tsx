@@ -1,4 +1,3 @@
-// src/app/components/ThreeColumnSection.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -14,52 +13,76 @@ interface ApiEvent {
   images?: { url: string }[];
 }
 
-interface Props {
-  location: string; // "City, ST"
+interface ThreeColumnSectionProps {
+  location: string;      // "City, ST"
+  category?: string;
+  genre?: string;        // for music or theater subtype
 }
 
-export default function ThreeColumnSection({ location }: Props) {
+export default function ThreeColumnSection({
+  location,
+  category,
+  genre,
+}: ThreeColumnSectionProps) {
   const [upcomingEvents, setUpcomingEvents] = useState<ApiEvent[]>([]);
   const [topSellers, setTopSellers] = useState<ApiEvent[]>([]);
   const [familyEvents, setFamilyEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [city, state] = location.split(',').map((part) => part.trim());
+  const [city, state] = location.split(',').map((p) => p.trim());
 
   useEffect(() => {
-    if (!city || !state) return;
+    if (!city || !state) {
+      setLoading(false);
+      return;
+    }
 
     async function fetchEvents() {
       setLoading(true);
+      const baseParams = new URLSearchParams();
+      baseParams.append('city', city);
+      baseParams.append('stateCode', state);
+
+      // include the new props
+      if (category) baseParams.append('category', category);
+      if (genre)    baseParams.append('genre', genre);
 
       try {
+        // Upcoming
+        const upcomingParams = new URLSearchParams(baseParams);
+        upcomingParams.append('date', 'upcoming');
         const upcomingRes = await fetch(
-          `/api/events?date=upcoming&city=${city}&stateCode=${state}`
+          `/api/events?${upcomingParams.toString()}`
         );
         const upcomingData = await upcomingRes.json();
 
-        const topSellersRes = await fetch(
-          `/api/events?sort=relevance&city=${city}&stateCode=${state}`
-        );
-        const topSellersData = await topSellersRes.json();
+        // Top Sellers (relevance)
+        const topParams = new URLSearchParams(baseParams);
+        topParams.append('sort', 'relevance');
+        const topRes = await fetch(`/api/events?${topParams.toString()}`);
+        const topData = await topRes.json();
 
-        const familyRes = await fetch(
-          `/api/events?category=family&city=${city}&stateCode=${state}`
-        );
+        // Family Events (override to family)
+        const familyParams = new URLSearchParams(baseParams);
+        familyParams.append('category', 'family');
+        const familyRes = await fetch(`/api/events?${familyParams.toString()}`);
         const familyData = await familyRes.json();
 
         setUpcomingEvents(upcomingData._embedded?.events || []);
-        setTopSellers(topSellersData._embedded?.events || []);
+        setTopSellers(topData._embedded?.events || []);
         setFamilyEvents(familyData._embedded?.events || []);
       } catch (error) {
         console.error('Failed to fetch events:', error);
+        setUpcomingEvents([]);
+        setTopSellers([]);
+        setFamilyEvents([]);
       } finally {
         setLoading(false);
       }
     }
 
     fetchEvents();
-  }, [city, state]);
+  }, [city, state, category, genre]);
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
@@ -114,7 +137,7 @@ export default function ThreeColumnSection({ location }: Props) {
               <p>No top sellers found.</p>
             ) : (
               topSellers.map((event) => {
-                const performerName =
+                const performer =
                   event._embedded?.attractions?.[0]?.name ||
                   'Featured Performer';
                 return (
@@ -123,14 +146,12 @@ export default function ThreeColumnSection({ location }: Props) {
                     className="flex flex-col border-b pb-4 last:border-none"
                   >
                     <img
-                      src={
-                        event.images?.[0]?.url || '/placeholder.jpg'
-                      }
+                      src={event.images?.[0]?.url || '/placeholder.jpg'}
                       alt={event.name}
                       className="rounded-lg mb-2 object-cover w-full h-40"
                     />
                     <p className="font-semibold text-gray-900">
-                      {performerName}
+                      {performer}
                     </p>
                     <a
                       href={`/events/${event.id}`}
@@ -168,9 +189,7 @@ export default function ThreeColumnSection({ location }: Props) {
                     {event.name}
                   </a>
                   <img
-                    src={
-                      event.images?.[0]?.url || '/placeholder.jpg'
-                    }
+                    src={event.images?.[0]?.url || '/placeholder.jpg'}
                     alt={event.name}
                     className="rounded-lg object-cover w-full h-40 mb-2"
                   />

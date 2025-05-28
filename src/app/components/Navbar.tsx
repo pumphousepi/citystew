@@ -1,194 +1,191 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import NavButton from './NavButton';
+import React, { useState, useEffect, useRef } from 'react';
 
-interface NavItem {
-  label: string;
-  links: { label: string; href: string }[];
+interface CityOption {
+  name: string;
+  abbreviation: string;
+  label: string;  // e.g. "Austin, TX"
 }
 
-const navItems: NavItem[] = [
-  {
-    label: 'CITIES',
-    links: [
-      { label: 'New York', href: '/cities/new-york' },
-      { label: 'Boston', href: '/cities/boston' },
-      { label: 'Chicago', href: '/cities/chicago' },
-      { label: 'Los Angeles', href: '/cities/los-angeles' },
-    ],
-  },
-  {
-    label: 'SPORTS',
-    links: [
-      { label: 'Atlanta Hawks', href: '/sports/atlanta-hawks' },
-      { label: 'Boston Red Sox', href: '/sports/boston-red-sox' },
-      { label: 'Chicago Bears', href: '/sports/chicago-bears' },
-    ],
-  },
-  {
-    label: 'CONCERTS',
-    links: [
-      { label: 'Rolling Stones', href: '/concerts/rolling-stones' },
-      { label: 'Coldplay', href: '/concerts/coldplay' },
-    ],
-  },
-  {
-    label: 'THEATER',
-    links: [
-      { label: 'Hamilton', href: '/theater/hamilton' },
-      { label: 'Wicked', href: '/theater/wicked' },
-    ],
-  },
-];
-
-function Dropdown({
-  items,
-  onLinkClick,
-}: {
-  items: { label: string; href: string }[];
-  onLinkClick?: () => void;
-}) {
-  return (
-    <div className="absolute top-full left-0 mt-1 w-48 bg-black rounded shadow-lg z-50">
-      {items.map(({ label, href }) => (
-        <Link
-          key={href}
-          href={href}
-          className="block px-4 py-2 text-white hover:text-gray-700 focus:outline-none transition-colors duration-300"
-          onClick={onLinkClick}
-        >
-          {label}
-        </Link>
-      ))}
-    </div>
-  );
+interface NavbarProps {
+  onSelectLocation: (loc: string) => void;
+  onSelectCategory: (cat: string) => void;
+  onSelectGenre: (genre: string) => void;
 }
 
-export default function Navbar() {
+export default function Navbar({
+  onSelectLocation,
+  onSelectCategory,
+  onSelectGenre,
+}: NavbarProps) {
+  const [cities, setCities] = useState<CityOption[]>([]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const navRef = useRef<HTMLElement>(null);
 
+  // Load city list once
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+    fetch('/api/locations/cities')
+      .then((res) => res.json())
+      .then((data: CityOption[]) => setCities(data))
+      .catch(console.error);
+  }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
         setOpenDropdown(null);
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
     };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  useEffect(() => {
-    function onScroll() {
-      setScrolled(window.scrollY > 10);
-    }
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  const toggle = (menu: string) =>
+    setOpenDropdown((prev) => (prev === menu ? null : menu));
 
-  const toggleDropdown = (label: string) => {
-    setOpenDropdown((prev) => (prev === label ? null : label));
-  };
-
-  const bgOpacity = scrolled ? 0.6 : 0.3;
+  // Static lists for categories/genres/theater
+  const categoryList = ['Food', 'Sports'];
+  const genreList = [
+    'Rock',
+    'Pop',
+    'Jazz',
+    'Country',
+    'Hip Hop',
+    'Electronic',
+    'Classical',
+    'R&B',
+  ];
+  const theaterList = ['Movies', 'Live Performances'];
 
   return (
     <nav
       ref={navRef}
-      className="fixed top-0 left-0 w-full z-50 backdrop-blur-md transition-colors duration-500"
-      style={{ backgroundColor: `rgba(0,0,0,${bgOpacity})` }}
+      className="fixed top-0 left-0 w-full bg-black bg-opacity-60 backdrop-blur-md z-50"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          <div className="flex-shrink-0">
-            <Link href="/" className="text-2xl font-bold text-white">
-              CityStew
-            </Link>
-          </div>
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between text-white">
+        {/* Logo */}
+        <a href="/" className="text-2xl font-bold">
+          CityStew
+        </a>
 
-          <div className="hidden md:flex space-x-6 relative">
-            {navItems.map(({ label, links }) => (
-              <div key={label} className="relative">
-                <button
-                  aria-haspopup="true"
-                  aria-expanded={openDropdown === label}
-                  onClick={() => toggleDropdown(label)}
-                  className="text-white font-semibold focus:outline-none rounded px-2 py-1 hover:text-gray-700 transition-colors duration-300"
-                >
-                  {label}
-                </button>
-
-                {openDropdown === label && (
-                  <Dropdown
-                    items={links}
-                    onLinkClick={() => setOpenDropdown(null)}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-
-          <button
-            className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-gray-700 focus:outline-none"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
-          >
-            <svg
-              className="h-6 w-6"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+        {/* Desktop menu */}
+        <ul className="hidden md:flex space-x-8">
+          {/* CITIES */}
+          <li className="relative">
+            <button
+              onClick={() => toggle('cities')}
+              className="hover:text-gray-300"
             >
-              {mobileOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {mobileOpen && (
-        <div className="md:hidden bg-black shadow-lg">
-          <div className="px-4 pt-2 pb-4 space-y-1">
-            {navItems.map(({ label, links }) => (
-              <div key={label}>
-                <NavButton ariaHasPopup={true}>{label}</NavButton>
-                <div className="pl-4">
-                  {links.map(({ label: linkLabel, href }) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      className="block py-1 text-white hover:text-gray-700 focus:outline-none transition-colors duration-300"
-                      onClick={() => setMobileOpen(false)}
+              CITIES
+            </button>
+            {openDropdown === 'cities' && (
+              <ul className="absolute mt-2 w-48 bg-white text-black rounded shadow-lg overflow-auto max-h-64">
+                {cities.map((c) => (
+                  <li key={c.label}>
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      onClick={() => {
+                        onSelectLocation(c.label);
+                        setOpenDropdown(null);
+                      }}
                     >
-                      {linkLabel}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+                      {c.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+
+          {/* CATEGORIES */}
+          <li className="relative">
+            <button
+              onClick={() => toggle('categories')}
+              className="hover:text-gray-300"
+            >
+              CATEGORIES
+            </button>
+            {openDropdown === 'categories' && (
+              <ul className="absolute mt-2 w-48 bg-white text-black rounded shadow-lg">
+                {categoryList.map((cat) => (
+                  <li key={cat}>
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      onClick={() => {
+                        onSelectCategory(cat.toLowerCase());
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      {cat}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+
+          {/* CONCERTS */}
+          <li className="relative">
+            <button
+              onClick={() => toggle('concerts')}
+              className="hover:text-gray-300"
+            >
+              CONCERTS
+            </button>
+            {openDropdown === 'concerts' && (
+              <ul className="absolute mt-2 w-48 bg-white text-black rounded shadow-lg overflow-auto max-h-64">
+                {genreList.map((g) => (
+                  <li key={g}>
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      onClick={() => {
+                        onSelectCategory('music');
+                        onSelectGenre(g);
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      {g}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+
+          {/* THEATER */}
+          <li className="relative">
+            <button
+              onClick={() => toggle('theater')}
+              className="hover:text-gray-300"
+            >
+              THEATER
+            </button>
+            {openDropdown === 'theater' && (
+              <ul className="absolute mt-2 w-48 bg-white text-black rounded shadow-lg">
+                {theaterList.map((t) => (
+                  <li key={t}>
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      onClick={() => {
+                        onSelectCategory('theater');
+                        onSelectGenre(t.toLowerCase().replace(/\s+/g, ''));
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      {t}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        </ul>
+
+        {/* Mobile menu toggle (optional) */}
+        {/* …you can re‑use your existing mobile panel here… */}
+      </div>
     </nav>
   );
 }

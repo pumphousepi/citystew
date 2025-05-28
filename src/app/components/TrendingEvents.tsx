@@ -12,15 +12,21 @@ interface ApiEvent {
 }
 
 interface TrendingEventsProps {
-  location: string; // e.g. "Austin, TX"
+  location: string;     // e.g. "Austin, TX"
+  category?: string;    // e.g. "food", "sports", "theater", "music"
+  genre?: string;       // for music genres or theatre sub‑types
 }
 
-export default function TrendingEvents({ location }: TrendingEventsProps) {
+export default function TrendingEvents({
+  location,
+  category,
+  genre,
+}: TrendingEventsProps) {
   const [events, setEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Only run when location is in "City, ST" form
+    // don’t fetch until we have “City, ST”
     if (!location.includes(',')) {
       setEvents([]);
       setLoading(false);
@@ -28,11 +34,6 @@ export default function TrendingEvents({ location }: TrendingEventsProps) {
     }
 
     const [city, stateCode] = location.split(',').map((s) => s.trim());
-    if (!city || !stateCode) {
-      setEvents([]);
-      setLoading(false);
-      return;
-    }
 
     async function fetchTrending() {
       setLoading(true);
@@ -43,8 +44,13 @@ export default function TrendingEvents({ location }: TrendingEventsProps) {
         params.append('trending', 'true');
         params.append('date', 'upcoming');
 
+        // include your new props
+        if (category) params.append('category', category);
+        if (genre)    params.append('genre', genre);
+
         const res = await fetch(`/api/events?${params.toString()}`);
         if (!res.ok) throw new Error('Failed to fetch trending events');
+
         const data = await res.json();
         setEvents(data._embedded?.events || []);
       } catch (error) {
@@ -56,9 +62,9 @@ export default function TrendingEvents({ location }: TrendingEventsProps) {
     }
 
     fetchTrending();
-  }, [location]);
+  }, [location, category, genre]);
 
-  // Prompt the user until they pick a location
+  // prompt until a location’s picked
   if (!location.includes(',')) {
     return (
       <section className="py-12 bg-gray-50">
