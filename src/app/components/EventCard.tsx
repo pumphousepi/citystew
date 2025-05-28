@@ -1,7 +1,7 @@
 // src/app/components/EventCard.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
 
 interface EventCardProps {
@@ -24,41 +24,20 @@ export default function EventCard({
   layout = 'vertical',
 }: EventCardProps) {
   const isHorizontal = layout === 'horizontal';
+  const placeholder = '/assets/images/placeholder.jpg';
 
-  const placeholder = '/placeholder.jpg';  // make sure this lives in /public
-  const [aiSrc, setAiSrc] = useState<string | null>(null);
-
-  // AI fallback if no TM image
-  useEffect(() => {
-    if (image) return;
-    ;(async () => {
-      try {
-        const res = await fetch(
-          `/api/generate-image?prompt=${encodeURIComponent(
-            `A vibrant photo of a live ${title} event`
-          )}`
-        );
-        const { url } = await res.json();
-        if (url) setAiSrc(url);
-      } catch (err) {
-        console.error('AI image generation failed:', err);
-      }
-    })();
-  }, [image, title]);
-
-  const finalSrc = image || aiSrc || placeholder;
-
-  // fall back to placeholder on any load error
-  const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    e.currentTarget.src = placeholder;
-  };
+  // Only use the TM image if present, otherwise local placeholder
+  const finalSrc = image || placeholder;
 
   const Img = (
     <img
       src={finalSrc}
       alt={title}
-      onError={handleError}
       className="w-full h-full object-cover"
+      onError={(e) => {
+        // in case that placeholder is missing or corrupt
+        e.currentTarget.src = '/placeholder.jpg';
+      }}
     />
   );
 
