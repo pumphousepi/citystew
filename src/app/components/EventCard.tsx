@@ -25,23 +25,29 @@ export default function EventCard({
   layout = 'vertical',
 }: EventCardProps) {
   const isHorizontal = layout === 'horizontal';
-
-  // State for a Pexels fallback URL
+  const placeholder = '/assets/images/placeholder.jpg';
   const [pexelsSrc, setPexelsSrc] = useState<string | null>(null);
 
   useEffect(() => {
-    if (image) return; // only fetch when no TM image
+    // never even try unless TM gave us nothing
+    if (image) return;
 
-    async function fetchPexels() {
+    const key = process.env.NEXT_PUBLIC_PEXELS_API_KEY;
+    console.log('PEXELS KEY →', key);
+
+    if (!key) {
+      console.warn('No Pexels API key found; skipping photo search');
+      return;
+    }
+
+    ;(async () => {
       try {
         const res = await fetch(
           `https://api.pexels.com/v1/search?query=${encodeURIComponent(
             title
           )}&per_page=5`,
           {
-            headers: {
-              Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY!,
-            },
+            headers: { Authorization: key },
           }
         );
         const data = await res.json();
@@ -53,13 +59,11 @@ export default function EventCard({
       } catch (err) {
         console.error('Pexels search failed:', err);
       }
-    }
-
-    fetchPexels();
+    })();
   }, [image, title]);
 
-  // Final image source: TM → Pexels → local placeholder
-  const finalSrc = image ?? pexelsSrc ?? '/assets/images/placeholder.jpg';
+  // decide: use TM image → Pexels → local file
+  const finalSrc = image || pexelsSrc || placeholder;
 
   const Img = (
     <Image
@@ -67,13 +71,17 @@ export default function EventCard({
       alt={title}
       fill
       className="object-cover"
-      sizes={
-        isHorizontal ? '96px' : '(max-width: 768px) 100vw, 240px'
-      }
+      sizes={isHorizontal ? '96px' : '(max-width:768px) 100vw,240px'}
+      onError={(e) => {
+        // in case Pexels URL 404s, fall back to local
+        // @ts-ignore
+        e.currentTarget.src = placeholder;
+      }}
     />
   );
 
   const content = isHorizontal ? (
+    // ...horizontal markup as before, using {Img}...
     <div className="flex items-center space-x-4 p-3 rounded-md hover:bg-gray-100 transition cursor-pointer">
       <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gray-200">
         {Img}
@@ -83,13 +91,12 @@ export default function EventCard({
         {date && <p className="text-sm text-gray-600">{date}</p>}
         {venue && <p className="text-sm text-gray-600">{venue}</p>}
         {description && (
-          <p className="text-sm text-gray-600 line-clamp-2">
-            {description}
-          </p>
+          <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
         )}
       </div>
     </div>
   ) : (
+    // ...vertical markup as before, using {Img}...
     <div className="bg-white rounded-xl shadow-md overflow-hidden w-60 flex-shrink-0 flex flex-col h-[250px]">
       <div className="relative w-full h-40 flex-shrink-0">{Img}</div>
       <div className="p-4 flex flex-col flex-grow justify-between min-h-[140px]">
@@ -107,11 +114,5 @@ export default function EventCard({
     </div>
   );
 
-  return href ? (
-    <Link href={href} className="block">
-      {content}
-    </Link>
-  ) : (
-    content
-  );
+  return href ? <Link href={href}>{content}</Link> : content;
 }
