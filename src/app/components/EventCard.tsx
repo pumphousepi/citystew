@@ -1,6 +1,8 @@
 // src/app/components/EventCard.tsx
 'use client';
 
+/* eslint-disable @next/next/no-img-element */
+
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -28,11 +30,11 @@ export default function EventCard({
 }: EventCardProps) {
   const isHorizontal = layout === 'horizontal';
 
-  // Local state for our fallback
-  const [fallback, setFallback] = useState<string | null>(null);
+  // State to hold our Pexels fallback URL
+  const [pexelsSrc, setPexelsSrc] = useState<string | null>(null);
 
   useEffect(() => {
-    // only fetch when no TM image
+    // Only run when Ticketmaster has no image
     if (image) return;
 
     async function fetchPexels() {
@@ -48,28 +50,32 @@ export default function EventCard({
           }
         );
         const data = await res.json();
-        // pick a random photo from the results
         if (data.photos?.length) {
-          const photo = data.photos[Math.floor(Math.random() * data.photos.length)];
-          setFallback(photo.src.medium);
+          const choice =
+            data.photos[Math.floor(Math.random() * data.photos.length)];
+          setPexelsSrc(choice.src.medium);
         }
       } catch (err) {
-        console.error('Pexels search failed', err);
+        console.error('Pexels search failed:', err);
       }
     }
 
     fetchPexels();
   }, [image, title]);
 
-  const imgSrc = image ?? fallback ?? '/assets/images/placeholder.jpg';
+  // Decide final src: TM image → Pexels → local placeholder
+  const finalSrc =
+    image ?? pexelsSrc ?? '/assets/images/placeholder.jpg';
 
   const Img = (
     <Image
-      src={imgSrc}
+      src={finalSrc}
       alt={title}
       fill
       className="object-cover"
-      sizes={isHorizontal ? '96px' : '(max-width: 768px) 100vw, 240px'}
+      sizes={
+        isHorizontal ? '96px' : '(max-width: 768px) 100vw, 240px'
+      }
     />
   );
 
@@ -83,7 +89,9 @@ export default function EventCard({
         {date && <p className="text-sm text-gray-600">{date}</p>}
         {venue && <p className="text-sm text-gray-600">{venue}</p>}
         {description && (
-          <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
+          <p className="text-sm text-gray-600 line-clamp-2">
+            {description}
+          </p>
         )}
       </div>
     </div>
