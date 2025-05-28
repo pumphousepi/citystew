@@ -11,7 +11,7 @@ export default function Footer() {
             <Link href="/" className="inline-block mb-4">
               <img
                 src="/assets/images/logo.png"
-                alt="CityStew Logo"
+                alt="CityStew"
                 width={160}
                 height={40}
                 className="object-contain"/>
