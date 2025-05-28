@@ -3,9 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 interface CityOption {
-  name: string;
-  abbreviation: string;
-  label: string;  // e.g. "Austin, TX"
+  name: string;           // e.g. "New Braunfels"
+  abbreviation: string;   // e.g. "TX"
+  label: string;          // e.g. "New Braunfels, TX"
 }
 
 interface NavbarProps {
@@ -21,17 +21,19 @@ export default function Navbar({
 }: NavbarProps) {
   const [cities, setCities] = useState<CityOption[]>([]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+  const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
 
-  // Load city list once
+  // Load cities
   useEffect(() => {
     fetch('/api/locations/cities')
-      .then((res) => res.json())
+      .then((r) => r.json())
       .then((data: CityOption[]) => setCities(data))
       .catch(console.error);
   }, []);
 
-  // Close dropdown on outside click
+  // Close any desktop dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (navRef.current && !navRef.current.contains(e.target as Node)) {
@@ -42,21 +44,20 @@ export default function Navbar({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const toggle = (menu: string) =>
+  const toggleDropdown = (menu: string) =>
     setOpenDropdown((prev) => (prev === menu ? null : menu));
 
-  // Static lists for categories/genres/theater
+  const toggleMobile = () => {
+    setMobileOpen((prev) => !prev);
+    setMobileSubmenuOpen(null);
+  };
+
+  const toggleMobileSubmenu = (menu: string) =>
+    setMobileSubmenuOpen((prev) => (prev === menu ? null : menu));
+
+  // Static lists
   const categoryList = ['Food', 'Sports'];
-  const genreList = [
-    'Rock',
-    'Pop',
-    'Jazz',
-    'Country',
-    'Hip Hop',
-    'Electronic',
-    'Classical',
-    'R&B',
-  ];
+  const genreList = ['Rock', 'Pop', 'Jazz', 'Country', 'Hip Hop', 'Electronic', 'Classical', 'R&B'];
   const theaterList = ['Movies', 'Live Performances'];
 
   return (
@@ -72,12 +73,9 @@ export default function Navbar({
 
         {/* Desktop menu */}
         <ul className="hidden md:flex space-x-8">
-          {/* CITIES */}
+          {/* Cities */}
           <li className="relative">
-            <button
-              onClick={() => toggle('cities')}
-              className="hover:text-gray-300"
-            >
+            <button onClick={() => toggleDropdown('cities')} className="hover:text-gray-300">
               CITIES
             </button>
             {openDropdown === 'cities' && (
@@ -99,12 +97,9 @@ export default function Navbar({
             )}
           </li>
 
-          {/* CATEGORIES */}
+          {/* Categories */}
           <li className="relative">
-            <button
-              onClick={() => toggle('categories')}
-              className="hover:text-gray-300"
-            >
+            <button onClick={() => toggleDropdown('categories')} className="hover:text-gray-300">
               CATEGORIES
             </button>
             {openDropdown === 'categories' && (
@@ -126,12 +121,9 @@ export default function Navbar({
             )}
           </li>
 
-          {/* CONCERTS */}
+          {/* Concerts */}
           <li className="relative">
-            <button
-              onClick={() => toggle('concerts')}
-              className="hover:text-gray-300"
-            >
+            <button onClick={() => toggleDropdown('concerts')} className="hover:text-gray-300">
               CONCERTS
             </button>
             {openDropdown === 'concerts' && (
@@ -154,12 +146,9 @@ export default function Navbar({
             )}
           </li>
 
-          {/* THEATER */}
+          {/* Theater */}
           <li className="relative">
-            <button
-              onClick={() => toggle('theater')}
-              className="hover:text-gray-300"
-            >
+            <button onClick={() => toggleDropdown('theater')} className="hover:text-gray-300">
               THEATER
             </button>
             {openDropdown === 'theater' && (
@@ -183,9 +172,146 @@ export default function Navbar({
           </li>
         </ul>
 
-        {/* Mobile menu toggle (optional) */}
-        {/* …you can re‑use your existing mobile panel here… */}
+        {/* Mobile menu toggle */}
+        <button
+          className="md:hidden p-2 rounded bg-gray-800 hover:bg-gray-700"
+          aria-label="Toggle menu"
+          onClick={toggleMobile}
+        >
+          {mobileOpen ? (
+            <svg
+              className="h-6 w-6 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg
+              className="h-6 w-6 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
       </div>
+
+      {/* Mobile dropdown panel */}
+      {mobileOpen && (
+        <div className="md:hidden bg-white text-black shadow-lg">
+          <div className="px-4 pt-2 pb-4 space-y-4">
+            {/* Cities */}
+            <div>
+              <button
+                className="w-full text-left font-semibold"
+                onClick={() => toggleMobileSubmenu('cities')}
+              >
+                CITIES
+              </button>
+              {mobileSubmenuOpen === 'cities' && (
+                <div className="pl-4 space-y-1">
+                  {cities.map((c) => (
+                    <button
+                      key={c.label}
+                      className="block w-full text-left py-1"
+                      onClick={() => {
+                        onSelectLocation(c.label);
+                        setMobileOpen(false);
+                      }}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Categories */}
+            <div>
+              <button
+                className="w-full text-left font-semibold"
+                onClick={() => toggleMobileSubmenu('categories')}
+              >
+                CATEGORIES
+              </button>
+              {mobileSubmenuOpen === 'categories' && (
+                <div className="pl-4 space-y-1">
+                  {categoryList.map((cat) => (
+                    <button
+                      key={cat}
+                      className="block w-full text-left py-1"
+                      onClick={() => {
+                        onSelectCategory(cat.toLowerCase());
+                        setMobileOpen(false);
+                      }}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Concerts */}
+            <div>
+              <button
+                className="w-full text-left font-semibold"
+                onClick={() => toggleMobileSubmenu('concerts')}
+              >
+                CONCERTS
+              </button>
+              {mobileSubmenuOpen === 'concerts' && (
+                <div className="pl-4 space-y-1">
+                  {genreList.map((g) => (
+                    <button
+                      key={g}
+                      className="block w-full text-left py-1"
+                      onClick={() => {
+                        onSelectCategory('music');
+                        onSelectGenre(g);
+                        setMobileOpen(false);
+                      }}
+                    >
+                      {g}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Theater */}
+            <div>
+              <button
+                className="w-full text-left font-semibold"
+                onClick={() => toggleMobileSubmenu('theater')}
+              >
+                THEATER
+              </button>
+              {mobileSubmenuOpen === 'theater' && (
+                <div className="pl-4 space-y-1">
+                  {theaterList.map((t) => (
+                    <button
+                      key={t}
+                      className="block w-full text-left py-1"
+                      onClick={() => {
+                        onSelectCategory('theater');
+                        onSelectGenre(t.toLowerCase().replace(/\s+/g, ''));
+                        setMobileOpen(false);
+                      }}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
