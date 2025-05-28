@@ -1,3 +1,4 @@
+// src/app/search/SearchResults.tsx
 'use client';
 
 import { useSearchParams } from 'next/navigation';
@@ -27,7 +28,9 @@ export default function SearchResults() {
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/events?search=${encodeURIComponent(query)}`);
+        const res = await fetch(
+          `/api/events?search=${encodeURIComponent(query)}`
+        );
         const data = await res.json();
         setEvents(data._embedded?.events || []);
       } catch (error) {
@@ -48,18 +51,21 @@ export default function SearchResults() {
       </h2>
 
       {loading && <p>Loading...</p>}
-      {!loading && events.length === 0 && <p>No events found for &quot;{query}&quot;.</p>}
+      {!loading && events.length === 0 && (
+        <p>No events found for &quot;{query}&quot;.</p>
+      )}
 
       <div className="flex gap-6 overflow-x-auto py-4">
         {events.map((event) => {
-          const venueName = event._embedded?.venues?.[0]?.name || 'Venue TBD';
-          const eventDate = event.dates?.start?.localDate || 'Date TBD';
+          const venueName =
+            event._embedded?.venues?.[0]?.name || 'Venue TBD';
+          const eventDate =
+            event.dates?.start?.localDate || 'Date TBD';
           const eventImage = event.images?.[0]?.url || '';
 
           return (
             <EventCard
               key={event.id}
-              id={event.id}
               title={event.name}
               date={eventDate}
               venue={venueName}
