@@ -26,38 +26,12 @@ export default function EventCard({
 }: EventCardProps) {
   const isHorizontal = layout === 'horizontal';
   const placeholder = '/assets/images/placeholder.jpg';
-
-  const [pexelsSrc, setPexelsSrc] = useState<string | null>(null);
   const [aiSrc, setAiSrc] = useState<string | null>(null);
 
-  // 1) Pexels fallback
+  // AI fallback only if TM image is missing
   useEffect(() => {
     if (image) return;
-    const key = process.env.NEXT_PUBLIC_PEXELS_API_KEY;
-    if (!key) return;
-    (async () => {
-      try {
-        const res = await fetch(
-          `https://api.pexels.com/v1/search?query=${encodeURIComponent(
-            title
-          )}&per_page=5`,
-          { headers: { Authorization: key } }
-        );
-        const data = await res.json();
-        if (data.photos?.length) {
-          const choice =
-            data.photos[Math.floor(Math.random() * data.photos.length)];
-          setPexelsSrc(choice.src.medium);
-        }
-      } catch {
-        // ignore
-      }
-    })();
-  }, [image, title]);
 
-  // 2) AI fallback
-  useEffect(() => {
-    if (image || pexelsSrc) return;
     (async () => {
       try {
         const res = await fetch(
@@ -67,13 +41,15 @@ export default function EventCard({
         );
         const data = await res.json();
         if (data.url) setAiSrc(data.url);
-      } catch {
-        // ignore
+      } catch (err) {
+        console.error('AI image generation failed:', err);
       }
     })();
-  }, [image, pexelsSrc, title]);
+  }, [image, title]);
 
-  const finalSrc = image || pexelsSrc || aiSrc || placeholder;
+  const finalSrc = image || aiSrc || placeholder;
+
+  console.log('EventCard using image →', finalSrc);
 
   const Img = (
     <Image
