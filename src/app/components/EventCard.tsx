@@ -26,28 +26,22 @@ export default function EventCard({
 }: EventCardProps) {
   const isHorizontal = layout === 'horizontal';
   const placeholder = '/assets/images/placeholder.jpg';
-  const [pexelsSrc, setPexelsSrc] = useState<string | null>(null);
 
+  const [pexelsSrc, setPexelsSrc] = useState<string | null>(null);
+  const [aiSrc, setAiSrc] = useState<string | null>(null);
+
+  // 1) Pexels fallback
   useEffect(() => {
     if (image) return;
-
     const key = process.env.NEXT_PUBLIC_PEXELS_API_KEY;
-    console.log('PEXELS KEY →', key);
-
-    if (!key) {
-      console.warn('No Pexels API key found; skipping photo search');
-      return;
-    }
-
+    if (!key) return;
     (async () => {
       try {
         const res = await fetch(
           `https://api.pexels.com/v1/search?query=${encodeURIComponent(
             title
           )}&per_page=5`,
-          {
-            headers: { Authorization: key },
-          }
+          { headers: { Authorization: key } }
         );
         const data = await res.json();
         if (data.photos?.length) {
@@ -55,13 +49,31 @@ export default function EventCard({
             data.photos[Math.floor(Math.random() * data.photos.length)];
           setPexelsSrc(choice.src.medium);
         }
-      } catch (err) {
-        console.error('Pexels search failed:', err);
+      } catch {
+        // ignore
       }
     })();
   }, [image, title]);
 
-  const finalSrc = image || pexelsSrc || placeholder;
+  // 2) AI fallback
+  useEffect(() => {
+    if (image || pexelsSrc) return;
+    (async () => {
+      try {
+        const res = await fetch(
+          `/api/generate-image?prompt=${encodeURIComponent(
+            `A vibrant photo of a live ${title} event`
+          )}`
+        );
+        const data = await res.json();
+        if (data.url) setAiSrc(data.url);
+      } catch {
+        // ignore
+      }
+    })();
+  }, [image, pexelsSrc, title]);
+
+  const finalSrc = image || pexelsSrc || aiSrc || placeholder;
 
   const Img = (
     <Image
@@ -71,7 +83,6 @@ export default function EventCard({
       className="object-cover"
       sizes={isHorizontal ? '96px' : '(max-width:768px) 100vw,240px'}
       onError={(e) => {
-        // cast so TS knows currentTarget has .src
         const imgEl = e.currentTarget as HTMLImageElement;
         imgEl.src = placeholder;
       }}
