@@ -1,7 +1,7 @@
-// src/app/components/Navbar.tsx
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 interface CityOption {
   name: string;
@@ -9,24 +9,21 @@ interface CityOption {
   label: string;  // e.g. "New Braunfels, TX"
 }
 
-interface NavbarProps {
-  onSelectLocation: (loc: string) => void;
-  onSelectCategory: (cat: string) => void;
-  onSelectGenre: (genre: string) => void;
-}
-
 export default function Navbar({
   onSelectLocation,
   onSelectCategory,
   onSelectGenre,
-}: NavbarProps) {
+}: {
+  onSelectLocation: (loc: string) => void;
+  onSelectCategory: (cat: string) => void;
+  onSelectGenre: (genre: string) => void;
+}) {
   const [cities, setCities] = useState<CityOption[]>([]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
 
-  // Load cities once
   useEffect(() => {
     fetch('/api/locations/cities')
       .then((r) => r.json())
@@ -34,7 +31,6 @@ export default function Navbar({
       .catch(console.error);
   }, []);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (navRef.current && !navRef.current.contains(e.target as Node)) {
@@ -55,10 +51,7 @@ export default function Navbar({
     setMobileSubmenu((prev) => (prev === menu ? null : menu));
 
   const categoryList = ['Food', 'Sports'];
-  const genreList = [
-    'Rock', 'Pop', 'Jazz', 'Country',
-    'Hip Hop','Electronic','Classical','R&B',
-  ];
+  const genreList = ['Rock', 'Pop', 'Jazz', 'Country', 'Hip Hop', 'Electronic', 'Classical', 'R&B'];
   const theaterList = ['Movies', 'Live Performances'];
 
   return (
@@ -67,11 +60,14 @@ export default function Navbar({
       className="fixed top-0 left-0 w-full bg-black bg-opacity-60 backdrop-blur-md z-50"
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between text-white">
-        <a href="/" className="text-2xl font-bold">CityStew</a>
+        {/* 🚀 Use Link here instead of <a> */}
+        <Link href="/" className="text-2xl font-bold">
+          CityStew
+        </Link>
 
         {/* Desktop */}
         <ul className="hidden md:flex space-x-8">
-          {/** CITIES **/}
+          {/* CITIES */}
           <li className="relative">
             <button onClick={() => toggleDropdown('cities')} className="hover:text-gray-300">
               CITIES
@@ -95,7 +91,7 @@ export default function Navbar({
             )}
           </li>
 
-          {/** CATEGORIES **/}
+          {/* CATEGORIES */}
           <li className="relative">
             <button onClick={() => toggleDropdown('categories')} className="hover:text-gray-300">
               CATEGORIES
@@ -119,7 +115,7 @@ export default function Navbar({
             )}
           </li>
 
-          {/** CONCERTS **/}
+          {/* CONCERTS */}
           <li className="relative">
             <button onClick={() => toggleDropdown('concerts')} className="hover:text-gray-300">
               CONCERTS
@@ -144,7 +140,7 @@ export default function Navbar({
             )}
           </li>
 
-          {/** THEATER **/}
+          {/* THEATER */}
           <li className="relative">
             <button onClick={() => toggleDropdown('theater')} className="hover:text-gray-300">
               THEATER
@@ -235,7 +231,7 @@ export default function Navbar({
                       onClick={() => {
                         onSelectCategory(cat.toLowerCase());
                         setMobileOpen(false);
-                      }}
+                      }}  
                     >
                       {cat}
                     </button>
