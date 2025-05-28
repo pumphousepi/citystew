@@ -12,15 +12,23 @@ export async function GET(request: Request) {
     const response = await openai.images.generate({
       prompt,
       n: 1,
-      size: '256x256',   // must be one of "256x256" | "512x512" | "1024x1024"
+      size: '512x512',
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const url = (response as any).data?.[0]?.url ?? null;
+    // @ts-expect-error: TS defs don’t include `.data`
+    const aiUrl = response.data?.[0]?.url ?? null;
 
-    return NextResponse.json({ url });
+    // fallback to a random Unsplash “event” if AI fails
+    const finalUrl =
+      aiUrl ||
+      `https://source.unsplash.com/400x300/?event,${encodeURIComponent(
+        prompt
+      )}`;
+
+    return NextResponse.json({ url: finalUrl });
   } catch (err) {
     console.error('AI image generation failed', err);
-    return NextResponse.json({ url: null }, { status: 500 });
+    const fallback = `https://source.unsplash.com/400x300/?event`;
+    return NextResponse.json({ url: fallback }, { status: 200 });
   }
 }
