@@ -15,7 +15,6 @@ export async function GET(request: Request) {
       size: '512x512',
     });
 
-    // @ts-expect-error: TS defs don’t include `.data`
     const aiUrl = response.data?.[0]?.url ?? null;
 
     // fallback to a random Unsplash “event” if AI fails
