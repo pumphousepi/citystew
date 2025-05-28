@@ -1,14 +1,11 @@
 // src/app/components/EventCard.tsx
 'use client';
 
-/* eslint-disable @next/next/no-img-element */
-
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 interface EventCardProps {
-  id: string;
   title: string;
   image?: string;
   date?: string;
@@ -19,7 +16,6 @@ interface EventCardProps {
 }
 
 export default function EventCard({
-  id,
   title,
   image,
   date,
@@ -30,12 +26,11 @@ export default function EventCard({
 }: EventCardProps) {
   const isHorizontal = layout === 'horizontal';
 
-  // State to hold our Pexels fallback URL
+  // State for a Pexels fallback URL
   const [pexelsSrc, setPexelsSrc] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only run when Ticketmaster has no image
-    if (image) return;
+    if (image) return; // only fetch when no TM image
 
     async function fetchPexels() {
       try {
@@ -63,9 +58,8 @@ export default function EventCard({
     fetchPexels();
   }, [image, title]);
 
-  // Decide final src: TM image → Pexels → local placeholder
-  const finalSrc =
-    image ?? pexelsSrc ?? '/assets/images/placeholder.jpg';
+  // Final image source: TM → Pexels → local placeholder
+  const finalSrc = image ?? pexelsSrc ?? '/assets/images/placeholder.jpg';
 
   const Img = (
     <Image

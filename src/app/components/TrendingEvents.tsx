@@ -1,3 +1,4 @@
+// src/app/components/TrendingEvents.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -26,7 +27,6 @@ export default function TrendingEvents({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // don’t fetch until we have “City, ST”
     if (!location.includes(',')) {
       setEvents([]);
       setLoading(false);
@@ -38,17 +38,17 @@ export default function TrendingEvents({
     async function fetchTrending() {
       setLoading(true);
       try {
-        const params = new URLSearchParams();
-        params.append('city', city);
-        params.append('stateCode', stateCode);
-        params.append('trending', 'true');
-        params.append('date', 'upcoming');
+        const params = new URLSearchParams({
+          city,
+          stateCode,
+          trending: 'true',
+          date: 'upcoming',
+        });
 
-        // include your new props
         if (category) params.append('category', category);
         if (genre)    params.append('genre', genre);
 
-        const res = await fetch(`/api/events?${params.toString()}`);
+        const res = await fetch(`/api/events?${params}`);
         if (!res.ok) throw new Error('Failed to fetch trending events');
 
         const data = await res.json();
@@ -64,7 +64,6 @@ export default function TrendingEvents({
     fetchTrending();
   }, [location, category, genre]);
 
-  // prompt until a location’s picked
   if (!location.includes(',')) {
     return (
       <section className="py-12 bg-gray-50">
@@ -91,9 +90,8 @@ export default function TrendingEvents({
           {events.map((event) => (
             <EventCard
               key={event.id}
-              id={event.id}
               title={event.name}
-              image={event.images?.[0]?.url || '/placeholder.jpg'}
+              image={event.images?.[0]?.url}
               date={event.dates?.start?.localDate}
               venue={event._embedded?.venues?.[0]?.name}
               href={`/events/${event.id}`}
