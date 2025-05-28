@@ -7,36 +7,52 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Missing Ticketmaster API key' }, { status: 500 });
   }
 
-  // Base Ticketmaster Discovery API URL
+  // Base TM Discovery URL
   const tmUrl = new URL('https://app.ticketmaster.com/discovery/v2/events.json');
   tmUrl.searchParams.set('apikey', API_KEY);
   tmUrl.searchParams.set('size', '20');
 
   const { searchParams } = new URL(request.url);
 
-  // Propagate standard filters
-  for (const key of ['city', 'stateCode', 'category', 'genre'] as const) {
-    const val = searchParams.get(key);
-    if (val) {
-      // Ticketmaster expects 'classificationName' for genre
-      if (key === 'genre') {
-        tmUrl.searchParams.set('classificationName', val);
-      } else {
-        tmUrl.searchParams.set(key, val);
-      }
+  // 1) Location filters
+  const city = searchParams.get('city');
+  if (city) tmUrl.searchParams.set('city', city);
+
+  const stateCode = searchParams.get('stateCode');
+  if (stateCode) tmUrl.searchParams.set('stateCode', stateCode);
+
+  // 2) Category → segmentId mapping
+  const category = searchParams.get('category');
+  if (category) {
+    const segmentMap: Record<string, string> = {
+      music:  'KZFzniwnSyZfZ7v7nJ',
+      sports: 'KZFzniwnSyZfZ7v7nE',
+      theater:'KZFzniwnSyZfZ7v7na',
+      family: 'KZFzniwnSyZfZ7v7n1',
+      food:   'KZFzniwnSyZfZ7v7nl', // adjust if you have a specific food segmentId
+    };
+    const segId = segmentMap[category.toLowerCase()];
+    if (segId) {
+      tmUrl.searchParams.set('segmentId', segId);
     }
   }
 
-  // Apply manual sort if provided, otherwise fall back
+  // 3) Genre → classificationName (for music genres or theater sub‑types)
+  const genre = searchParams.get('genre');
+  if (genre) {
+    tmUrl.searchParams.set('classificationName', genre);
+  }
+
+  // 4) Sorting: manual override wins
   const manualSort = searchParams.get('sort');
   if (manualSort) {
     tmUrl.searchParams.set('sort', manualSort);
   } else {
-    // Trending → popularity desc
+    // fallback: trending → popularity desc
     if (searchParams.get('trending') === 'true') {
       tmUrl.searchParams.set('sort', 'popularity,desc');
     }
-    // Upcoming → date asc
+    // fallback: upcoming → date asc
     if (searchParams.get('date') === 'upcoming') {
       tmUrl.searchParams.set('sort', 'date,asc');
     }
