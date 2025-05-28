@@ -13,7 +13,8 @@ import Sponsors from './components/Sponsors';
 import Footer from './components/Footer';
 
 export default function HomePage() {
-  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedLocation, setSelectedLocation] =
+  useState('New Braunfels, TX');
 
   return (
     <>
