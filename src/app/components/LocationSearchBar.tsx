@@ -4,75 +4,61 @@ import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 
 interface CityOption {
-  name: string;           // e.g. "New Braunfels"
-  abbreviation: string;   // e.g. "TX"
-  label: string;          // e.g. "New Braunfels, TX"
+  name: string;
+  abbreviation: string;
+  label: string;
 }
 
-interface LocationSearchBarProps {
-  onSelectLocation: (location: string) => void;  // single string "City, ST"
+interface Props {
+  onSelectLocation: (location: string) => void;
 }
 
-export default function LocationSearchBar({
-  onSelectLocation,
-}: LocationSearchBarProps) {
+export default function LocationSearchBar({ onSelectLocation }: Props) {
   const [options, setOptions] = useState<CityOption[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [selectedOption, setSelectedOption] = useState<CityOption | null>(
-    null
-  );
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<CityOption | null>(null);
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchCities = async () => {
-      try {
-        // simulate network delay
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+    let mounted = true;
+    async function load() {
+      // simulate delay
+      await new Promise((r) => setTimeout(r, 1500));
+      const res = await fetch('/api/locations/cities');
+      const cities: CityOption[] = await res.json();
+      if (!mounted) return;
 
-        const res = await fetch('/api/locations/cities');
-        if (!res.ok) throw new Error('Failed to fetch cities');
-        const rawData: CityOption[] = await res.json();
+      setOptions(cities);
+      setLoading(false);
 
-        if (!isMounted) return;
-        setOptions(rawData);
-
-        // pick the default only once
-        const defaultOpt = rawData.find(
-          (opt) => opt.name === 'New Braunfels' && opt.abbreviation === 'TX'
-        );
-        if (defaultOpt) {
-          setSelectedOption(defaultOpt);
-          onSelectLocation(defaultOpt.label);
-        }
-      } catch (err) {
-        console.error('Error fetching city options:', err);
-      } finally {
-        if (isMounted) setLoading(false);
+      // pick default once
+      const def = cities.find(
+        (c) => c.name === 'New Braunfels' && c.abbreviation === 'TX'
+      );
+      if (def) {
+        setSelected(def);
+        onSelectLocation(def.label);
       }
-    };
-
-    fetchCities();
-    return () => {
-      isMounted = false;
-    };
-  }, []); // <-- empty deps so this runs only once
-
-  const handleChange = (opt: CityOption | null) => {
-    setSelectedOption(opt);
-    if (opt) {
-      onSelectLocation(`${opt.name}, ${opt.abbreviation}`);
     }
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [onSelectLocation]);
+
+  const onChange = (opt: CityOption | null) => {
+    setSelected(opt);
+    if (opt) onSelectLocation(opt.label);
   };
 
   return (
     <div className="w-full max-w-md mx-auto my-4">
       <Select<CityOption>
-        value={selectedOption}
-        isLoading={loading}
+        value={selected}
         options={options}
+        isLoading={loading}
         getOptionLabel={(o) => o.label}
         getOptionValue={(o) => `${o.name},${o.abbreviation}`}
-        onChange={handleChange}
+        onChange={onChange}
         placeholder="Search cities (e.g. Austin, TX)"
         className="text-black"
         noOptionsMessage={() => 'No matches found'}
