@@ -2,11 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
+import { useId } from 'react';
 
 interface CityOption {
-  name: string;           // e.g. "New Braunfels"
-  abbreviation: string;   // e.g. "TX"
-  label: string;          // e.g. "New Braunfels, TX"
+  name: string;         // e.g. "New Braunfels"
+  abbreviation: string; // e.g. "TX"
+  label: string;        // e.g. "New Braunfels, TX"
 }
 
 interface LocationSearchBarProps {
@@ -18,65 +19,51 @@ export default function LocationSearchBar({
 }: LocationSearchBarProps) {
   const [options, setOptions] = useState<CityOption[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedOption, setSelectedOption] = useState<CityOption | null>(
-    null
-  );
+  const [selectedOption, setSelectedOption] = useState<CityOption | null>(null);
 
   useEffect(() => {
     let isMounted = true;
-    const fetchCities = async () => {
-      try {
-        // simulate network delay
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-
-        const res = await fetch('/api/locations/cities');
-        if (!res.ok) throw new Error('Failed to fetch cities');
-        const rawData: CityOption[] = await res.json();
-
+    fetch('/api/locations/cities')
+      .then((r) => r.json())
+      .then((rawData: CityOption[]) => {
         if (!isMounted) return;
         setOptions(rawData);
-
-        // pick the default only once
         const defaultOpt = rawData.find(
-          (opt) => opt.name === 'New Braunfels' && opt.abbreviation === 'TX'
+          (o) => o.name === 'New Braunfels' && o.abbreviation === 'TX'
         );
         if (defaultOpt) {
           setSelectedOption(defaultOpt);
           onSelectLocation(defaultOpt.label);
         }
-      } catch (err) {
-        console.error('Error fetching city options:', err);
-      } finally {
+      })
+      .catch(console.error)
+      .finally(() => {
         if (isMounted) setLoading(false);
-      }
-    };
-
-    fetchCities();
+      });
     return () => {
       isMounted = false;
     };
-  }, []); // <-- empty deps so this runs only once
+  }, [onSelectLocation]);
 
-  const handleChange = (opt: CityOption | null) => {
+  function handleChange(opt: CityOption | null) {
     setSelectedOption(opt);
     if (opt) {
       onSelectLocation(`${opt.name}, ${opt.abbreviation}`);
     }
-  };
+  }
 
   return (
-    <div className="w-full max-w-md mx-auto my-4">
-      <Select<CityOption>
-        value={selectedOption}
-        isLoading={loading}
-        options={options}
-        getOptionLabel={(o) => o.label}
-        getOptionValue={(o) => `${o.name},${o.abbreviation}`}
-        onChange={handleChange}
-        placeholder="Search cities (e.g. Austin, TX)"
-        className="text-black"
-        noOptionsMessage={() => 'No matches found'}
-      />
-    </div>
+    <Select<CityOption>
+      instanceId="location-select"
+      value={selectedOption}
+      isLoading={loading}
+      options={options}
+      getOptionLabel={(o) => o.label}
+      getOptionValue={(o) => `${o.name},${o.abbreviation}`}
+      onChange={handleChange}
+      placeholder="Search cities (e.g. Austin, TX)"
+      className="text-black"
+      noOptionsMessage={() => 'No matches found'}
+    />
   );
 }
