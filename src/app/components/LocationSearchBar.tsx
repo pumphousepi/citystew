@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
-import { useId } from 'react';
 
 interface CityOption {
   name: string;         // e.g. "New Braunfels"
