@@ -1,3 +1,4 @@
+// src/app/components/Sponsors.tsx
 import Image from 'next/image';
 
 const sponsors = [
@@ -23,28 +24,30 @@ const sponsors = [
 
 export default function Sponsors() {
   return (
-    <section id="sponsors" className="py-12">
-      <h2 className="text-2xl font-bold text-center mb-6"></h2>
-      <div className="flex justify-center space-x-4 overflow-x-auto px-4">
-        {sponsors.map(({ img, title, desc, url }) => (
-          <a
-            key={title}
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="min-w-[200px] bg-white shadow rounded p-4 text-center"
-          >
-            <Image
-              src={`/assets/images/${img}`}
-              alt={title}
-              width={100}
-              height={100}
-              className="mx-auto"
-            />
-            <div className="font-bold mt-2">{title}</div>
-            <div className="text-sm">{desc}</div>
-          </a>
-        ))}
+    <section id="sponsors" className="py-12 bg-gray-50">
+      {/* Match other sections’ width & padding */}
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex justify-center space-x-4 overflow-x-auto py-4">
+          {sponsors.map(({ img, title, desc, url }) => (
+            <a
+              key={title}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="min-w-[200px] bg-white shadow rounded p-4 text-center"
+            >
+              <Image
+                src={`/assets/images/${img}`}
+                alt={title}
+                width={100}
+                height={100}
+                className="mx-auto"
+              />
+              <div className="font-bold mt-2">{title}</div>
+              <div className="text-sm text-gray-600 mt-1">{desc}</div>
+            </a>
+          ))}
+        </div>
       </div>
     </section>
   );
