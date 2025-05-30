@@ -40,13 +40,18 @@ export default function TrendingEvents({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
+  // Default category is music if not provided via props
+  const activeCategory = category || 'music';
+
+  // Load city list
   useEffect(() => {
     fetch('/api/locations/cities')
-      .then(r => r.json())
+      .then(res => res.json())
       .then((data: CityOption[]) => setCities(data))
-      .catch(err => console.error('[TrendingEvents] city load error', err));
+      .catch(err => console.error('[TrendingEvents] cities load error', err));
   }, []);
 
+  // Fetch trending events when location, category, or genre changes
   useEffect(() => {
     if (!location.includes(',')) {
       setEvents([]);
@@ -59,11 +64,16 @@ export default function TrendingEvents({
       setLoading(true);
       setRateLimited(false);
 
-      const params = new URLSearchParams({ city, stateCode, size: '10', trending: 'true' });
-      if (category) params.append('category', category);
-      if (genre)    params.append('genre', genre);
+      const params = new URLSearchParams({
+        city,
+        stateCode,
+        trending: 'true',
+        size: '10',
+        category: activeCategory,
+      });
+      if (genre) params.append('genre', genre);
 
-      const url = `/api/events?${params}`;
+      const url = `/api/events?${params.toString()}`;
       console.log('[TrendingEvents] Fetching →', url);
 
       try {
@@ -87,37 +97,45 @@ export default function TrendingEvents({
         setLoading(false);
       }
     })();
-  }, [location, category, genre]);
+  }, [location, activeCategory, genre]);
 
   const scrollBy = (distance: number) => {
     scrollerRef.current?.scrollBy({ left: distance, behavior: 'smooth' });
   };
 
+  const toggleDropdown = () => setDropdownOpen(prev => !prev);
+  const onSelectCity = (loc: string) => {
+    onSelectLocation(loc);
+    setDropdownOpen(false);
+  };
+
   return (
     <section className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 relative">
-        {/* Header & dropdown */}
+        {/* Header with city selector */}
         <div className="flex items-center mb-6">
-          <h2 className="text-2xl font-bold mr-2">Trending Events in</h2>
+          <h2 className="text-2xl font-bold mr-2">
+            Trending {activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)} in
+          </h2>
           <div className="relative">
             <NavButton
-              onClick={() => setDropdownOpen(o => !o)}
+              onClick={toggleDropdown}
               ariaHasPopup
               className="flex items-center space-x-1"
             >
               <span className="text-blue-500">{location}</span>
-              <ChevronRight className="w-4 h-4 text-blue-500 rotate-90" />
+              <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" clipRule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z"/>
+              </svg>
             </NavButton>
             {dropdownOpen && (
-              <ul className="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg overflow-auto max-h-64 z-10">
+              <ul className="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg overflow-auto max-h-64">
                 {cities.map(c => (
                   <li key={c.label}>
                     <button
                       className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                      onClick={() => {
-                        onSelectLocation(c.label);
-                        setDropdownOpen(false);
-                      }}
+                      onClick={() => onSelectCity(c.label)}
                     >
                       {c.label}
                     </button>
@@ -128,7 +146,7 @@ export default function TrendingEvents({
           </div>
         </div>
 
-        {/* Arrows */}
+        {/* Scroll arrows */}
         <button
           onClick={() => scrollBy(-300)}
           className="hidden sm:block absolute left-0 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow"
@@ -144,13 +162,13 @@ export default function TrendingEvents({
           <ChevronRight className="w-6 h-6 text-gray-700" />
         </button>
 
-        {/* Content */}
+        {/* Event cards */}
         {loading ? (
-          <p>Loading trending events…</p>
+          <p>Loading trending {activeCategory}…</p>
         ) : rateLimited ? (
           <p className="text-red-600">Rate limit exceeded, please wait a moment.</p>
         ) : events.length === 0 ? (
-          <p>No trending events found.</p>
+          <p>No {activeCategory} found.</p>
         ) : (
           <div
             ref={scrollerRef}
