@@ -1,4 +1,3 @@
-// src/app/components/ThreeColumnSection.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -13,40 +12,23 @@ interface ApiEvent {
 
 interface SectionConfig {
   title: string;
-  category: string;      // maps to segmentId in your API
+  category: string;
   imageUrl: string;
 }
 
 const SECTIONS: SectionConfig[] = [
-  {
-    title: 'Sports Near You',
-    category: 'sports',
-    imageUrl: '/assets/images/sports.jpg',
-  },
-  {
-    title: 'Concerts Near You',
-    category: 'music',
-    imageUrl: '/assets/images/concert_card_002.jpg',
-  },
-  {
-    title: 'Theater Near You',
-    category: 'theater',
-    imageUrl: '/assets/images/theater.jpg',
-  },
+  { title: 'Sports Near You',   category: 'sports',  imageUrl: '/assets/images/sports.jpg' },
+  { title: 'Concerts Near You', category: 'music',   imageUrl: '/assets/images/concert_card_002.jpg' },
+  { title: 'Theater Near You',  category: 'theater', imageUrl: '/assets/images/theater.jpg' },
 ];
 
-interface ThreeColumnSectionProps {
-  /** format “City, ST” */
-  location: string;
-}
-
-export default function ThreeColumnSection({ location }: ThreeColumnSectionProps) {
-  const [lists, setLists]    = useState<ApiEvent[][]>(SECTIONS.map(() => []));
+export default function ThreeColumnSection({ location }: { location: string }) {
+  const [lists, setLists]     = useState<ApiEvent[][]>(SECTIONS.map(() => []));
   const [loading, setLoading] = useState(true);
 
-  // split out city & stateCode
+  // split out "City, ST"
   const [city, stateCode] = location.includes(',')
-    ? location.split(',').map((s) => s.trim())
+    ? location.split(',').map(s => s.trim())
     : ['', ''];
 
   useEffect(() => {
@@ -64,16 +46,20 @@ export default function ThreeColumnSection({ location }: ThreeColumnSectionProps
               stateCode,
               category,
               size: '5',
-              sort: 'dates.start.localDate,asc',
+              sort: 'date,asc',      // valid TM sort key
             });
-            const res = await fetch(`/api/events?${params.toString()}`);
+            const res  = await fetch(`/api/events?${params}`);
             const data = await res.json();
+            if (!res.ok) {
+              console.error(`TM error [${category}]:`, data.error || data);
+              return [];
+            }
             return (data._embedded?.events as ApiEvent[]) || [];
           })
         );
         setLists(results);
       } catch (err) {
-        console.error(err);
+        console.error('ThreeColumnSection fetch error:', err);
         setLists(SECTIONS.map(() => []));
       } finally {
         setLoading(false);
@@ -81,23 +67,19 @@ export default function ThreeColumnSection({ location }: ThreeColumnSectionProps
     })();
   }, [city, stateCode]);
 
+  // nothing to render until we have a valid city & state
   if (!city || !stateCode) return null;
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {SECTIONS.map((cfg, idx) => (
-          <div
-            key={cfg.title}
-            className="flex flex-col bg-white rounded-2xl shadow-lg overflow-hidden"
-          >
-            {/* static banner */}
+          <div key={cfg.title} className="flex flex-col bg-white rounded-2xl shadow-lg overflow-hidden">
             <img
               src={cfg.imageUrl}
               alt={cfg.title}
               className="w-full h-40 object-cover"
             />
-
             <div className="p-4 flex flex-col flex-1">
               <h3 className="text-xl font-semibold mb-4">{cfg.title}</h3>
 
@@ -110,7 +92,7 @@ export default function ThreeColumnSection({ location }: ThreeColumnSectionProps
               ) : (
                 <ul className="flex-1 overflow-y-auto space-y-2">
                   {lists[idx].map((event) => {
-                    const date = event.dates?.start?.localDate || 'TBD';
+                    const date  = event.dates?.start?.localDate || 'TBD';
                     const venue = event._embedded?.venues?.[0]?.name || '';
                     return (
                       <li key={event.id}>
@@ -131,7 +113,7 @@ export default function ThreeColumnSection({ location }: ThreeColumnSectionProps
               )}
             </div>
           </div>
-        ))}
+        ))}  {/* <- Note the two closing parentheses before the curly brace */}
       </div>
     </section>
   );

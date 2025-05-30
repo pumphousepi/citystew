@@ -7,64 +7,58 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Missing Ticketmaster API key' }, { status: 500 });
   }
 
-  // Base TM Discovery URL
-  const tmUrl = new URL('https://app.ticketmaster.com/discovery/v2/events.json');
-  tmUrl.searchParams.set('apikey', API_KEY);
-  tmUrl.searchParams.set('size', '20');
-
   const { searchParams } = new URL(request.url);
+  const tmUrl = new URL('https://app.ticketmaster.com/discovery/v2/events.json');
 
-  // 1) Location filters
-  const city = searchParams.get('city');
-  if (city) tmUrl.searchParams.set('city', city);
+  // required
+  tmUrl.searchParams.set('apikey', API_KEY);
 
-  const stateCode = searchParams.get('stateCode');
-  if (stateCode) tmUrl.searchParams.set('stateCode', stateCode);
+  // size
+  const size = searchParams.get('size') || '20';
+  tmUrl.searchParams.set('size', size);
 
-  // 2) Category → segmentId mapping
-  const category = searchParams.get('category');
-  if (category) {
-    const segmentMap: Record<string, string> = {
-      music:  'KZFzniwnSyZfZ7v7nJ',
-      sports: 'KZFzniwnSyZfZ7v7nE',
+  // location
+  if (searchParams.get('city'))      tmUrl.searchParams.set('city', searchParams.get('city')!);
+  if (searchParams.get('stateCode')) tmUrl.searchParams.set('stateCode', searchParams.get('stateCode')!);
+
+  // category → segmentId
+  if (searchParams.get('category')) {
+    const map: Record<string,string> = {
+      music: 'KZFzniwnSyZfZ7v7nJ',
+      sports:'KZFzniwnSyZfZ7v7nE',
       theater:'KZFzniwnSyZfZ7v7na',
-      family: 'KZFzniwnSyZfZ7v7n1',
-      food:   'KZFzniwnSyZfZ7v7nl', // adjust if you have a specific food segmentId
+      family:'KZFzniwnSyZfZ7v7n1',
+      food:  'KZFzniwnSyZfZ7v7nl',
     };
-    const segId = segmentMap[category.toLowerCase()];
-    if (segId) {
-      tmUrl.searchParams.set('segmentId', segId);
-    }
+    const seg = map[searchParams.get('category')!.toLowerCase()];
+    if (seg) tmUrl.searchParams.set('segmentId', seg);
   }
 
-  // 3) Genre → classificationName (for music genres or theater sub‑types)
-  const genre = searchParams.get('genre');
-  if (genre) {
-    tmUrl.searchParams.set('classificationName', genre);
-  }
-
-  // 4) Sorting: manual override wins
+  // sort logic
   const manualSort = searchParams.get('sort');
   if (manualSort) {
     tmUrl.searchParams.set('sort', manualSort);
+  } else if (searchParams.get('trending') === 'true') {
+    // Trending: omit sort so TM uses its default ranking
+    // (or use tmUrl.searchParams.set('sort','random') for random order)
   } else {
-    // fallback: trending → popularity desc
-    if (searchParams.get('trending') === 'true') {
-      tmUrl.searchParams.set('sort', 'popularity,desc');
-    }
-    // fallback: upcoming → date asc
-    if (searchParams.get('date') === 'upcoming') {
-      tmUrl.searchParams.set('sort', 'date,asc');
-    }
+    // default “near you” order
+    tmUrl.searchParams.set('sort', 'date,asc');
   }
 
+  console.log('→ TM URL →', tmUrl.toString());
+
   try {
-    const res = await fetch(tmUrl.toString());
-    if (!res.ok) {
-      return NextResponse.json({ error: 'Ticketmaster API error' }, { status: res.status });
-    }
+    const res  = await fetch(tmUrl.toString(), { next: { revalidate: 60 } });
     const data = await res.json();
-    return NextResponse.json(data);
+    console.log('← TM RAW response →', JSON.stringify(data, null, 2));
+
+    return NextResponse.json(data, {
+      status: res.status,
+      headers: {
+        'Cache-Control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=30',
+      },
+    });
   } catch (err) {
     console.error('Fetch error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

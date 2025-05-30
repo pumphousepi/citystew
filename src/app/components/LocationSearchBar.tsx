@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
+import { useId } from 'react';
 
 interface CityOption {
   name: string;         // e.g. "New Braunfels"
@@ -53,7 +54,7 @@ export default function LocationSearchBar({
 
   return (
     <Select<CityOption>
-      instanceId="location-select"
+       instanceId="location-select"
       value={selectedOption}
       isLoading={loading}
       options={options}
