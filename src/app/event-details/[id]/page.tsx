@@ -28,7 +28,7 @@ async function fetchEventDetailsFromAPI(id: string): Promise<ApiEvent | null> {
   }
 }
 
-// This is now a Server Component (no 'use client'), so asynchronous fetch is allowed
+// This is a Server Component (no 'use client'), so `async` is allowed
 export default async function EventDetailsPage({
   params,
 }: {
@@ -36,7 +36,7 @@ export default async function EventDetailsPage({
 }) {
   const event = await fetchEventDetailsFromAPI(params.id);
   if (!event) {
-    notFound(); // renders Next.js 404 if API returns null
+    notFound();
   }
 
   return (
@@ -46,8 +46,7 @@ export default async function EventDetailsPage({
         {event.dates?.start?.localDate} @ {event.dates?.start?.localTime}
       </p>
       <p className="mb-4">
-        {event._embedded?.venues?.[0]?.name},{' '}
-        {event._embedded?.venues?.[0]?.city?.name}
+        {event._embedded?.venues?.[0]?.name}, {event._embedded?.venues?.[0]?.city?.name}
       </p>
 
       {event.url && (
@@ -63,3 +62,4 @@ export default async function EventDetailsPage({
     </div>
   );
 }
+
