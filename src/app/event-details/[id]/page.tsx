@@ -1,3 +1,6 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-dynamic'; // ensure server-side rendering on each request (optional)
