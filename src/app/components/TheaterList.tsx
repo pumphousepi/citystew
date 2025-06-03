@@ -1,9 +1,7 @@
-// src/app/components/TheaterList.tsx
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import EventCard from './EventCard'; // you can reuse EventCard for layout
-import NavButton from './NavButton';
+import React, { useEffect, useState, useRef } from 'react';
+import NavButton from './NavButton'; // used to toggle “location” display
 
 interface Theater {
   place_id: string;
@@ -20,16 +18,24 @@ interface Props {
 
 export default function TheaterList({ location }: Props) {
   const [theaters, setTheaters] = useState<Theater[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [open, setOpen]         = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false); // still used for toggling UI
   const scroller = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const [city, stateCode] = location.split(',').map(s => s.trim());
+    const [city, stateCode] = location.split(',').map((s) => s.trim());
     setLoading(true);
-    fetch(`/api/theaters?city=${encodeURIComponent(city)}&stateCode=${encodeURIComponent(stateCode)}`)
-      .then(res => res.json())
-      .then(json => setTheaters(json.results || []))
+
+    fetch(
+      `/api/theaters?city=${encodeURIComponent(city)}&stateCode=${encodeURIComponent(
+        stateCode
+      )}`
+    )
+      .then((res) => res.json())
+      .then((json) => {
+        // assume API returns an object with `.results` array
+        setTheaters(json.results || []);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [location]);
@@ -44,7 +50,7 @@ export default function TheaterList({ location }: Props) {
         {/* Header: no wrap */}
         <div className="flex items-center space-x-2 whitespace-nowrap mb-6">
           <h2 className="text-2xl font-bold flex-shrink-0">Movie Theaters in</h2>
-          <NavButton onClick={() => setOpen(o => !o)} className="flex-shrink-0">
+          <NavButton onClick={() => setOpen((o) => !o)} className="flex-shrink-0">
             <span>{location}</span>
           </NavButton>
         </div>
@@ -66,12 +72,9 @@ export default function TheaterList({ location }: Props) {
             </button>
 
             {/* Scrollable row of cards */}
-            <div
-              ref={scroller}
-              className="flex space-x-4 overflow-x-auto scroll-smooth pb-2"
-            >
+            <div ref={scroller} className="flex space-x-4 overflow-x-auto scroll-smooth pb-2">
               {theaters.map((t) => {
-                // build Google Maps link
+                // Build Google Maps link
                 const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
                   t.name + ' ' + t.vicinity
                 )}`;

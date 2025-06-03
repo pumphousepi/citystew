@@ -13,14 +13,20 @@ interface CityOption {
   label: string; // e.g. "Austin, TX"
 }
 
+// Updated NavbarProps to include onSelectCategory and onSelectGenre,
+// since they are used inside this component.
 interface NavbarProps {
   selectedLocation: string;                  // e.g. "Austin, TX"
   onSelectLocation: (loc: string) => void;   // callback to set location
+  onSelectCategory: (cat: string) => void;   // callback to set category (e.g. "sports")
+  onSelectGenre: (genre: string) => void;    // callback to set genre (e.g. "rock" or team name)
 }
 
 export default function Navbar({
   selectedLocation,
   onSelectLocation,
+  onSelectCategory,
+  onSelectGenre,
 }: NavbarProps) {
   const router = useRouter();
   const navRef = useRef<HTMLElement>(null);
@@ -34,9 +40,18 @@ export default function Navbar({
   const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null);
 
   // For concerts, a static list of genres:
-  const genreList   = ['Rock','Pop','Jazz','Country','Hip Hop','Electronic','Classical','R&B'];
+  const genreList = [
+    'Rock',
+    'Pop',
+    'Jazz',
+    'Country',
+    'Hip Hop',
+    'Electronic',
+    'Classical',
+    'R&B',
+  ];
 
-  // New: state to hold dynamic theater titles fetched from the API
+  // State to hold dynamic theater titles fetched from the API
   const [theaterItems, setTheaterItems] = useState<string[]>([]);
 
   // 1️⃣ Fetch list of cities on mount
@@ -51,7 +66,7 @@ export default function Navbar({
   useEffect(() => {
     const onScroll = () => {
       const hero = document.getElementById('hero-section');
-      const navH  = navRef.current?.offsetHeight || 0;
+      const navH = navRef.current?.offsetHeight || 0;
       if (hero) {
         setShowInputs(hero.getBoundingClientRect().bottom <= navH + 5);
       }
@@ -79,16 +94,23 @@ export default function Navbar({
       const [cityName, stateCode] = selectedLocation.split(', ');
       if (cityName && stateCode) {
         fetch(
-          `/api/events?category=theater&city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(stateCode)}`
+          `/api/events?category=theater&city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(
+            stateCode
+          )}`
         )
-          .then((r) => r.json())
+          .then(
+            (r) =>
+              r.json() as Promise<
+                Array<{ title: string }> | { events: Array<{ title: string }> }
+              >
+          )
           .then((data) => {
             // Data might be an array or an object with an "events" array
             let rawArray: Array<{ title: string }> = [];
             if (Array.isArray(data)) {
               rawArray = data;
-            } else if (Array.isArray((data as any).events)) {
-              rawArray = (data as any).events;
+            } else if (Array.isArray(data.events)) {
+              rawArray = data.events;
             }
             const titles = rawArray.map((evt) => evt.title);
             setTheaterItems(titles);
@@ -134,7 +156,7 @@ export default function Navbar({
   };
 
   // Helper: build "&city=<>&state=<>" from selectedLocation
-  const baseQueryFromLocation = () => {
+  const baseQueryFromLocation = (): string => {
     const parts = selectedLocation.split(', ');
     if (parts.length === 2) {
       return `&city=${encodeURIComponent(parts[0])}&state=${encodeURIComponent(parts[1])}`;
@@ -152,10 +174,7 @@ export default function Navbar({
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 h-16">
         {/* Logo */}
-        <button
-          onClick={() => router.push('/')}
-          className="text-2xl font-bold"
-        >
+        <button onClick={() => router.push('/')} className="text-2xl font-bold">
           CityStew
         </button>
 
@@ -194,7 +213,10 @@ export default function Navbar({
           {/* --- SPORTS (hover mega dropdown) --- */}
           <li
             className="relative"
-            onMouseEnter={() => setOpenMenu('sports')}
+            onMouseEnter={() => {
+              setOpenMenu('sports');
+              onSelectCategory('sports');
+            }}
             onMouseLeave={() => setOpenMenu((prev) => (prev === 'sports' ? null : prev))}
           >
             <NavButton
@@ -206,18 +228,17 @@ export default function Navbar({
               SPORTS
             </NavButton>
             {openMenu === 'sports' && (
-              <MegaDropdown
-                menuKey="sports"
-                dataMap={sportsData}
-                baseQuery={baseQueryFromLocation()}
-              />
+              <MegaDropdown menuKey="sports" dataMap={sportsData} baseQuery={baseQueryFromLocation()} />
             )}
           </li>
 
           {/* --- CONCERTS (hover mega dropdown) --- */}
           <li
             className="relative"
-            onMouseEnter={() => setOpenMenu('concerts')}
+            onMouseEnter={() => {
+              setOpenMenu('concerts');
+              onSelectCategory('music'); // “concerts” category is “music”
+            }}
             onMouseLeave={() => setOpenMenu((prev) => (prev === 'concerts' ? null : prev))}
           >
             <NavButton
@@ -240,7 +261,10 @@ export default function Navbar({
           {/* --- THEATER (hover to fetch & open dynamic MegaDropdown) --- */}
           <li
             className="relative"
-            onMouseEnter={() => setOpenMenu('theater')}
+            onMouseEnter={() => {
+              setOpenMenu('theater');
+              onSelectCategory('theater');
+            }}
             onMouseLeave={() => setOpenMenu((prev) => (prev === 'theater' ? null : prev))}
           >
             <NavButton
@@ -367,7 +391,9 @@ export default function Navbar({
                     onSelectLocation(c.label);
                     const [cityName, stateCode] = c.label.split(', ');
                     router.push(
-                      `/events?city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(stateCode)}`
+                      `/events?city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(
+                        stateCode
+                      )}`
                     );
                     setMobileOpen(false);
                     setMobileSubmenu(null);
@@ -381,7 +407,10 @@ export default function Navbar({
 
           {/* Mobile: SPORTS */}
           <NavButton
-            onClick={() => toggleMobileSubmenu('sports')}
+            onClick={() => {
+              toggleMobileSubmenu('sports');
+              onSelectCategory('sports');
+            }}
             className="w-full text-left px-4 py-2 text-white rounded"
           >
             SPORTS
@@ -397,10 +426,11 @@ export default function Navbar({
                         key={team}
                         className="block w-full text-left py-1 text-white hover:underline"
                         onClick={() => {
+                          onSelectGenre(team);
                           router.push(
                             `/events?category=sports&league=${encodeURIComponent(
                               league
-                            )}&team=${encodeURIComponent(team)}`
+                            )}&team=${encodeURIComponent(team)}${baseQueryFromLocation()}`
                           );
                           setMobileOpen(false);
                           setMobileSubmenu(null);
@@ -417,7 +447,10 @@ export default function Navbar({
 
           {/* Mobile: CONCERTS */}
           <NavButton
-            onClick={() => toggleMobileSubmenu('concerts')}
+            onClick={() => {
+              toggleMobileSubmenu('concerts');
+              onSelectCategory('music');
+            }}
             className="w-full text-left px-4 py-2 text-white rounded"
           >
             CONCERTS
@@ -430,7 +463,10 @@ export default function Navbar({
                   key={g}
                   className="block w-full text-left py-1 text-white hover:underline"
                   onClick={() => {
-                    router.push(`/events?category=music&genre=${encodeURIComponent(g)}`);
+                    onSelectGenre(g);
+                    router.push(
+                      `/events?category=music&genre=${encodeURIComponent(g)}${baseQueryFromLocation()}`
+                    );
                     setMobileOpen(false);
                     setMobileSubmenu(null);
                   }}
@@ -443,7 +479,10 @@ export default function Navbar({
 
           {/* Mobile: THEATER */}
           <NavButton
-            onClick={() => toggleMobileSubmenu('theater')}
+            onClick={() => {
+              toggleMobileSubmenu('theater');
+              onSelectCategory('theater');
+            }}
             className="w-full text-left px-4 py-2 text-white rounded"
           >
             THEATER
@@ -458,8 +497,11 @@ export default function Navbar({
                     key={show}
                     className="block w-full text-left py-1 text-white hover:underline"
                     onClick={() => {
+                      onSelectGenre(show);
                       router.push(
-                        `/events?category=theater&genre=${encodeURIComponent(genreKey)}`
+                        `/events?category=theater&genre=${encodeURIComponent(
+                          genreKey
+                        )}${baseQueryFromLocation()}`
                       );
                       setMobileOpen(false);
                       setMobileSubmenu(null);

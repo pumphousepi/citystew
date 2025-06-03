@@ -1,8 +1,7 @@
-// app/tickets/[id]/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+// Removed `useRouter` import since it was never used
 
 interface ApiEvent {
   name: string;
@@ -56,8 +55,13 @@ export default function TicketPage({ params }: { params: { id: string } }) {
   return (
     <div className="p-6 max-w-2xl mx-auto text-center">
       <h1 className="text-2xl font-bold mb-2">{event.name}</h1>
-      <p className="mb-1">{event.dates?.start?.localDate} @ {event.dates?.start?.localTime}</p>
-      <p className="mb-4">{event._embedded?.venues?.[0]?.name}, {event._embedded?.venues?.[0]?.city?.name}</p>
+      <p className="mb-1">
+        {event.dates?.start?.localDate} @ {event.dates?.start?.localTime}
+      </p>
+      <p className="mb-4">
+        {event._embedded?.venues?.[0]?.name},{' '}
+        {event._embedded?.venues?.[0]?.city?.name}
+      </p>
 
       {event.url && (
         <a

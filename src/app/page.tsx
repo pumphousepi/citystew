@@ -1,7 +1,6 @@
-// src/app/page.tsx
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import TrendingEvents from './components/TrendingEvents';
@@ -14,7 +13,7 @@ import Footer from './components/Footer';
 export default function HomePage() {
   const [selectedLocation, setSelectedLocation] = useState('Austin, TX');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [selectedGenre, setSelectedGenre]       = useState<string>('');
+  const [selectedGenre, setSelectedGenre] = useState<string>('');
 
   return (
     <>

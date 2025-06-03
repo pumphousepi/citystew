@@ -1,3 +1,5 @@
+// src/app/api/event-details/[id]/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
@@ -18,7 +20,8 @@ export async function GET(
 
     const data = await res.json();
     return NextResponse.json(data);
-  } catch (error) {
+  } catch (_error) {
+    // Renamed `error` → `_error` so ESLint no longer flags "defined but never used"
     return NextResponse.json({ error: 'Failed to fetch event' }, { status: 500 });
   }
 }
