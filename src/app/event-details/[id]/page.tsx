@@ -23,28 +23,27 @@ interface EventDetails {
 }
 
 export default function EventDetailPage() {
-  const { id } = useParams();
+  // next/navigation’s useParams returns a generic string record,
+  // so we cast to { id: string } so TS knows “id” is a string.
+  const { id } = useParams() as { id: string };
   const [event, setEvent] = useState<EventDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) return;
     async function fetchEvent() {
       try {
         const res = await fetch(`/api/event-details/${id}`);
-        if (!res.ok) throw new Error('Failed to fetch event');
-        const data = await res.json();
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = (await res.json()) as EventDetails;
         setEvent(data);
-      } catch (err) {
-        console.error('Failed to load event:', err);
+      } catch {
         setEvent(null);
       } finally {
         setLoading(false);
       }
     }
-
-    if (id) {
-      fetchEvent();
-    }
+    fetchEvent();
   }, [id]);
 
   if (loading) {
@@ -63,7 +62,9 @@ export default function EventDetailPage() {
     );
   }
 
-  const image = event.images?.[0]?.url || '/placeholder.jpg';
+  // Safely grab the first image URL or fall back to a placeholder
+  const image = event.images?.[0]?.url ?? '/placeholder.jpg';
+  // “venue” might be undefined, so TS needs to know we guard before using it
   const venue = event._embedded?.venues?.[0];
 
   return (
@@ -73,8 +74,10 @@ export default function EventDetailPage() {
         alt={event.name}
         className="w-full h-64 object-cover rounded-lg mb-6"
       />
+
       <h1 className="text-3xl font-bold mb-2">{event.name}</h1>
 
+      {/* Only render date/time if both exist */}
       {event.dates?.start?.localDate && (
         <p className="text-gray-700 mb-2">
           📅 {event.dates.start.localDate}
@@ -82,12 +85,14 @@ export default function EventDetailPage() {
         </p>
       )}
 
+      {/* Only render venue if it’s defined */}
       {venue && (
         <p className="text-gray-700 mb-4">
-          📍 {venue.name}, {venue.city?.name}
+          📍 {venue.name ?? ''}, {venue.city?.name ?? ''}
         </p>
       )}
 
+      {/* Only render Buy Tickets link if `event.url` is truthy */}
       {event.url && (
         <a
           href={event.url}
