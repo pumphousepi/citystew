@@ -1,3 +1,4 @@
+// src/app/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -6,6 +7,7 @@ import HeroSection from './components/HeroSection';
 import TrendingEvents from './components/TrendingEvents';
 import Categories from './components/Categories';
 import ThreeColumnSection from './components/ThreeColumnSection'; // now renders Sports/Concerts/Theater Near You
+import TheaterList from './components/TheaterList';
 import Sponsors from './components/Sponsors';
 import Footer from './components/Footer';
 
@@ -37,6 +39,9 @@ export default function HomePage() {
 
         {/* ThreeColumnSection now only needs location */}
         <ThreeColumnSection location={selectedLocation} />
+
+        {/* New Movie Theaters section */}
+        <TheaterList location={selectedLocation} />
 
         <Sponsors />
       </main>

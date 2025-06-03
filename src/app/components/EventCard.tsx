@@ -1,4 +1,3 @@
-// src/app/components/EventCard.tsx
 'use client';
 
 import React from 'react';
@@ -25,8 +24,6 @@ export default function EventCard({
 }: EventCardProps) {
   const isHorizontal = layout === 'horizontal';
   const placeholder = '/assets/images/placeholder.jpg';
-
-  // Only use the TM image if present, otherwise local placeholder
   const finalSrc = image || placeholder;
 
   const Img = (
@@ -35,14 +32,13 @@ export default function EventCard({
       alt={title}
       className="w-full h-full object-cover"
       onError={(e) => {
-        // in case that placeholder is missing or corrupt
         e.currentTarget.src = '/placeholder.jpg';
       }}
     />
   );
 
   const content = isHorizontal ? (
-    <div className="flex items-center space-x-4 p-3 rounded-md hover:bg-gray-100 transition cursor-pointer">
+    <div className="flex items-center space-x-4 p-3 rounded-md hover:bg-gray-100 transition">
       <div className="w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gray-200">
         {Img}
       </div>
@@ -56,7 +52,7 @@ export default function EventCard({
       </div>
     </div>
   ) : (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden w-60 flex-shrink-0 flex flex-col h-[250px]">
+    <div className="bg-white rounded-xl shadow-md overflow-hidden w-60 flex-shrink-0 flex flex-col h-[250px] hover:shadow-lg transition">
       <div className="w-full h-40 flex-shrink-0">{Img}</div>
       <div className="p-4 flex flex-col flex-grow justify-between min-h-[140px]">
         <div>
@@ -73,5 +69,11 @@ export default function EventCard({
     </div>
   );
 
-  return href ? <Link href={href}>{content}</Link> : content;
+  return href ? (
+    <Link href={href} className="block">
+      {content}
+    </Link>
+  ) : (
+    content
+  );
 }
