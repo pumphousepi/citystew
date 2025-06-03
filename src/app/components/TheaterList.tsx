@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import NavButton from './NavButton'; // used to toggle “location” display
+import NavButton from './NavButton'; // still used to display the location
 
 interface Theater {
   place_id: string;
@@ -19,13 +19,11 @@ interface Props {
 export default function TheaterList({ location }: Props) {
   const [theaters, setTheaters] = useState<Theater[]>([]);
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false); // still used for toggling UI
   const scroller = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const [city, stateCode] = location.split(',').map((s) => s.trim());
     setLoading(true);
-
     fetch(
       `/api/theaters?city=${encodeURIComponent(city)}&stateCode=${encodeURIComponent(
         stateCode
@@ -33,7 +31,6 @@ export default function TheaterList({ location }: Props) {
     )
       .then((res) => res.json())
       .then((json) => {
-        // assume API returns an object with `.results` array
         setTheaters(json.results || []);
       })
       .catch(console.error)
@@ -50,7 +47,7 @@ export default function TheaterList({ location }: Props) {
         {/* Header: no wrap */}
         <div className="flex items-center space-x-2 whitespace-nowrap mb-6">
           <h2 className="text-2xl font-bold flex-shrink-0">Movie Theaters in</h2>
-          <NavButton onClick={() => setOpen((o) => !o)} className="flex-shrink-0">
+          <NavButton className="flex-shrink-0">
             <span>{location}</span>
           </NavButton>
         </div>
