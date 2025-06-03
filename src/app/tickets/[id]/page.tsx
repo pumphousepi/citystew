@@ -1,7 +1,8 @@
+// src/app/tickets/[id]/page.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
-// Removed `useRouter` import since it was never used
+import { useParams } from 'next/navigation';
 
 interface ApiEvent {
   name: string;
@@ -14,26 +15,29 @@ interface ApiEvent {
   };
 }
 
-export default function TicketPage({ params }: { params: { id: string } }) {
+export default function TicketPage() {
+  // Grab the dynamic ID from the URL
+  const { id } = useParams() as { id: string };
   const [event, setEvent] = useState<ApiEvent | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) return;
     async function fetchEventDetails() {
       try {
-        const res = await fetch(`/api/event-details/${params.id}`);
+        const res = await fetch(`/api/event-details/${id}`);
         if (!res.ok) throw new Error('Failed to load event');
-        const data = await res.json();
+        const data = (await res.json()) as ApiEvent;
         setEvent(data);
       } catch (err) {
         console.error(err);
+        setEvent(null);
       } finally {
         setLoading(false);
       }
     }
-
     fetchEventDetails();
-  }, [params.id]);
+  }, [id]);
 
   if (loading) {
     return (
@@ -52,17 +56,20 @@ export default function TicketPage({ params }: { params: { id: string } }) {
     );
   }
 
+  const date = event.dates?.start?.localDate;
+  const time = event.dates?.start?.localTime;
+  const venueName = event._embedded?.venues?.[0]?.name;
+  const venueCity = event._embedded?.venues?.[0]?.city?.name;
+
   return (
     <div className="p-6 max-w-2xl mx-auto text-center">
       <h1 className="text-2xl font-bold mb-2">{event.name}</h1>
-      <p className="mb-1">
-        {event.dates?.start?.localDate} @ {event.dates?.start?.localTime}
-      </p>
-      <p className="mb-4">
-        {event._embedded?.venues?.[0]?.name},{' '}
-        {event._embedded?.venues?.[0]?.city?.name}
-      </p>
-
+      {date && time && (
+        <p className="mb-1">{date} @ {time}</p>
+      )}
+      {venueName && venueCity && (
+        <p className="mb-4">{venueName}, {venueCity}</p>
+      )}
       {event.url && (
         <a
           href={event.url}
