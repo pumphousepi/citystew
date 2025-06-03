@@ -2,52 +2,91 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { notFound } from 'next/navigation';
+import { useParams } from 'next/navigation';
 
-interface ApiEvent {
+interface EventDetails {
   name: string;
   url?: string;
   dates?: {
-    start?: { localDate?: string; localTime?: string };
+    start?: {
+      localDate?: string;
+      localTime?: string;
+    };
   };
   _embedded?: {
-    venues?: { name: string; city: { name: string } }[];
+    venues?: {
+      name?: string;
+      city?: { name?: string };
+    }[];
   };
+  images?: { url: string }[];
 }
 
-async function fetchEventDetailsFromAPI(id: string): Promise<ApiEvent | null> {
-  try {
-    const res = await fetch(
-      `https://app.ticketmaster.com/discovery/v2/events/${id}.json?apikey=${process.env.TICKETMASTER_API_KEY}`
+export default function EventDetailPage() {
+  const { id } = useParams();
+  const [event, setEvent] = useState<EventDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchEvent() {
+      try {
+        const res = await fetch(`/api/event-details/${id}`);
+        if (!res.ok) throw new Error('Failed to fetch event');
+        const data = await res.json();
+        setEvent(data);
+      } catch (err) {
+        console.error('Failed to load event:', err);
+        setEvent(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (id) {
+      fetchEvent();
+    }
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="text-center py-20 text-lg font-medium">
+        Loading event details...
+      </div>
     );
-    if (!res.ok) return null;
-    const data: ApiEvent = await res.json();
-    return data;
-  } catch {
-    return null;
   }
-}
 
-// This is a Server Component (no 'use client'), so `async` is allowed
-export default async function EventDetailsPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const event = await fetchEventDetailsFromAPI(params.id);
   if (!event) {
-    notFound();
+    return (
+      <div className="text-center py-20 text-red-600 text-lg">
+        Event not found.
+      </div>
+    );
   }
+
+  const image = event.images?.[0]?.url || '/placeholder.jpg';
+  const venue = event._embedded?.venues?.[0];
 
   return (
-    <div className="p-6 max-w-2xl mx-auto text-center">
-      <h1 className="text-2xl font-bold mb-2">{event.name}</h1>
-      <p className="mb-1">
-        {event.dates?.start?.localDate} @ {event.dates?.start?.localTime}
-      </p>
-      <p className="mb-4">
-        {event._embedded?.venues?.[0]?.name}, {event._embedded?.venues?.[0]?.city?.name}
-      </p>
+    <div className="max-w-3xl mx-auto px-4 py-10">
+      <img
+        src={image}
+        alt={event.name}
+        className="w-full h-64 object-cover rounded-lg mb-6"
+      />
+      <h1 className="text-3xl font-bold mb-2">{event.name}</h1>
+
+      {event.dates?.start?.localDate && (
+        <p className="text-gray-700 mb-2">
+          📅 {event.dates.start.localDate}
+          {event.dates.start.localTime && ` at ${event.dates.start.localTime}`}
+        </p>
+      )}
+
+      {venue && (
+        <p className="text-gray-700 mb-4">
+          📍 {venue.name}, {venue.city?.name}
+        </p>
+      )}
 
       {event.url && (
         <a
@@ -62,4 +101,3 @@ export default async function EventDetailsPage({
     </div>
   );
 }
-
