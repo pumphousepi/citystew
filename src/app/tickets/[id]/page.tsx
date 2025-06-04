@@ -1,8 +1,7 @@
-// src/app/tickets/[id]/page.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 interface ApiEvent {
   name: string;
@@ -13,25 +12,23 @@ interface ApiEvent {
   _embedded?: {
     venues?: { name: string; city: { name: string } }[];
   };
+  images?: { url: string }[];
 }
 
-export default function TicketPage() {
-  // Grab the dynamic ID from the URL
-  const { id } = useParams() as { id: string };
+export default function TicketPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const [event, setEvent] = useState<ApiEvent | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
     async function fetchEventDetails() {
       try {
         const res = await fetch(`/api/event-details/${id}`);
         if (!res.ok) throw new Error('Failed to load event');
-        const data = (await res.json()) as ApiEvent;
-        setEvent(data);
+        const data = await res.json();
+        setEvent(data as ApiEvent);
       } catch (err) {
         console.error(err);
-        setEvent(null);
       } finally {
         setLoading(false);
       }
@@ -56,19 +53,27 @@ export default function TicketPage() {
     );
   }
 
-  const date = event.dates?.start?.localDate;
-  const time = event.dates?.start?.localTime;
-  const venueName = event._embedded?.venues?.[0]?.name;
-  const venueCity = event._embedded?.venues?.[0]?.city?.name;
+  const imageUrl = event.images?.[0]?.url || '/assets/images/placeholder.jpg';
+  const venue = event._embedded?.venues?.[0];
 
   return (
-    <div className="p-6 max-w-2xl mx-auto text-center">
+    <div className="max-w-2xl mx-auto text-center p-6">
+      <img
+        src={imageUrl}
+        alt={event.name}
+        className="w-full h-64 object-cover rounded-lg mb-6"
+      />
       <h1 className="text-2xl font-bold mb-2">{event.name}</h1>
-      {date && time && (
-        <p className="mb-1">{date} @ {time}</p>
+      {event.dates?.start?.localDate && (
+        <p className="mb-1">
+          {event.dates.start.localDate}
+          {event.dates.start.localTime && ` @ ${event.dates.start.localTime}`}
+        </p>
       )}
-      {venueName && venueCity && (
-        <p className="mb-4">{venueName}, {venueCity}</p>
+      {venue && (
+        <p className="mb-4">
+          {venue.name}, {venue.city?.name}
+        </p>
       )}
       {event.url && (
         <a

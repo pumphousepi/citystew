@@ -38,7 +38,9 @@ export default function HighlightsSection() {
               />
               <div>
                 <p className="font-bold">Taylor Swift</p>
-                <a href="#" className="text-blue-600 text-sm underline">View Tickets</a>
+                <a href="#" className="text-blue-600 text-sm underline">
+                  View Tickets
+                </a>
               </div>
             </li>
             <li className="flex space-x-4 items-center">
@@ -51,7 +53,9 @@ export default function HighlightsSection() {
               />
               <div>
                 <p className="font-bold">Kevin Hart</p>
-                <a href="#" className="text-blue-600 text-sm underline">View Tickets</a>
+                <a href="#" className="text-blue-600 text-sm underline">
+                  View Tickets
+                </a>
               </div>
             </li>
           </ul>

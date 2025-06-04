@@ -19,6 +19,10 @@ interface NavbarProps {
   onSelectGenre: (genre: string) => void;
 }
 
+interface TMEventsResponse {
+  events?: Array<{ title: string }>;
+}
+
 export default function Navbar({
   selectedLocation,
   onSelectLocation,
@@ -28,20 +32,20 @@ export default function Navbar({
   const router = useRouter();
   const navRef = useRef<HTMLElement>(null);
 
-  const [cities, setCities]               = useState<CityOption[]>([]);
-  const [searchTerm, setSearchTerm]       = useState('');
-  const [showInputs, setShowInputs]       = useState(false);
-  const [openMenu, setOpenMenu]           = useState<string | null>(null);
-  const [mobileOpen, setMobileOpen]       = useState(false);
+  const [cities, setCities] = useState<CityOption[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showInputs, setShowInputs] = useState(false);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null);
   const [showAllCities, setShowAllCities] = useState(false);
 
-  const genreList: string[] = [
+  const genreList = [
     'Rock',
     'Pop',
     'Jazz',
     'Country',
-    'Hip Hop',
+    'Hip Hop',
     'Electronic',
     'Classical',
     'R&B',
@@ -102,10 +106,17 @@ export default function Navbar({
           )}&state=${encodeURIComponent(stateCode)}`
         )
           .then((r) => r.json())
-          .then((data: { _embedded?: { events: Array<{ title: string }> } }) => {
-            const rawEvents = data._embedded?.events ?? [];
-            const titles = rawEvents.map((evt) => evt.title);
-            setTheaterItems(titles);
+          .then((data: unknown) => {
+            let rawArray: Array<{ title: string }> = [];
+            if (Array.isArray(data)) {
+              rawArray = data as Array<{ title: string }>;
+            } else {
+              const resp = data as TMEventsResponse;
+              if (Array.isArray(resp.events)) {
+                rawArray = resp.events;
+              }
+            }
+            setTheaterItems(rawArray.map((evt) => evt.title));
           })
           .catch(() => {
             setTheaterItems([]);
@@ -157,9 +168,10 @@ export default function Navbar({
   return (
     <nav
       ref={navRef}
-      className={`sticky top-0 w-full backdrop-blur-sm z-50 transition-colors duration-300 ${
-        showInputs ? 'bg-black bg-opacity-90 text-white' : 'bg-transparent text-white'
-      }`}
+      className={`
+        sticky top-0 w-full backdrop-blur-sm z-50 transition-colors duration-300
+        ${showInputs ? 'bg-black bg-opacity-90 text-white' : 'bg-transparent text-white'}
+      `}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 h-16">
         {/* ─── Logo ─── */}
@@ -309,7 +321,10 @@ export default function Navbar({
               onMouseEnter={() => setOpenMenu('nav-city')}
               onMouseLeave={() => setOpenMenu((prev) => (prev === 'nav-city' ? null : prev))}
             >
-              <NavButton ariaHasPopup className="flex items-center space-x-1 px-3 py-2 font-medium text-white">
+              <NavButton
+                ariaHasPopup
+                className="flex items-center space-x-1 px-3 py-2 font-medium text-white"
+              >
                 <span className="text-blue-400">{selectedLocation}</span>
                 <svg
                   className="w-4 h-4 text-blue-400"
@@ -467,9 +482,7 @@ export default function Navbar({
                   onClick={() => {
                     onSelectGenre(g);
                     router.push(
-                      `/events?category=music&genre=${encodeURIComponent(
-                        g
-                      )}${baseQueryFromLocation()}`
+                      `/events?category=music&genre=${encodeURIComponent(g)}${baseQueryFromLocation()}`
                     );
                     setMobileOpen(false);
                     setMobileSubmenu(null);
