@@ -1,17 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import EventCard from '../../components/EventCard';
 
 interface ApiEvent {
+  id: string;
   name: string;
   url?: string;
-  dates?: {
-    start?: { localDate?: string; localTime?: string };
-  };
-  _embedded?: {
-    venues?: { name: string; city: { name: string } }[];
-  };
+  dates?: { start?: { localDate?: string; localTime?: string } };
+  _embedded?: { venues?: { name?: string; city?: { name?: string } }[] };
   images?: { url: string }[];
 }
 
@@ -26,9 +23,10 @@ export default function TicketPage({ params }: { params: { id: string } }) {
         const res = await fetch(`/api/event-details/${id}`);
         if (!res.ok) throw new Error('Failed to load event');
         const data = await res.json();
-        setEvent(data as ApiEvent);
+        setEvent(data);
       } catch (err) {
         console.error(err);
+        setEvent(null);
       } finally {
         setLoading(false);
       }
@@ -57,7 +55,7 @@ export default function TicketPage({ params }: { params: { id: string } }) {
   const venue = event._embedded?.venues?.[0];
 
   return (
-    <div className="max-w-2xl mx-auto text-center p-6">
+    <div className="p-6 max-w-2xl mx-auto text-center">
       <img
         src={imageUrl}
         alt={event.name}
