@@ -1,27 +1,34 @@
+// src/app/tickets/[id]/page.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 
 interface ApiEvent {
-  id: string;
   name: string;
   url?: string;
-  dates?: { start?: { localDate?: string; localTime?: string } };
-  _embedded?: { venues?: { name?: string; city?: { name?: string } }[] };
+  dates?: {
+    start?: { localDate?: string; localTime?: string };
+  };
+  _embedded?: {
+    venues?: { name: string; city: { name: string } }[];
+  };
   images?: { url: string }[];
 }
 
-export default function TicketPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function TicketPage() {
+  // Grab the dynamic ID from the URL
+  const { id } = useParams() as { id: string };
   const [event, setEvent] = useState<ApiEvent | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) return;
     async function fetchEventDetails() {
       try {
         const res = await fetch(`/api/event-details/${id}`);
         if (!res.ok) throw new Error('Failed to load event');
-        const data = await res.json();
+        const data = (await res.json()) as ApiEvent;
         setEvent(data);
       } catch (err) {
         console.error(err);
@@ -36,7 +43,7 @@ export default function TicketPage({ params }: { params: { id: string } }) {
   if (loading) {
     return (
       <div className="h-screen flex flex-col justify-center items-center text-center">
-        <h1 className="text-2xl font-bold mb-2">Checking Availability...</h1>
+        <h1 className="text-2xl font-bold mb-2">Checking Availability…</h1>
         <p>Hang tight — we’re pulling event details.</p>
       </div>
     );
@@ -51,7 +58,10 @@ export default function TicketPage({ params }: { params: { id: string } }) {
   }
 
   const imageUrl = event.images?.[0]?.url || '/assets/images/placeholder.jpg';
-  const venue = event._embedded?.venues?.[0];
+  const date = event.dates?.start?.localDate;
+  const time = event.dates?.start?.localTime;
+  const venueName = event._embedded?.venues?.[0]?.name;
+  const venueCity = event._embedded?.venues?.[0]?.city?.name;
 
   return (
     <div className="p-6 max-w-2xl mx-auto text-center">
@@ -61,17 +71,19 @@ export default function TicketPage({ params }: { params: { id: string } }) {
         className="w-full h-64 object-cover rounded-lg mb-6"
       />
       <h1 className="text-2xl font-bold mb-2">{event.name}</h1>
-      {event.dates?.start?.localDate && (
+
+      {date && time && (
         <p className="mb-1">
-          {event.dates.start.localDate}
-          {event.dates.start.localTime && ` @ ${event.dates.start.localTime}`}
+          {date} @ {time}
         </p>
       )}
-      {venue && (
+
+      {venueName && venueCity && (
         <p className="mb-4">
-          {venue.name}, {venue.city?.name}
+          {venueName}, {venueCity}
         </p>
       )}
+
       {event.url && (
         <a
           href={event.url}
