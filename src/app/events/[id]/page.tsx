@@ -1,70 +1,181 @@
+// src/app/event-details/[id]/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-
-// Define interface for event data
-interface EventData {
-  name: string;
-  dates?: {
-    start?: {
-      localDate?: string;
-    };
-  };
-  _embedded?: {
-    venues?: Array<{ name?: string }>;
-  };
-  info?: string;
-  url?: string;
-}
+import type { EventDetail } from '../../../types/EventDetail';
 
 export default function EventDetailPage() {
-  const params = useParams();
-  const id = typeof params?.id === 'string' ? params.id : Array.isArray(params?.id) ? params.id[0] : '';
-  
-  const [event, setEvent] = useState<EventData | null>(null);
+  const { id } = useParams() as { id: string };
+  const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchEventDetails = async () => {
-      const baseURL =
-        process.env.NODE_ENV === 'development'
-          ? 'http://localhost:3000'
-          : 'https://www.citystew.com';
+    if (!id) {
+      setLoading(false);
+      return;
+    }
 
+    async function fetchEventDetails() {
+      setLoading(true);
       try {
-        const res = await fetch(`${baseURL}/api/event-details/${id}`);
-        const data = await res.json();
+        const res = await fetch(`/api/event-details/${id}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = (await res.json()) as EventDetail;
         setEvent(data);
-      } catch (error) {
-        console.error('Failed to fetch event details:', error);
+      } catch (err) {
+        console.error('Failed to fetch event details:', err);
+        setEvent(null);
       } finally {
         setLoading(false);
       }
-    };
-
-    if (id) {
-      fetchEventDetails();
     }
+
+    fetchEventDetails();
   }, [id]);
 
-  if (loading) return <p>Loading event details...</p>;
-  if (!event) return <p>No event found.</p>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg">Loading event details…</p>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-600">Event not found.</p>
+      </div>
+    );
+  }
+
+  // Choose a “hero” image (16:9 >= 640px width preferred, else fallback)
+  const heroImageUrl =
+    event.images?.find((img) => img.ratio === '16_9' && img.width && img.width >= 640)?.url ??
+    event.images?.[0]?.url ??
+    '/assets/images/placeholder.jpg';
+
+  // Format date and time
+  const localDate = event.dates?.start?.localDate;
+  const localTime = event.dates?.start?.localTime;
+  const displayDateTime = localDate
+    ? `${localDate}${localTime ? ` at ${localTime}` : ''}`
+    : 'Date TBD';
+
+  // Venue info (first in array)
+  const venue = event._embedded?.venues?.[0];
+  const venueName = venue?.name ?? 'Venue TBD';
+  const venueCity = venue?.city?.name;
+  const venueState = venue?.state?.stateCode;
+
+  // Event description
+  const description = event.info || event.pleaseNote || 'No description available.';
+
+  // Price range (e.g. “$50–$200”)
+  const priceText = event.priceRanges
+    ? event.priceRanges
+        .map((pr) => {
+          const min = pr.min != null ? `$${pr.min}` : '';
+          const max = pr.max != null ? `$${pr.max}` : '';
+          return min && max ? `${min} – ${max}` : min || max || '';
+        })
+        .join(', ')
+    : '';
+
+  // Classification (e.g. “Sports › Basketball”)
+  const classificationText = event.classifications
+    ?.map((c) => {
+      const seg = c.segment?.name;
+      const gen = c.genre?.name;
+      return [seg, gen].filter(Boolean).join(' › ');
+    })
+    .join(', ');
+
+  // Seat map URL
+  const seatMapUrl = event.seatmap?.staticUrl;
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">{event.name}</h1>
-      <p className="mb-2">{event.dates?.start?.localDate}</p>
-      <p className="mb-2">{event._embedded?.venues?.[0]?.name}</p>
-      <p className="mb-2">{event.info || 'No description available.'}</p>
-      <a
-        href={event.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-600 underline"
-      >
-        Buy Tickets
-      </a>
+    <div className="flex flex-col">
+      {/* ─── Hero Banner ─── */}
+      <div className="relative h-64 w-full">
+        <img
+          src={heroImageUrl}
+          alt={event.name}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.src = '/assets/images/placeholder.jpg';
+          }}
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-50"
+          aria-hidden="true"
+        />
+      </div>
+
+      {/* ─── Overlapping Card with Title/Info/Buy Button ─── */}
+      <div className="relative -mt-16 px-4">
+        <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6">
+          <h1 className="text-3xl font-bold mb-2">{event.name}</h1>
+          <p className="text-gray-700 mb-1">{displayDateTime}</p>
+          <p className="text-gray-700 mb-1">
+            {venueName}
+            {venueCity && venueState && ` • ${venueCity}, ${venueState}`}
+          </p>
+          {classificationText && (
+            <p className="text-sm text-gray-500 mb-2">{classificationText}</p>
+          )}
+          {priceText && (
+            <p className="text-sm text-gray-500 mb-2">Price: {priceText}</p>
+          )}
+          {event.url && (
+            <a
+              href={event.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-2 px-5 py-3 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700"
+            >
+              Buy Tickets
+            </a>
+          )}
+        </div>
+      </div>
+
+      {/* ─── Main Content: Two Columns ─── */}
+      <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* ─── Left Column (2/3 width) ─── */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Description Section */}
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-2xl font-semibold mb-4">Event Details</h2>
+            <p className="text-gray-700 leading-relaxed">{description}</p>
+          </div>
+
+          {/* Seating Chart / Additional Info */}
+          {seatMapUrl && (
+            <div className="bg-white rounded-xl shadow p-6">
+              <h3 className="text-xl font-semibold mb-2">Seating Chart</h3>
+              <a
+                href={seatMapUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline"
+              >
+                View Seating Chart
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* ─── Right Column (1/3 width) ─── */}
+        <aside className="space-y-6">
+          {/* You Might Also Like (Placeholder) */}
+          <div className="bg-white rounded-xl shadow p-6">
+            <h3 className="text-xl font-semibold mb-4">You Might Also Like</h3>
+            <p className="text-gray-500">Coming soon…</p>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

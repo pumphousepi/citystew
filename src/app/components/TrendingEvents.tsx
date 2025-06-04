@@ -9,7 +9,7 @@ import NavButton from './NavButton';
 interface ApiEvent {
   id: string;
   name: string;
-  images?: { url: string }[];
+  images?: { url?: string }[];
   dates?: { start?: { localDate?: string } };
   _embedded?: { venues?: { name?: string }[] };
 }
@@ -21,9 +21,9 @@ interface CityOption {
 }
 
 interface TrendingEventsProps {
-  location: string;
-  category?: string;
-  genre?: string;
+  location: string;                  // e.g. "Austin, TX"
+  category?: string;                 // e.g. "sports" or "music"
+  genre?: string;                    // e.g. "Rock"
   onSelectLocation: (loc: string) => void;
 }
 
@@ -40,10 +40,10 @@ export default function TrendingEvents({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
-  // Default category is music if not provided via props
+  // If the parent did not pass a category, default to "music"
   const activeCategory = category || 'music';
 
-  // Load city list
+  // 1) Load the list of cities once
   useEffect(() => {
     fetch('/api/locations/cities')
       .then(res => res.json())
@@ -51,8 +51,9 @@ export default function TrendingEvents({
       .catch(err => console.error('[TrendingEvents] cities load error', err));
   }, []);
 
-  // Fetch trending events when location, category, or genre changes
+  // 2) Fetch “trending” events whenever location, category or genre changes
   useEffect(() => {
+    // If location is not in "City, State" format, skip
     if (!location.includes(',')) {
       setEvents([]);
       setLoading(false);
@@ -82,12 +83,14 @@ export default function TrendingEvents({
         console.log('[TrendingEvents] Response →', json);
 
         if (res.status === 429) {
+          // Too many requests
           setRateLimited(true);
           setEvents([]);
         } else if (!res.ok) {
           console.error('[TrendingEvents] API error →', json);
           setEvents([]);
         } else {
+          // Depending on your API shape, it may be { _embedded: { events: [...] } }
           setEvents(json._embedded?.events ?? []);
         }
       } catch (err) {
@@ -99,11 +102,15 @@ export default function TrendingEvents({
     })();
   }, [location, activeCategory, genre]);
 
+  // Scroll functions for the left/right arrows
   const scrollBy = (distance: number) => {
     scrollerRef.current?.scrollBy({ left: distance, behavior: 'smooth' });
   };
 
+  // Toggle the city dropdown
   const toggleDropdown = () => setDropdownOpen(prev => !prev);
+
+  // When a city is clicked, update parent’s location and close dropdown
   const onSelectCity = (loc: string) => {
     onSelectLocation(loc);
     setDropdownOpen(false);
@@ -112,11 +119,12 @@ export default function TrendingEvents({
   return (
     <section className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 relative">
-        {/* Header with city selector */}
+        {/* ─── Header: “Trending [Category] in [City, ST]” ─── */}
         <div className="flex items-center mb-6">
           <h2 className="text-2xl font-bold mr-2">
             Trending {activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)} in
           </h2>
+
           <div className="relative">
             <NavButton
               onClick={toggleDropdown}
@@ -125,16 +133,23 @@ export default function TrendingEvents({
             >
               <span className="text-blue-500">{location}</span>
               <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" clipRule="evenodd"
-                  d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z"/>
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 
+                     0 111.06 1.06l-4.24 4.24a.75.75 0 
+                     01-1.06 0L5.21 8.27a.75.75 0 
+                     01.02-1.06z"
+                />
               </svg>
             </NavButton>
+
             {dropdownOpen && (
               <ul className="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg overflow-auto max-h-64">
                 {cities.map(c => (
                   <li key={c.label}>
                     <button
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                       onClick={() => onSelectCity(c.label)}
                     >
                       {c.label}
@@ -146,23 +161,25 @@ export default function TrendingEvents({
           </div>
         </div>
 
-        {/* Scroll arrows */}
+        {/* ─── Left Arrow ─── */}
         <button
           onClick={() => scrollBy(-300)}
-          className="hidden sm:block absolute left-0 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow"
+          className="hidden sm:block absolute left-0 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
           aria-label="Scroll left"
         >
           <ChevronLeft className="w-6 h-6 text-gray-700" />
         </button>
+
+        {/* ─── Right Arrow ─── */}
         <button
           onClick={() => scrollBy(300)}
-          className="hidden sm:block absolute right-0 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow"
+          className="hidden sm:block absolute right-0 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
           aria-label="Scroll right"
         >
           <ChevronRight className="w-6 h-6 text-gray-700" />
         </button>
 
-        {/* Event cards */}
+        {/* ─── Event Cards Row ─── */}
         {loading ? (
           <p>Loading trending {activeCategory}…</p>
         ) : rateLimited ? (
@@ -174,16 +191,21 @@ export default function TrendingEvents({
             ref={scrollerRef}
             className="flex space-x-4 overflow-x-auto no-scrollbar scroll-smooth pb-2"
           >
-            {events.map(evt => (
-              <EventCard
-                key={evt.id}
-                title={evt.name}
-                image={evt.images?.[0]?.url}
-                date={evt.dates?.start?.localDate}
-                venue={evt._embedded?.venues?.[0]?.name}
-                href={`/events/${evt.id}`}
-              />
-            ))}
+            {events.map(evt => {
+              // Build the URL to your detail page:
+              const detailPath = `/event-details/${evt.id}`;
+
+              return (
+                <EventCard
+                  key={evt.id}
+                  title={evt.name}
+                  image={evt.images?.[0]?.url}
+                  date={evt.dates?.start?.localDate}
+                  venue={evt._embedded?.venues?.[0]?.name}
+                  href={detailPath} 
+                />
+              );
+            })}
           </div>
         )}
       </div>
