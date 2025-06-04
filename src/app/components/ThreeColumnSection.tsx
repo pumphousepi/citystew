@@ -2,135 +2,125 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import EventCard from './EventCard';
+import Link from 'next/link';
 
 interface ApiEvent {
   id: string;
   name: string;
-  dates?: {
-    start?: { localDate?: string; localTime?: string };
-  };
-  _embedded?: {
-    venues?: { name: string }[];
-  };
-  images?: { url: string }[];
+  dates?: { start?: { localDate?: string } };
+  _embedded?: { venues?: { name?: string }[] };
 }
 
-interface ThreeColumnSectionProps {
-  location: string; // e.g. "Austin, TX"
+interface SectionConfig {
+  title: string;
+  category: string;
+  imageUrl: string;
 }
 
-export default function ThreeColumnSection({ location }: ThreeColumnSectionProps) {
-  const [sportsEvents, setSportsEvents] = useState<ApiEvent[]>([]);
-  const [concertEvents, setConcertEvents] = useState<ApiEvent[]>([]);
-  const [theaterEvents, setTheaterEvents] = useState<ApiEvent[]>([]);
+const SECTIONS: SectionConfig[] = [
+  { title: 'Sports Near You',   category: 'sports',  imageUrl: '/assets/images/sports.jpg' },
+  { title: 'Concerts Near You', category: 'music',   imageUrl: '/assets/images/concert_card_002.jpg' },
+  { title: 'Theater Near You',  category: 'theater', imageUrl: '/assets/images/theater.jpg' },
+];
+
+export default function ThreeColumnSection({ location }: { location: string }) {
+  const [lists, setLists]     = useState<ApiEvent[][]>(SECTIONS.map(() => []));
   const [loading, setLoading] = useState(true);
 
+  // Split “City, ST” into [city, stateCode]
+  const [city, stateCode] = location.includes(',')
+    ? location.split(',').map((s) => s.trim())
+    : ['', ''];
+
   useEffect(() => {
-    const [cityName, stateCode] = location.split(',').map((s) => s.trim());
-    setLoading(true);
+    // If location isn't valid, skip fetching
+    if (!city || !stateCode) {
+      setLoading(false);
+      return;
+    }
 
-    // Helper that normalizes “either an array directly or an object { events: [...] }” → ApiEvent[]
-    const normalize = (data: unknown): ApiEvent[] => {
-      if (Array.isArray(data)) {
-        return data as ApiEvent[];
-      }
-      const asObj = data as { events?: ApiEvent[] };
-      return Array.isArray(asObj.events) ? asObj.events : [];
-    };
-
-    // Fetch events for a given category, then call the appropriate setter
-    const fetchCategory = async (
-      category: 'sports' | 'music' | 'theater',
-      setter: React.Dispatch<React.SetStateAction<ApiEvent[]>>
-    ) => {
+    (async () => {
+      setLoading(true);
       try {
-        const res = await fetch(
-          `/api/events?category=${category}&city=${encodeURIComponent(
-            cityName
-          )}&state=${encodeURIComponent(stateCode)}`
+        const results = await Promise.all(
+          SECTIONS.map(async ({ category }) => {
+            const params = new URLSearchParams({
+              city,
+              stateCode,
+              category,
+              size: '5',           // fetch only 5 items
+              sort: 'date,asc',    // sort by date ascending
+            });
+            const res  = await fetch(`/api/events?${params}`);
+            const data = await res.json();
+            if (!res.ok) {
+              console.error(`TicketMaster error [${category}]:`, data.error || data);
+              return [];
+            }
+            // Some TM endpoints return { _embedded: { events: [...] } }
+            return (data._embedded?.events as ApiEvent[]) || [];
+          })
         );
-        if (!res.ok) throw new Error();
-        const raw = await res.json();
-        setter(normalize(raw));
-      } catch {
-        setter([]);
+        setLists(results);
+      } catch (err) {
+        console.error('ThreeColumnSection fetch error:', err);
+        setLists(SECTIONS.map(() => []));
+      } finally {
+        setLoading(false);
       }
-    };
+    })();
+  }, [city, stateCode]);
 
-    Promise.all([
-      fetchCategory('sports', setSportsEvents),
-      fetchCategory('music', setConcertEvents),
-      fetchCategory('theater', setTheaterEvents),
-    ]).finally(() => setLoading(false));
-  }, [location]);
-
-  if (loading) {
-    return <p className="text-center py-10">Loading events…</p>;
-  }
+  // Do not render section at all if location is not “City, ST”
+  if (!city || !stateCode) return null;
 
   return (
-    <section className="py-12 bg-white">
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* ── SPORTS COLUMN ── */}
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Sports Near You</h3>
-          {sportsEvents.length === 0 ? (
-            <p className="text-sm text-gray-600">No sports events for {location}.</p>
-          ) : (
-            sportsEvents.map((evt) => (
-              <EventCard
-                key={evt.id}
-                title={evt.name}
-                image={evt.images?.[0]?.url}
-                date={evt.dates?.start?.localDate}
-                venue={evt._embedded?.venues?.[0]?.name}
-                href={`/tickets/${evt.id}`}
-                layout="vertical"
-              />
-            ))
-          )}
-        </div>
+    <section className="max-w-7xl mx-auto px-4 py-12">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {SECTIONS.map((cfg, idx) => (
+          <div
+            key={cfg.title}
+            className="flex flex-col bg-white rounded-2xl shadow-lg overflow-hidden"
+          >
+            <img
+              src={cfg.imageUrl}
+              alt={cfg.title}
+              className="w-full h-40 object-cover"
+            />
+            <div className="p-4 flex flex-col flex-1">
+              <h3 className="text-xl font-semibold mb-4">{cfg.title}</h3>
 
-        {/* ── CONCERTS COLUMN ── */}
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Concerts Near You</h3>
-          {concertEvents.length === 0 ? (
-            <p className="text-sm text-gray-600">No concerts for {location}.</p>
-          ) : (
-            concertEvents.map((evt) => (
-              <EventCard
-                key={evt.id}
-                title={evt.name}
-                image={evt.images?.[0]?.url}
-                date={evt.dates?.start?.localDate}
-                venue={evt._embedded?.venues?.[0]?.name}
-                href={`/tickets/${evt.id}`}
-                layout="vertical"
-              />
-            ))
-          )}
-        </div>
-
-        {/* ── THEATER COLUMN ── */}
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Theater Near You</h3>
-          {theaterEvents.length === 0 ? (
-            <p className="text-sm text-gray-600">No theater events for {location}.</p>
-          ) : (
-            theaterEvents.map((evt) => (
-              <EventCard
-                key={evt.id}
-                title={evt.name}
-                image={evt.images?.[0]?.url}
-                date={evt.dates?.start?.localDate}
-                venue={evt._embedded?.venues?.[0]?.name}
-                href={`/tickets/${evt.id}`}
-                layout="vertical"
-              />
-            ))
-          )}
-        </div>
+              {loading ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <p>Loading…</p>
+                </div>
+              ) : lists[idx].length === 0 ? (
+                <p className="text-gray-600">No events found.</p>
+              ) : (
+                <ul className="flex-1 overflow-y-auto space-y-2">
+                  {lists[idx].map((event) => {
+                    const date  = event.dates?.start?.localDate || 'TBD';
+                    const venue = event._embedded?.venues?.[0]?.name || '';
+                    return (
+                      <li key={event.id}>
+                        <Link
+                          href={`/tickets/${event.id}`}
+                          className="block hover:bg-gray-100 rounded px-2 py-1"
+                        >
+                          <div className="font-medium">{event.name}</div>
+                          <div className="text-sm text-gray-600">
+                            {date}
+                            {venue && ` — ${venue}`}
+                          </div>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );
