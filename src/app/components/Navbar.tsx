@@ -1,4 +1,3 @@
-// src/app/components/Navbar.tsx
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -37,12 +36,12 @@ export default function Navbar({
   const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null);
   const [showAllCities, setShowAllCities] = useState(false);
 
-  const genreList = [
+  const genreList: string[] = [
     'Rock',
     'Pop',
     'Jazz',
     'Country',
-    'Hip Hop',
+    'Hip Hop',
     'Electronic',
     'Classical',
     'R&B',
@@ -103,14 +102,10 @@ export default function Navbar({
           )}&state=${encodeURIComponent(stateCode)}`
         )
           .then((r) => r.json())
-          .then((data) => {
-            let rawArray: Array<{ title: string }> = [];
-            if (Array.isArray(data)) {
-              rawArray = data;
-            } else if (Array.isArray((data as any).events)) {
-              rawArray = (data as any).events;
-            }
-            setTheaterItems(rawArray.map((evt) => evt.title));
+          .then((data: { _embedded?: { events: Array<{ title: string }> } }) => {
+            const rawEvents = data._embedded?.events ?? [];
+            const titles = rawEvents.map((evt) => evt.title);
+            setTheaterItems(titles);
           })
           .catch(() => {
             setTheaterItems([]);
@@ -162,10 +157,9 @@ export default function Navbar({
   return (
     <nav
       ref={navRef}
-      className={`
-        sticky top-0 w-full backdrop-blur-sm z-50 transition-colors duration-300
-        ${showInputs ? 'bg-black bg-opacity-90 text-white' : 'bg-transparent text-white'}
-      `}
+      className={`sticky top-0 w-full backdrop-blur-sm z-50 transition-colors duration-300 ${
+        showInputs ? 'bg-black bg-opacity-90 text-white' : 'bg-transparent text-white'
+      }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 h-16">
         {/* ─── Logo ─── */}
@@ -315,10 +309,7 @@ export default function Navbar({
               onMouseEnter={() => setOpenMenu('nav-city')}
               onMouseLeave={() => setOpenMenu((prev) => (prev === 'nav-city' ? null : prev))}
             >
-              <NavButton
-                ariaHasPopup
-                className="flex items-center space-x-1 px-3 py-2 font-medium text-white"
-              >
+              <NavButton ariaHasPopup className="flex items-center space-x-1 px-3 py-2 font-medium text-white">
                 <span className="text-blue-400">{selectedLocation}</span>
                 <svg
                   className="w-4 h-4 text-blue-400"

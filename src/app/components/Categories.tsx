@@ -1,7 +1,6 @@
-// src/app/components/Categories.tsx
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import CategoryCard from './CategoryCard';
 
