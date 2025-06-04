@@ -23,20 +23,24 @@ export default function ThreeColumnSection({ location }: ThreeColumnSectionProps
     const [cityName, stateCode] = location.split(', ').map((s) => s.trim());
     setLoading(true);
 
-    fetch(
-      `/api/events?city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(stateCode)}`
-    )
+    fetch(`/api/events?city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(stateCode)}`)
       .then((res) => res.json())
       .then((data) => {
+        // Data might be an array or an object with `events` property
         if (Array.isArray(data)) {
           setEvents(data as ApiEvent[]);
-        } else if (Array.isArray((data as any).events)) {
-          setEvents((data as any).events);
         } else {
-          setEvents([]);
+          const container = data as { events?: ApiEvent[] };
+          if (Array.isArray(container.events)) {
+            setEvents(container.events);
+          } else {
+            setEvents([]);
+          }
         }
       })
-      .catch(() => setEvents([]))
+      .catch(() => {
+        setEvents([]);
+      })
       .finally(() => setLoading(false));
   }, [location]);
 
@@ -59,6 +63,7 @@ export default function ThreeColumnSection({ location }: ThreeColumnSectionProps
               }`
             : undefined;
           const venueName = evt._embedded?.venues?.[0]?.name;
+
           return (
             <EventCard
               key={evt.id}
