@@ -34,6 +34,7 @@ export default function NavButton({
         cursor-pointer
         px-2
         py-2
+        hover:text-[#999]
         focus:outline-none
         transition-colors
         duration-300

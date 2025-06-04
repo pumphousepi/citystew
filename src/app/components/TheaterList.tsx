@@ -69,7 +69,7 @@ export default function TheaterList({ location }: Props) {
             </button>
 
             {/* Scrollable row of cards */}
-            <div ref={scroller} className="flex space-x-4 overflow-x-auto scroll-smooth pb-2">
+            <div ref={scroller} className="flex space-x-4 overflow-x-auto no-scrollbar scroll-smooth pb-2">
               {theaters.map((t) => {
                 // Build Google Maps link
                 const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(

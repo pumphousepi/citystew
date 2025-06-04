@@ -1,7 +1,7 @@
 // src/app/components/Categories.tsx
 'use client';
 
-import { useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import CategoryCard from './CategoryCard';
 
@@ -40,7 +40,7 @@ export default function Categories() {
         {/* Scroll container */}
         <div
           ref={scrollerRef}
-          className="flex space-x-4 overflow-x-auto scroll-smooth scrollbar-hidden pb-2"
+          className="flex space-x-4 overflow-x-auto no-scrollbar scroll-smooth pb-2"
         >
           {categories.map(({ image, title }) => (
             <div key={title} className="flex-shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5">

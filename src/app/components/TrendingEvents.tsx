@@ -1,7 +1,7 @@
 // src/app/components/TrendingEvents.tsx
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import EventCard from './EventCard';
 import NavButton from './NavButton';
@@ -172,7 +172,7 @@ export default function TrendingEvents({
         ) : (
           <div
             ref={scrollerRef}
-            className="flex space-x-6 overflow-x-auto scroll-smooth scrollbar-hidden px-2"
+            className="flex space-x-4 overflow-x-auto no-scrollbar scroll-smooth pb-2"
           >
             {events.map(evt => (
               <EventCard

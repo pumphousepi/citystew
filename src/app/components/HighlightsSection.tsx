@@ -1,5 +1,7 @@
 // app/components/HighlightsSection.tsx
 import Image from 'next/image';
+import React, { useEffect, useState, useRef } from 'react';
+
 
 export default function HighlightsSection() {
   return (
