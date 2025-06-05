@@ -171,6 +171,7 @@ export default function Navbar({
     <nav
       ref={navRef}
       className={`
+        relative
         sticky top-0 w-full backdrop-blur-sm z-50 transition-colors duration-300
         ${showInputs ? 'bg-black bg-opacity-90 text-white' : 'bg-transparent text-white'}
       `}
@@ -188,7 +189,6 @@ export default function Navbar({
         <ul className="hidden md:flex items-center space-x-6">
           {/* ==== CITIES ==== */}
           <li
-            className="relative"
             onMouseEnter={() => setOpenMenu('cities')}
             onMouseLeave={() => setOpenMenu((prev) => (prev === 'cities' ? null : prev))}
           >
@@ -201,10 +201,12 @@ export default function Navbar({
             </NavButton>
 
             {openMenu === 'cities' && (
-              <div className="
-                absolute top-full left-0 w-screen bg-white text-black shadow-lg z-50
-                md:right-0 md:w-96
-              ">
+              <div
+                className="
+                  absolute top-full left-0 w-screen bg-white text-black shadow-lg z-50
+                  md:right-0 md:w-96
+                "
+              >
                 <ul className="flex flex-col gap-1 p-4">
                   {(showAllCities ? cities : cities.slice(0, 15)).map((c) => (
                     <li key={c.label}>
@@ -233,7 +235,6 @@ export default function Navbar({
 
           {/* ==== SPORTS ==== */}
           <li
-            className="relative"
             onMouseEnter={() => {
               setOpenMenu('sports');
               onSelectCategory('sports');
@@ -259,7 +260,6 @@ export default function Navbar({
 
           {/* ==== CONCERTS ==== */}
           <li
-            className="relative"
             onMouseEnter={() => {
               setOpenMenu('concerts');
               onSelectCategory('music');
@@ -285,7 +285,6 @@ export default function Navbar({
 
           {/* ==== THEATER ==== */}
           <li
-            className="relative"
             onMouseEnter={() => {
               setOpenMenu('theater');
               onSelectCategory('theater');
@@ -325,7 +324,6 @@ export default function Navbar({
 
             {/* City selector */}
             <div
-              className="relative"
               onMouseEnter={() => setOpenMenu('nav-city')}
               onMouseLeave={() => setOpenMenu((prev) => (prev === 'nav-city' ? null : prev))}
             >
@@ -351,10 +349,12 @@ export default function Navbar({
               </NavButton>
 
               {openMenu === 'nav-city' && (
-                <ul className="
-                  absolute top-full left-0 w-screen bg-white text-black shadow-lg z-50
-                  md:left-1/2 md:-translate-x-1/2 md:w-48
-                ">
+                <ul
+                  className="
+                    absolute top-full left-0 w-screen bg-white text-black shadow-lg z-50
+                    md:left-1/2 md:-translate-x-1/2 md:w-48
+                  "
+                >
                   {cities.map((c) => (
                     <li key={c.label}>
                       <button
