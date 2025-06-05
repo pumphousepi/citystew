@@ -1,5 +1,8 @@
-// src/app/components/Sponsors.tsx
+'use client';
+
 import Image from 'next/image';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRef } from 'react';
 
 const sponsors = [
   {
@@ -23,18 +26,36 @@ const sponsors = [
 ];
 
 export default function Sponsors() {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+
+  const scrollBy = (dx: number) => {
+    scrollerRef.current?.scrollBy({ left: dx, behavior: 'smooth' });
+  };
+
   return (
     <section id="sponsors" className="py-12 bg-gray-50">
-      {/* Match other sections’ width & padding */}
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-center space-x-4 overflow-x-auto py-4">
+      <div className="max-w-7xl mx-auto px-4 relative">
+        {/* Left arrow */}
+        <button
+          onClick={() => scrollBy(-200)}
+          className="flex absolute left-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
+          aria-label="Scroll sponsors left"
+        >
+          <ChevronLeft className="w-6 h-6 text-gray-700" />
+        </button>
+
+        {/* Scrollable sponsor cards */}
+        <div
+          ref={scrollerRef}
+          className="flex justify-center space-x-4 overflow-x-auto no-scrollbar py-4"
+        >
           {sponsors.map(({ img, title, desc, url }) => (
             <a
               key={title}
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="min-w-[200px] bg-white shadow rounded p-4 text-center"
+              className="min-w-[200px] bg-white shadow rounded p-4 text-center flex-shrink-0"
             >
               <Image
                 src={`/assets/images/${img}`}
@@ -48,6 +69,15 @@ export default function Sponsors() {
             </a>
           ))}
         </div>
+
+        {/* Right arrow */}
+        <button
+          onClick={() => scrollBy(200)}
+          className="flex absolute right-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
+          aria-label="Scroll sponsors right"
+        >
+          <ChevronRight className="w-6 h-6 text-gray-700" />
+        </button>
       </div>
     </section>
   );
