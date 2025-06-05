@@ -1,3 +1,4 @@
+// src/app/components/TheaterList.tsx
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -59,17 +60,20 @@ export default function TheaterList({ location }: Props) {
           <p>No theaters found.</p>
         ) : (
           <div className="relative">
-            {/* Left arrow */}
+            {/* Left arrow (always visible) */}
             <button
               onClick={() => scrollBy(-300)}
-              className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow"
+              className="flex absolute left-0 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow z-10"
               aria-label="Scroll left"
             >
               ‹
             </button>
 
             {/* Scrollable row of cards */}
-            <div ref={scroller} className="flex space-x-4 overflow-x-auto no-scrollbar scroll-smooth pb-2">
+            <div
+              ref={scroller}
+              className="flex space-x-4 overflow-x-auto no-scrollbar scroll-smooth pb-2"
+            >
               {theaters.map((t) => {
                 // Build Google Maps link
                 const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -97,10 +101,10 @@ export default function TheaterList({ location }: Props) {
               })}
             </div>
 
-            {/* Right arrow */}
+            {/* Right arrow (always visible) */}
             <button
               onClick={() => scrollBy(300)}
-              className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow"
+              className="flex absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow"
               aria-label="Scroll right"
             >
               ›
