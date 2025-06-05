@@ -1,113 +1,208 @@
+// src/app/components/TrendingEvents.tsx
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import NavButton from './NavButton'; // still used to display the location
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import EventCard from './EventCard';
+import NavButton from './NavButton';
 
-interface Theater {
-  place_id: string;
+interface ApiEvent {
+  id: string;
   name: string;
-  vicinity: string;
-  rating?: number;
-  user_ratings_total?: number;
-  geometry: { location: { lat: number; lng: number } };
+  images?: { url?: string }[];
+  dates?: { start?: { localDate?: string } };
+  _embedded?: { venues?: { name?: string }[] };
 }
 
-interface Props {
-  location: string; // e.g. "Austin, TX"
+interface CityOption {
+  name: string;
+  abbreviation: string;
+  label: string;
 }
 
-export default function TheaterList({ location }: Props) {
-  const [theaters, setTheaters] = useState<Theater[]>([]);
+interface TrendingEventsProps {
+  location: string;                   // e.g. "Austin, TX"
+  category?: string;                  // e.g. "sports" or "music"
+  genre?: string;                     // e.g. "Rock"
+  onSelectLocation: (loc: string) => void;
+}
+
+export default function TrendingEvents({
+  location,
+  category,
+  genre,
+  onSelectLocation,
+}: TrendingEventsProps) {
+  const [events, setEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const scroller = useRef<HTMLDivElement>(null);
+  const [rateLimited, setRateLimited] = useState(false);
+  const [cities, setCities] = useState<CityOption[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const scrollerRef = useRef<HTMLDivElement>(null);
 
+  // If the parent did not pass a category, default to "music"
+  const activeCategory = category || 'music';
+
+  // 1) Load the list of cities once
   useEffect(() => {
-    const [city, stateCode] = location.split(',').map((s) => s.trim());
-    setLoading(true);
-    fetch(
-      `/api/theaters?city=${encodeURIComponent(city)}&stateCode=${encodeURIComponent(
-        stateCode
-      )}`
-    )
+    fetch('/api/locations/cities')
       .then((res) => res.json())
-      .then((json) => {
-        setTheaters(json.results || []);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [location]);
+      .then((data: CityOption[]) => setCities(data))
+      .catch((err) => console.error('[TrendingEvents] cities load error', err));
+  }, []);
 
-  const scrollBy = (dx: number) => {
-    scroller.current?.scrollBy({ left: dx, behavior: 'smooth' });
+  // 2) Fetch “trending” events whenever location, category or genre changes
+  useEffect(() => {
+    if (!location.includes(',')) {
+      setEvents([]);
+      setLoading(false);
+      return;
+    }
+    const [city, stateCode] = location.split(',').map((s) => s.trim());
+
+    (async () => {
+      setLoading(true);
+      setRateLimited(false);
+
+      const params = new URLSearchParams({
+        city,
+        stateCode,
+        trending: 'true',
+        size: '10',
+        category: activeCategory,
+      });
+      if (genre) params.append('genre', genre);
+
+      const url = `/api/events?${params.toString()}`;
+      console.log('[TrendingEvents] Fetching →', url);
+
+      try {
+        const res = await fetch(url);
+        const json = await res.json();
+        console.log('[TrendingEvents] Response →', json);
+
+        if (res.status === 429) {
+          setRateLimited(true);
+          setEvents([]);
+        } else if (!res.ok) {
+          console.error('[TrendingEvents] API error →', json);
+          setEvents([]);
+        } else {
+          setEvents(json._embedded?.events ?? []);
+        }
+      } catch (err) {
+        console.error('[TrendingEvents] Fetch error →', err);
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [location, activeCategory, genre]);
+
+  // Scroll functions for the left/right arrows
+  const scrollBy = (distance: number) => {
+    scrollerRef.current?.scrollBy({ left: distance, behavior: 'smooth' });
+  };
+
+  // Toggle the city dropdown
+  const toggleDropdown = () => setDropdownOpen((prev) => !prev);
+
+  // When a city is clicked, update parent’s location and close dropdown
+  const onSelectCity = (loc: string) => {
+    onSelectLocation(loc);
+    setDropdownOpen(false);
   };
 
   return (
     <section className="py-12 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header: no wrap */}
-        <div className="flex items-center space-x-2 whitespace-nowrap mb-6">
-          <h2 className="text-2xl font-bold flex-shrink-0">Movie Theaters in</h2>
-          <NavButton className="flex-shrink-0">
-            <span>{location}</span>
-          </NavButton>
+      <div className="max-w-7xl mx-auto px-4 relative">
+        {/* ─── Header: “Trending [Category] in [City, ST]” ─── */}
+        <div className="flex items-center mb-6">
+          <h2 className="text-2xl font-bold mr-2">
+            Trending {activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)} in
+          </h2>
+
+          <div className="relative">
+            <NavButton
+              onClick={toggleDropdown}
+              ariaHasPopup
+              className="flex items-center space-x-1"
+            >
+              <span className="text-blue-500">{location}</span>
+              <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 
+                     0 111.06 1.06l-4.24 4.24a.75.75 0 
+                     01-1.06 0L5.21 8.27a.75.75 0 
+                     01.02-1.06z"
+                />
+              </svg>
+            </NavButton>
+
+            {dropdownOpen && (
+              <ul className="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg overflow-auto max-h-64">
+                {cities.map((c) => (
+                  <li key={c.label}>
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                      onClick={() => onSelectCity(c.label)}
+                    >
+                      {c.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
 
-        {/* Cards */}
+        {/* ─── Left Arrow (always visible) ─── */}
+        <button
+          onClick={() => scrollBy(-300)}
+          className="flex absolute left-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
+          aria-label="Scroll left"
+        >
+          <ChevronLeft className="w-6 h-6 text-gray-700" />
+        </button>
+
+        {/* ─── Right Arrow (always visible) ─── */}
+        <button
+          onClick={() => scrollBy(300)}
+          className="flex absolute right-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
+          aria-label="Scroll right"
+        >
+          <ChevronRight className="w-6 h-6 text-gray-700" />
+        </button>
+
+        {/* ─── Event Cards Row ─── */}
         {loading ? (
-          <p>Loading theaters…</p>
-        ) : theaters.length === 0 ? (
-          <p>No theaters found.</p>
+          <p>Loading trending {activeCategory}…</p>
+        ) : rateLimited ? (
+          <p className="text-red-600">Rate limit exceeded, please wait a moment.</p>
+        ) : events.length === 0 ? (
+          <p>No {activeCategory} found.</p>
         ) : (
-          <div className="relative">
-            {/* Left arrow (always visible) */}
-            <button
-              onClick={() => scrollBy(-300)}
-              className="flex absolute left-0 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow z-10"
-              aria-label="Scroll left"
-            >
-              ‹
-            </button>
+          <div
+            ref={scrollerRef}
+            className="flex space-x-4 overflow-x-auto no-scrollbar scroll-smooth pb-2"
+          >
+            {events.map((evt) => {
+              // Build the URL to your detail page:
+              const detailPath = `/event-details/${evt.id}`;
 
-            {/* Scrollable row of cards */}
-            <div
-              ref={scroller}
-              className="flex space-x-4 overflow-x-auto no-scrollbar scroll-smooth pb-2"
-            >
-              {theaters.map((t) => {
-                // Build Google Maps link
-                const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                  t.name + ' ' + t.vicinity
-                )}`;
-                return (
-                  <a
-                    key={t.place_id}
-                    href={mapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="min-w-[240px] bg-white rounded-2xl shadow-lg overflow-hidden flex-shrink-0"
-                  >
-                    <div className="p-4">
-                      <h3 className="font-semibold text-lg">{t.name}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{t.vicinity}</p>
-                      {t.rating != null && (
-                        <p className="text-sm text-gray-700 mt-2">
-                          ★ {t.rating} ({t.user_ratings_total})
-                        </p>
-                      )}
-                    </div>
-                  </a>
-                );
-              })}
-            </div>
-
-            {/* Right arrow (always visible) */}
-            <button
-              onClick={() => scrollBy(300)}
-              className="flex absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow"
-              aria-label="Scroll right"
-            >
-              ›
-            </button>
+              return (
+                <EventCard
+                  key={evt.id}
+                  title={evt.name}
+                  image={evt.images?.[0]?.url}
+                  date={evt.dates?.start?.localDate}
+                  venue={evt._embedded?.venues?.[0]?.name}
+                  href={detailPath}
+                />
+              );
+            })}
           </div>
         )}
       </div>
