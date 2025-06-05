@@ -78,18 +78,14 @@ export default function Navbar({
   // 3) Close open dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        navRef.current &&
-        !navRef.current.contains(e.target as Node)
-      ) {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
         setOpenMenu(null);
         setMobileSubmenu(null);
         setShowAllCities(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () =>
-      document.removeEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   // 4) Reset showAllCities when cities menu closes
@@ -205,7 +201,10 @@ export default function Navbar({
             </NavButton>
 
             {openMenu === 'cities' && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 w-full md:w-96 bg-white text-black shadow-lg z-50 rounded-none">
+              <div className="
+                absolute top-full left-1/2 -translate-x-1/2 
+                w-full md:w-96 bg-white text-black shadow-lg z-50 rounded-none
+              ">
                 <ul className="flex flex-col gap-1 p-4">
                   {(showAllCities ? cities : cities.slice(0, 15)).map((c) => (
                     <li key={c.label}>
@@ -352,7 +351,10 @@ export default function Navbar({
               </NavButton>
 
               {openMenu === 'nav-city' && (
-                <ul className="absolute top-full left-1/2 -translate-x-1/2 w-full md:w-48 bg-white text-black shadow-lg z-50 rounded-none">
+                <ul className="
+                  absolute top-full left-1/2 -translate-x-1/2 
+                  w-full md:w-48 bg-white text-black shadow-lg z-50 rounded-none
+                ">
                   {cities.map((c) => (
                     <li key={c.label}>
                       <button
@@ -424,7 +426,7 @@ export default function Navbar({
                     setMobileOpen(false);
                     setMobileSubmenu(null);
                   }}
-                >
+                >  
                   {c.name}, {c.abbreviation}
                 </button>
               ))}
