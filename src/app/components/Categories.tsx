@@ -27,10 +27,10 @@ export default function Categories() {
       <div className="max-w-7xl mx-auto px-6 relative">
         <h2 className="text-2xl font-bold text-left mb-6">Popular Categories</h2>
 
-        {/* Left arrow */}
+        {/* Left arrow (visible on all viewports) */}
         <button
           onClick={() => scrollBy(-200)}
-          className="hidden md:flex items-center justify-center absolute left-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
+          className="flex items-center justify-center absolute left-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
           aria-label="Scroll categories left"
         >
           <ChevronLeft className="w-6 h-6 text-gray-700" />
@@ -48,10 +48,10 @@ export default function Categories() {
           ))}
         </div>
 
-        {/* Right arrow */}
+        {/* Right arrow (visible on all viewports) */}
         <button
           onClick={() => scrollBy(200)}
-          className="hidden md:flex items-center justify-center absolute right-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
+          className="flex items-center justify-center absolute right-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
           aria-label="Scroll categories right"
         >
           <ChevronRight className="w-6 h-6 text-gray-700" />
