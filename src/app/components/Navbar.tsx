@@ -202,8 +202,8 @@ export default function Navbar({
 
             {openMenu === 'cities' && (
               <div className="
-                absolute top-full left-1/2 -translate-x-1/2 
-                w-full md:w-96 bg-white text-black shadow-lg z-50 rounded-none
+                absolute top-full left-0 w-screen bg-white text-black shadow-lg z-50
+                md:right-0 md:w-96
               ">
                 <ul className="flex flex-col gap-1 p-4">
                   {(showAllCities ? cities : cities.slice(0, 15)).map((c) => (
@@ -352,8 +352,8 @@ export default function Navbar({
 
               {openMenu === 'nav-city' && (
                 <ul className="
-                  absolute top-full left-1/2 -translate-x-1/2 
-                  w-full md:w-48 bg-white text-black shadow-lg z-50 rounded-none
+                  absolute top-full left-0 w-screen bg-white text-black shadow-lg z-50
+                  md:left-1/2 md:-translate-x-1/2 md:w-48
                 ">
                   {cities.map((c) => (
                     <li key={c.label}>
@@ -426,7 +426,7 @@ export default function Navbar({
                     setMobileOpen(false);
                     setMobileSubmenu(null);
                   }}
-                >  
+                >
                   {c.name}, {c.abbreviation}
                 </button>
               ))}

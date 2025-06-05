@@ -47,11 +47,12 @@ export default function MegaDropdown({
   };
 
   return (
-    <div className="
-      absolute top-full left-0 w-full 
-      md:left-1/2 md:-translate-x-1/2 md:w-screen
-      bg-white text-black shadow-lg z-50
-    ">
+    <div
+      className="
+        absolute top-full left-0 w-screen bg-white text-black shadow-lg z-50
+        md:left-1/2 md:-translate-x-1/2 md:w-screen
+      "
+    >
       <div className="max-w-7xl mx-auto">
         {/* ─── Tabs Row ─── */}
         <nav className="flex space-x-8 border-b border-gray-200 px-6 py-2 bg-white">
