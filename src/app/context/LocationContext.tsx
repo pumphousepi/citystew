@@ -1,5 +1,5 @@
 // src/app/context/LocationContext.tsx
-'use client';
+'use client';  // ← This file IS a client component
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
