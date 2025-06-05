@@ -33,10 +33,10 @@ export default function TrendingEvents({
   genre,
   onSelectLocation,
 }: TrendingEventsProps) {
-  const [events, setEvents]           = useState<ApiEvent[]>([]);
-  const [loading, setLoading]         = useState(true);
+  const [events, setEvents] = useState<ApiEvent[]>([]);
+  const [loading, setLoading] = useState(true);
   const [rateLimited, setRateLimited] = useState(false);
-  const [cities, setCities]           = useState<CityOption[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
@@ -161,19 +161,19 @@ export default function TrendingEvents({
           </div>
         </div>
 
-        {/* ─── Left Arrow ─── */}
+        {/* ─── Left Arrow (now always visible) ─── */}
         <button
           onClick={() => scrollBy(-300)}
-          className="hidden sm:block absolute left-0 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
           aria-label="Scroll left"
         >
           <ChevronLeft className="w-6 h-6 text-gray-700" />
         </button>
 
-        {/* ─── Right Arrow ─── */}
+        {/* ─── Right Arrow (now always visible) ─── */}
         <button
           onClick={() => scrollBy(300)}
-          className="hidden sm:block absolute right-0 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
           aria-label="Scroll right"
         >
           <ChevronRight className="w-6 h-6 text-gray-700" />
