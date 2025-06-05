@@ -171,7 +171,6 @@ export default function Navbar({
     <nav
       ref={navRef}
       className={`
-        relative
         sticky top-0 w-full backdrop-blur-sm z-50 transition-colors duration-300
         ${showInputs ? 'bg-black bg-opacity-90 text-white' : 'bg-transparent text-white'}
       `}
@@ -203,7 +202,7 @@ export default function Navbar({
             {openMenu === 'cities' && (
               <div
                 className="
-                  absolute top-full left-0 w-screen bg-white text-black shadow-lg z-50
+                  absolute top-full inset-x-0 bg-white text-black shadow-lg z-50
                   md:right-0 md:w-96
                 "
               >
@@ -351,7 +350,7 @@ export default function Navbar({
               {openMenu === 'nav-city' && (
                 <ul
                   className="
-                    absolute top-full left-0 w-screen bg-white text-black shadow-lg z-50
+                    absolute top-full inset-x-0 bg-white text-black shadow-lg z-50
                     md:left-1/2 md:-translate-x-1/2 md:w-48
                   "
                 >

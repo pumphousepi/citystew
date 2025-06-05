@@ -49,7 +49,7 @@ export default function MegaDropdown({
   return (
     <div
       className="
-        absolute top-full left-0 w-screen bg-white text-black shadow-lg z-50
+        absolute top-full inset-x-0 bg-white text-black shadow-lg z-50
         md:left-1/2 md:-translate-x-1/2 md:w-screen
       "
     >
