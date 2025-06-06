@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import NavButton from './NavButton'; // still used to display the location
+import NavButton from './NavButton'; // used to display the location
 
 interface Theater {
   place_id: string;
@@ -85,9 +85,9 @@ export default function TheaterList({ location }: Props) {
                     href={mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="min-w-[240px] bg-white rounded-2xl shadow-lg overflow-hidden flex-shrink-0"
+                    className="min-w-[200px] bg-white rounded-2xl shadow-lg overflow-hidden flex-shrink-0 h-full"
                   >
-                    <div className="p-4">
+                    <div className="p-4 flex flex-col h-full">
                       <h3 className="font-semibold text-lg">{t.name}</h3>
                       <p className="text-sm text-gray-600 mt-1">{t.vicinity}</p>
                       {t.rating != null && (

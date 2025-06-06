@@ -1,3 +1,4 @@
+// src/app/components/Sponsors.tsx
 'use client';
 
 import Image from 'next/image';
@@ -55,7 +56,7 @@ export default function Sponsors() {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="min-w-[200px] bg-white shadow rounded p-4 text-center flex-shrink-0"
+              className="min-w-[180px] bg-white shadow rounded p-4 text-center flex-shrink-0"
             >
               <Image
                 src={`/assets/images/${img}`}

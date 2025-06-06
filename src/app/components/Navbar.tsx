@@ -1,6 +1,7 @@
+// src/app/components/Navbar.tsx
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import NavButton from './NavButton';
 import MegaDropdown from './MegaDropdown';
@@ -19,10 +20,6 @@ interface NavbarProps {
   onSelectGenre: (genre: string) => void;
 }
 
-interface TMEventsResponse {
-  events?: Array<{ title: string }>;
-}
-
 export default function Navbar({
   selectedLocation,
   onSelectLocation,
@@ -39,18 +36,6 @@ export default function Navbar({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null);
   const [showAllCities, setShowAllCities] = useState(false);
-
-  const genreList = [
-    'Rock',
-    'Pop',
-    'Jazz',
-    'Country',
-    'Hip Hop',
-    'Electronic',
-    'Classical',
-    'R&B',
-  ];
-
   const [theaterItems, setTheaterItems] = useState<string[]>([]);
 
   // 1) Fetch cities once
@@ -61,7 +46,7 @@ export default function Navbar({
       .catch(console.error);
   }, []);
 
-  // 2) Show “Search + City” after hero scrolls under nav
+  // 2) Show “Search + City” after hero scroll under nav
   useEffect(() => {
     const onScroll = () => {
       const hero = document.getElementById('hero-section');
@@ -75,7 +60,7 @@ export default function Navbar({
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // 3) Close open dropdowns on outside click
+  // 3) Close any open dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (navRef.current && !navRef.current.contains(e.target as Node)) {
@@ -88,17 +73,17 @@ export default function Navbar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 4) Reset showAllCities when cities menu closes
+  // 4) Reset “showAllCities” when cities menu closes
   useEffect(() => {
     if (openMenu !== 'cities') {
       setShowAllCities(false);
     }
   }, [openMenu]);
 
-  // 5) Fetch theater items when hovering “THEATER”
+  // 5) Fetch theater events when hovering “THEATER”
   useEffect(() => {
     if (openMenu === 'theater') {
-      const [cityName, stateCode] = selectedLocation.split(', ');
+      const [cityName, stateCode] = selectedLocation.split(', ').map((s) => s.trim());
       if (cityName && stateCode) {
         fetch(
           `/api/events?category=theater&city=${encodeURIComponent(
@@ -106,15 +91,12 @@ export default function Navbar({
           )}&state=${encodeURIComponent(stateCode)}`
         )
           .then((r) => r.json())
-          .then((data: unknown) => {
+          .then((data: { events?: Array<{ title: string }> }) => {
             let rawArray: Array<{ title: string }> = [];
             if (Array.isArray(data)) {
               rawArray = data as Array<{ title: string }>;
-            } else {
-              const resp = data as TMEventsResponse;
-              if (Array.isArray(resp.events)) {
-                rawArray = resp.events;
-              }
+            } else if (Array.isArray(data.events)) {
+              rawArray = data.events;
             }
             setTheaterItems(rawArray.map((evt) => evt.title));
           })
@@ -129,7 +111,7 @@ export default function Navbar({
 
   // Helper to build “&city=…&state=…” query
   const baseQueryFromLocation = (): string => {
-    const [cityName, stateCode] = selectedLocation.split(', ');
+    const [cityName, stateCode] = selectedLocation.split(', ').map((s) => s.trim());
     return cityName && stateCode
       ? `&city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(stateCode)}`
       : '';
@@ -153,14 +135,12 @@ export default function Navbar({
     setMobileSubmenu((prev) => (prev === menu ? null : menu));
   };
 
-  // Desktop user picks a city
+  // When desktop user picks a city
   const handleCityPick = (cityLabel: string) => {
     onSelectLocation(cityLabel);
-    const [cityName, stateCode] = cityLabel.split(', ');
+    const [cityName, stateCode] = cityLabel.split(', ').map((s) => s.trim());
     router.push(
-      `/events?city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(
-        stateCode
-      )}`
+      `/events?city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(stateCode)}`
     );
     setOpenMenu(null);
     setMobileOpen(false);
@@ -177,10 +157,7 @@ export default function Navbar({
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 h-16">
         {/* ─── Logo ─── */}
-        <button
-          onClick={() => router.push('/')}
-          className="text-2xl font-bold"
-        >
+        <button onClick={() => router.push('/')} className="text-2xl font-bold">
           CityStew
         </button>
 
@@ -188,6 +165,7 @@ export default function Navbar({
         <ul className="hidden md:flex items-center space-x-6">
           {/* ==== CITIES ==== */}
           <li
+            className="relative"
             onMouseEnter={() => setOpenMenu('cities')}
             onMouseLeave={() => setOpenMenu((prev) => (prev === 'cities' ? null : prev))}
           >
@@ -200,40 +178,38 @@ export default function Navbar({
             </NavButton>
 
             {openMenu === 'cities' && (
-              <div
-                className="
-                  absolute top-full inset-x-0 bg-white text-black shadow-lg z-50
-                  md:right-0 md:w-96
-                "
-              >
-                <ul className="flex flex-col gap-1 p-4">
-                  {(showAllCities ? cities : cities.slice(0, 15)).map((c) => (
-                    <li key={c.label}>
+              <div className="absolute left-0 top-full w-full bg-white text-black shadow-lg z-50">
+                <div className="max-w-7xl mx-auto px-6 py-4">
+                  <ul className="flex flex-col gap-1">
+                    {(showAllCities ? cities : cities.slice(0, 15)).map((c) => (
+                      <li key={c.label}>
+                        <button
+                          className="w-full text-left px-2 py-1 hover:bg-gray-100 text-sm"
+                          onClick={() => handleCityPick(c.label)}
+                        >
+                          {c.name}, {c.abbreviation}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  {cities.length > 15 && !showAllCities && (
+                    <div className="border-t border-gray-200 px-4 py-2 flex justify-end">
                       <button
-                        className="w-full text-left px-2 py-1 hover:bg-gray-100 text-sm"
-                        onClick={() => handleCityPick(c.label)}
+                        className="text-sm text-blue-600 hover:underline"
+                        onClick={() => setShowAllCities(true)}
                       >
-                        {c.name}, {c.abbreviation}
+                        View All Cities
                       </button>
-                    </li>
-                  ))}
-                </ul>
-                {cities.length > 15 && !showAllCities && (
-                  <div className="border-t border-gray-200 px-4 py-2 flex justify-end">
-                    <button
-                      className="text-sm text-blue-600 hover:underline"
-                      onClick={() => setShowAllCities(true)}
-                    >
-                      View All Cities
-                    </button>
-                  </div>
-                )}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </li>
 
           {/* ==== SPORTS ==== */}
           <li
+            className="relative"
             onMouseEnter={() => {
               setOpenMenu('sports');
               onSelectCategory('sports');
@@ -259,6 +235,7 @@ export default function Navbar({
 
           {/* ==== CONCERTS ==== */}
           <li
+            className="relative"
             onMouseEnter={() => {
               setOpenMenu('concerts');
               onSelectCategory('music');
@@ -276,7 +253,16 @@ export default function Navbar({
             {openMenu === 'concerts' && (
               <MegaDropdown
                 menuKey="concerts"
-                dataMap={{ 'All Genres': genreList }}
+                dataMap={{ 'All Genres': [
+                  'Rock',
+                  'Pop',
+                  'Jazz',
+                  'Country',
+                  'Hip Hop',
+                  'Electronic',
+                  'Classical',
+                  'R&B',
+                ]}}
                 baseQuery={baseQueryFromLocation()}
               />
             )}
@@ -284,6 +270,7 @@ export default function Navbar({
 
           {/* ==== THEATER ==== */}
           <li
+            className="relative"
             onMouseEnter={() => {
               setOpenMenu('theater');
               onSelectCategory('theater');
@@ -308,7 +295,7 @@ export default function Navbar({
           </li>
         </ul>
 
-        {/* ─── Desktop: Search + City (once scrolled) ─── */}
+        {/* ─── Desktop: Search + City Selector (only when scrolled) ─── */}
         {showInputs && (
           <div className="hidden md:flex items-center space-x-4">
             {/* Search box */}
@@ -323,6 +310,7 @@ export default function Navbar({
 
             {/* City selector */}
             <div
+              className="relative"
               onMouseEnter={() => setOpenMenu('nav-city')}
               onMouseLeave={() => setOpenMenu((prev) => (prev === 'nav-city' ? null : prev))}
             >
@@ -348,22 +336,19 @@ export default function Navbar({
               </NavButton>
 
               {openMenu === 'nav-city' && (
-                <ul
-                  className="
-                    absolute top-full inset-x-0 bg-white text-black shadow-lg z-50
-                    md:left-1/2 md:-translate-x-1/2 md:w-48
-                  "
-                >
-                  {cities.map((c) => (
-                    <li key={c.label}>
-                      <button
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                        onClick={() => handleCityPick(c.label)}
-                      >
-                        {c.name}, {c.abbreviation}
-                      </button>
-                    </li>
-                  ))}
+                <ul className="absolute right-0 top-full mt-0 w-full bg-white text-black shadow-lg z-50">
+                  <div className="max-w-7xl mx-auto px-6 py-4">
+                    {cities.map((c) => (
+                      <li key={c.label}>
+                        <button
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                          onClick={() => handleCityPick(c.label)}
+                        >
+                          {c.name}, {c.abbreviation}
+                        </button>
+                      </li>
+                    ))}
+                  </div>
                 </ul>
               )}
             </div>
@@ -388,7 +373,7 @@ export default function Navbar({
         </button>
       </div>
 
-      {/* ─── Mobile panel ─── */}
+      {/* ─── Mobile panel (below md) ─── */}
       {mobileOpen && (
         <div className="md:hidden bg-black bg-opacity-90 px-4 py-4 space-y-4">
           {/* Mobile search */}
@@ -403,8 +388,8 @@ export default function Navbar({
 
           {/* Mobile: CITIES */}
           <NavButton
-            className="w-full text-left px-4 py-2 text-white"
             onClick={() => toggleMobileSubmenu('cities')}
+            className="w-full text-left px-4 py-2 text-white"
           >
             CITIES
           </NavButton>
@@ -416,11 +401,9 @@ export default function Navbar({
                   className="block w-full text-left py-1 text-white hover:underline text-sm"
                   onClick={() => {
                     onSelectLocation(c.label);
-                    const [cityName, stateCode] = c.label.split(', ');
+                    const [cn, sc] = c.label.split(', ').map((s) => s.trim());
                     router.push(
-                      `/events?city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(
-                        stateCode
-                      )}`
+                      `/events?city=${encodeURIComponent(cn)}&state=${encodeURIComponent(sc)}`
                     );
                     setMobileOpen(false);
                     setMobileSubmenu(null);
@@ -434,11 +417,11 @@ export default function Navbar({
 
           {/* Mobile: SPORTS */}
           <NavButton
-            className="w-full text-left px-4 py-2 text-white"
             onClick={() => {
               toggleMobileSubmenu('sports');
               onSelectCategory('sports');
             }}
+            className="w-full text-left px-4 py-2 text-white"
           >
             SPORTS
           </NavButton>
@@ -474,25 +457,36 @@ export default function Navbar({
 
           {/* Mobile: CONCERTS */}
           <NavButton
-            className="w-full text-left px-4 py-2 text-white"
             onClick={() => {
               toggleMobileSubmenu('concerts');
               onSelectCategory('music');
             }}
+            className="w-full text-left px-4 py-2 text-white"
           >
             CONCERTS
           </NavButton>
           {mobileSubmenu === 'concerts' && (
             <div className="pl-4 space-y-1 max-h-60 overflow-auto">
               <h4 className="text-gray-300 font-semibold mb-1">All Genres</h4>
-              {genreList.map((g) => (
+              {[
+                'Rock',
+                'Pop',
+                'Jazz',
+                'Country',
+                'Hip Hop',
+                'Electronic',
+                'Classical',
+                'R&B',
+              ].map((g) => (
                 <button
                   key={g}
                   className="block w-full text-left py-1 text-white hover:underline text-sm"
                   onClick={() => {
                     onSelectGenre(g);
                     router.push(
-                      `/events?category=music&genre=${encodeURIComponent(g)}${baseQueryFromLocation()}`
+                      `/events?category=music&genre=${encodeURIComponent(
+                        g
+                      )}${baseQueryFromLocation()}`
                     );
                     setMobileOpen(false);
                     setMobileSubmenu(null);
@@ -506,11 +500,11 @@ export default function Navbar({
 
           {/* Mobile: THEATER */}
           <NavButton
-            className="w-full text-left px-4 py-2 text-white"
             onClick={() => {
               toggleMobileSubmenu('theater');
               onSelectCategory('theater');
             }}
+            className="w-full text-left px-4 py-2 text-white"
           >
             THEATER
           </NavButton>

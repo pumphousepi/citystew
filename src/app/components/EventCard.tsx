@@ -24,12 +24,10 @@ export default function EventCard({
   layout = 'vertical',
 }: EventCardProps) {
   const isHorizontal = layout === 'horizontal';
-  // If no image provided, fall back to this placeholder
   const placeholder = '/assets/images/placeholder.jpg';
   const finalSrc = image || placeholder;
 
-  // Shared <img> element
-  const Img = (
+  const ImgElement = (
     <img
       src={finalSrc}
       alt={title}
@@ -46,7 +44,7 @@ export default function EventCard({
       <Link href={href} className="block">
         <div className="flex items-center space-x-4 p-3 rounded-md hover:bg-gray-100 transition">
           <div className="w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gray-200">
-            {Img}
+            {ImgElement}
           </div>
           <div className="flex flex-col justify-between flex-grow min-h-[96px]">
             <h3 className="text-md font-semibold text-gray-900">{title}</h3>
@@ -61,7 +59,7 @@ export default function EventCard({
     ) : (
       <div className="flex items-center space-x-4 p-3 rounded-md hover:bg-gray-100 transition">
         <div className="w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gray-200">
-          {Img}
+          {ImgElement}
         </div>
         <div className="flex flex-col justify-between flex-grow min-h-[96px]">
           <h3 className="text-md font-semibold text-gray-900">{title}</h3>
@@ -79,17 +77,16 @@ export default function EventCard({
   const cardContent = (
     <div className="flex flex-col bg-white rounded-xl shadow-md overflow-hidden h-full">
       {/* 
-        Image wrapper with responsive aspect ratio. 
-        Requires @tailwindcss/aspect-ratio plugin. 
-        - aspect-[1/1]: square on mobile (< 640px)
-        - sm:aspect-[4/3]: 4:3 on ≥ 640px
-        - lg:aspect-[16/9]: 16:9 on ≥ 1024px
+        Responsive aspect‐ratio for the image:
+        - aspect-[1/1] on mobile (square)
+        - sm:aspect-[4/3] on ≥640px
+        - lg:aspect-[16/9] on ≥1024px
       */}
       <div className="relative w-full aspect-[1/1] sm:aspect-[4/3] lg:aspect-[16/9] bg-gray-200">
-        {Img}
+        {ImgElement}
       </div>
 
-      {/* Content area: responsive padding, flex-grow so cards line up */}
+      {/* Content area with responsive padding/text */}
       <div className="p-3 sm:p-4 lg:p-6 flex flex-col flex-1">
         <h3 className="text-base sm:text-lg lg:text-xl font-semibold mb-2 line-clamp-2">
           {title}
