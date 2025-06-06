@@ -1,7 +1,7 @@
 // src/app/components/TrendingEvents.tsx
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import EventCard from './EventCard';
 import NavButton from './NavButton';
@@ -21,9 +21,9 @@ interface CityOption {
 }
 
 interface TrendingEventsProps {
-  location: string;                   // e.g. "Austin, TX"
-  category?: string;                  // e.g. "sports" or "music"
-  genre?: string;                     // e.g. "Rock"
+  location: string;
+  category?: string;
+  genre?: string;
   onSelectLocation: (loc: string) => void;
 }
 
@@ -38,20 +38,18 @@ export default function TrendingEvents({
   const [rateLimited, setRateLimited] = useState(false);
   const [cities, setCities] = useState<CityOption[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const scrollerRef = useRef<HTMLDivElement>(null);
 
-  // If the parent did not pass a category, default to "music"
   const activeCategory = category || 'music';
 
-  // 1) Load the list of cities once
   useEffect(() => {
     fetch('/api/locations/cities')
       .then((res) => res.json())
       .then((data: CityOption[]) => setCities(data))
-      .catch((err) => console.error('[TrendingEvents] cities load error', err));
+      .catch((err) =>
+        console.error('[TrendingEvents] cities load error', err)
+      );
   }, []);
 
-  // 2) Fetch “trending” events whenever location, category or genre changes
   useEffect(() => {
     if (!location.includes(',')) {
       setEvents([]);
@@ -74,12 +72,9 @@ export default function TrendingEvents({
       if (genre) params.append('genre', genre);
 
       const url = `/api/events?${params.toString()}`;
-      console.log('[TrendingEvents] Fetching →', url);
-
       try {
         const res = await fetch(url);
         const json = await res.json();
-        console.log('[TrendingEvents] Response →', json);
 
         if (res.status === 429) {
           setRateLimited(true);
@@ -99,15 +94,7 @@ export default function TrendingEvents({
     })();
   }, [location, activeCategory, genre]);
 
-  // Scroll functions for the left/right arrows
-  const scrollBy = (distance: number) => {
-    scrollerRef.current?.scrollBy({ left: distance, behavior: 'smooth' });
-  };
-
-  // Toggle the city dropdown
   const toggleDropdown = () => setDropdownOpen((prev) => !prev);
-
-  // When a city is clicked, update parent’s location and close dropdown
   const onSelectCity = (loc: string) => {
     onSelectLocation(loc);
     setDropdownOpen(false);
@@ -115,13 +102,15 @@ export default function TrendingEvents({
 
   return (
     <section className="py-12 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 relative">
-        {/* ─── Header: “Trending [Category] in [City, ST]” ─── */}
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header */}
         <div className="flex items-center mb-6">
           <h2 className="text-2xl font-bold mr-2">
-            Trending {activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)} in
+            Trending{' '}
+            {activeCategory.charAt(0).toUpperCase() +
+              activeCategory.slice(1)}{' '}
+            in
           </h2>
-
           <div className="relative">
             <NavButton
               onClick={toggleDropdown}
@@ -129,18 +118,21 @@ export default function TrendingEvents({
               className="flex items-center space-x-1"
             >
               <span className="text-blue-500">{location}</span>
-              <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+              <svg
+                className="w-4 h-4 text-blue-500"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
                 <path
                   fillRule="evenodd"
                   clipRule="evenodd"
-                  d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 
-                     0 111.06 1.06l-4.24 4.24a.75.75 0 
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 
+                     111.06 1.06l-4.24 4.24a.75.75 0 
                      01-1.06 0L5.21 8.27a.75.75 0 
                      01.02-1.06z"
                 />
               </svg>
             </NavButton>
-
             {dropdownOpen && (
               <ul className="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg overflow-auto max-h-64">
                 {cities.map((c) => (
@@ -158,51 +150,26 @@ export default function TrendingEvents({
           </div>
         </div>
 
-        {/* ─── Left Arrow (always visible) ─── */}
-        <button
-          onClick={() => scrollBy(-300)}
-          className="flex absolute left-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
-          aria-label="Scroll left"
-        >
-          <ChevronLeft className="w-6 h-6 text-gray-700" />
-        </button>
-
-        {/* ─── Right Arrow (always visible) ─── */}
-        <button
-          onClick={() => scrollBy(300)}
-          className="flex absolute right-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
-          aria-label="Scroll right"
-        >
-          <ChevronRight className="w-6 h-6 text-gray-700" />
-        </button>
-
-        {/* ─── Event Cards Row ─── */}
         {loading ? (
           <p>Loading trending {activeCategory}…</p>
         ) : rateLimited ? (
-          <p className="text-red-600">Rate limit exceeded, please wait a moment.</p>
+          <p className="text-red-600">
+            Rate limit exceeded, please wait a moment.
+          </p>
         ) : events.length === 0 ? (
           <p>No {activeCategory} found.</p>
         ) : (
-          <div
-            ref={scrollerRef}
-            className="flex space-x-4 overflow-x-auto no-scrollbar scroll-smooth pb-2"
-          >
-            {events.map((evt) => {
-              // Build the URL to your detail page:
-              const detailPath = `/event-details/${evt.id}`;
-
-              return (
-                <EventCard
-                  key={evt.id}
-                  title={evt.name}
-                  image={evt.images?.[0]?.url}
-                  date={evt.dates?.start?.localDate}
-                  venue={evt._embedded?.venues?.[0]?.name}
-                  href={detailPath}
-                />
-              );
-            })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {events.map((evt) => (
+              <EventCard
+                key={evt.id}
+                title={evt.name}
+                image={evt.images?.[0]?.url}
+                date={evt.dates?.start?.localDate}
+                venue={evt._embedded?.venues?.[0]?.name}
+                href={`/event-details/${evt.id}`}
+              />
+            ))}
           </div>
         )}
       </div>
