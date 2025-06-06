@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import EventCard from './EventCard';
 import NavButton from './NavButton';
 
@@ -21,9 +21,9 @@ interface CityOption {
 }
 
 interface TrendingEventsProps {
-  location: string;                   // e.g. "Austin, TX"
-  category?: string;                  // e.g. "sports" or "music"
-  genre?: string;                     // e.g. "Rock"
+  location: string;                  // e.g. "Austin, TX"
+  category?: string;                 // e.g. "sports" or "music"
+  genre?: string;                    // e.g. "Rock"
   onSelectLocation: (loc: string) => void;
 }
 
@@ -33,46 +33,38 @@ export default function TrendingEvents({
   genre,
   onSelectLocation,
 }: TrendingEventsProps) {
-  const router = useRouter();
-  const [events, setEvents] = useState<ApiEvent[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [events, setEvents]           = useState<ApiEvent[]>([]);
+  const [loading, setLoading]         = useState(true);
   const [rateLimited, setRateLimited] = useState(false);
-  const [cities, setCities] = useState<CityOption[]>([]);
+  const [cities, setCities]           = useState<CityOption[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // If no category is passed, default to "music"
   const activeCategory = category || 'music';
 
-  // Build a “baseQuery” for “View All” (adjust as needed)
-  const [cityName, stateCode] = location.split(',').map((s) => s.trim());
-  const baseQuery = cityName && stateCode
-    ? `?city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(stateCode)}&category=${encodeURIComponent(activeCategory)}${genre ? `&genre=${encodeURIComponent(genre)}` : ''}`
-    : `?category=${encodeURIComponent(activeCategory)}${genre ? `&genre=${encodeURIComponent(genre)}` : ''}`;
-
-  // 1) Load the list of cities once (for the location dropdown)
+  // 1) Load cities once
   useEffect(() => {
     fetch('/api/locations/cities')
-      .then((res) => res.json())
+      .then(res => res.json())
       .then((data: CityOption[]) => setCities(data))
-      .catch((err) => console.error('[TrendingEvents] cities load error', err));
+      .catch(err => console.error('[TrendingEvents] cities load error', err));
   }, []);
 
-  // 2) Fetch “trending” events whenever location, category or genre changes
+  // 2) Fetch trending events whenever location/category/genre changes
   useEffect(() => {
     if (!location.includes(',')) {
       setEvents([]);
       setLoading(false);
       return;
     }
+    const [city, stateCode] = location.split(',').map(s => s.trim());
 
-    const [city, state] = location.split(',').map((s) => s.trim());
     (async () => {
       setLoading(true);
       setRateLimited(false);
 
       const params = new URLSearchParams({
         city,
-        stateCode: state,
+        stateCode,
         trending: 'true',
         size: '10',
         category: activeCategory,
@@ -82,8 +74,9 @@ export default function TrendingEvents({
       const url = `/api/events?${params.toString()}`;
 
       try {
-        const res = await fetch(url);
+        const res  = await fetch(url);
         const json = await res.json();
+
         if (res.status === 429) {
           setRateLimited(true);
           setEvents([]);
@@ -102,18 +95,23 @@ export default function TrendingEvents({
     })();
   }, [location, activeCategory, genre]);
 
-  // Toggle the location dropdown
-  const toggleDropdown = () => setDropdownOpen((prev) => !prev);
-
-  // When a city is clicked in the dropdown
+  // Toggle city dropdown
+  const toggleDropdown = () => setDropdownOpen(prev => !prev);
   const onSelectCity = (loc: string) => {
     onSelectLocation(loc);
     setDropdownOpen(false);
   };
 
-  // Only show at most 4 events on desktop; on smaller screens, we’ll still map through
-  // (but since the grid will wrap, users see them in 1–3 columns)
-  const displayedEvents = events.slice(0, 4);
+  // Build “&city=…&state=…” query
+  const baseQueryFromLocation = (): string => {
+    const [cityName, stateCode] = location.split(',').map(s => s.trim());
+    return cityName && stateCode
+      ? `&city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(stateCode)}`
+      : '';
+  };
+
+  // Limit to first 4
+  const visibleEvents = events.slice(0, 4);
 
   return (
     <section className="py-12 bg-gray-50">
@@ -121,9 +119,7 @@ export default function TrendingEvents({
         {/* ─── Header: “Trending [Category] in [City, ST]” ─── */}
         <div className="flex items-center mb-6">
           <h2 className="text-2xl font-bold mr-2">
-            Trending{' '}
-            {activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)}{' '}
-            in
+            Trending {activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)} in
           </h2>
 
           <div className="relative">
@@ -133,11 +129,7 @@ export default function TrendingEvents({
               className="flex items-center space-x-1"
             >
               <span className="text-blue-500">{location}</span>
-              <svg
-                className="w-4 h-4 text-blue-500"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
+              <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   clipRule="evenodd"
@@ -151,7 +143,7 @@ export default function TrendingEvents({
 
             {dropdownOpen && (
               <ul className="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg overflow-auto max-h-64">
-                {cities.map((c) => (
+                {cities.map(c => (
                   <li key={c.label}>
                     <button
                       className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
@@ -166,47 +158,40 @@ export default function TrendingEvents({
           </div>
         </div>
 
+        {/* ─── Content ─── */}
         {loading ? (
-          <p>Loading trending {activeCategory} …</p>
+          <p>Loading trending {activeCategory}…</p>
         ) : rateLimited ? (
-          <p className="text-red-600">
-            Rate limit exceeded, please wait a moment.
-          </p>
+          <p className="text-red-600">Rate limit exceeded, please wait a moment.</p>
         ) : events.length === 0 ? (
           <p>No {activeCategory} found.</p>
         ) : (
           <>
-            {/* 
-              ─── Responsive Grid: 
-                  - 1 column on mobile (<640px)
-                  - 2 columns on small tablets (≥640px)
-                  - 3 columns on medium (≥768px)
-                  - 4 columns on large (≥1024px)
-            */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {displayedEvents.map((evt) => (
-                <EventCard
-                  key={evt.id}
-                  title={evt.name}
-                  image={evt.images?.[0]?.url}
-                  date={evt.dates?.start?.localDate}
-                  venue={evt._embedded?.venues?.[0]?.name}
-                  href={`/event-details/${evt.id}`}
-                />
-              ))}
+            {/* ─── Responsive Grid of Four ─── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {visibleEvents.map(evt => {
+                const detailPath = `/event-details/${evt.id}`;
+                return (
+                  <EventCard
+                    key={evt.id}
+                    title={evt.name}
+                    image={evt.images?.[0]?.url}
+                    date={evt.dates?.start?.localDate}
+                    venue={evt._embedded?.venues?.[0]?.name}
+                    href={detailPath}
+                  />
+                );
+              })}
             </div>
 
-            {/* ─── “View All” Button (aligned right) ─── */}
+            {/* ─── “View All Events” Link (aligned right) ─── */}
             <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => router.push(`/events${baseQuery}`)}
-                className="
-                  bg-blue-600 text-white px-4 py-2 rounded-md 
-                  hover:bg-blue-700 transition-colors duration-200
-                "
+              <Link
+                href={`/events?category=${encodeURIComponent(activeCategory)}${baseQueryFromLocation()}`}
+                className="text-sm text-blue-600 hover:underline"
               >
-                View All
-              </button>
+                View All Events
+              </Link>
             </div>
           </>
         )}

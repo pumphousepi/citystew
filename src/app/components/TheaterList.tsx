@@ -1,8 +1,8 @@
 // src/app/components/TheaterList.tsx
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
-import NavButton from './NavButton'; // still used to display the location
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 interface Theater {
   place_id: string;
@@ -20,7 +20,6 @@ interface Props {
 export default function TheaterList({ location }: Props) {
   const [theaters, setTheaters] = useState<Theater[]>([]);
   const [loading, setLoading] = useState(true);
-  const scroller = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const [city, stateCode] = location.split(',').map((s) => s.trim());
@@ -38,58 +37,42 @@ export default function TheaterList({ location }: Props) {
       .finally(() => setLoading(false));
   }, [location]);
 
-  const scrollBy = (dx: number) => {
-    scroller.current?.scrollBy({ left: dx, behavior: 'smooth' });
-  };
+  // Show up to four theaters; “View All” links to /theaters?city=…&stateCode=…
+  const visibleTheaters = theaters.slice(0, 4);
+  const [cityName, stateCode] = location.split(',').map((s) => s.trim());
 
   return (
     <section className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Header: no wrap */}
-        <div className="flex items-center space-x-2 whitespace-nowrap mb-6">
-          <h2 className="text-2xl font-bold flex-shrink-0">Movie Theaters in</h2>
-          <NavButton className="flex-shrink-0">
-            <span>{location}</span>
-          </NavButton>
-        </div>
+        {/* Header */}
+        <h2 className="text-2xl font-bold mb-6">
+          Movie Theaters in <span className="text-blue-500">{location}</span>
+        </h2>
 
-        {/* Cards */}
         {loading ? (
           <p>Loading theaters…</p>
         ) : theaters.length === 0 ? (
           <p>No theaters found.</p>
         ) : (
-          <div className="relative">
-            {/* Left arrow (always visible) */}
-            <button
-              onClick={() => scrollBy(-300)}
-              className="flex absolute left-0 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow z-10"
-              aria-label="Scroll left"
-            >
-              ‹
-            </button>
-
-            {/* Scrollable row of cards */}
-            <div
-              ref={scroller}
-              className="flex space-x-4 overflow-x-auto no-scrollbar scroll-smooth pb-2"
-            >
-              {theaters.map((t) => {
-                // Build Google Maps link
+          <>
+            {/* Grid of cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {visibleTheaters.map((t) => {
                 const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
                   t.name + ' ' + t.vicinity
                 )}`;
+
                 return (
                   <a
                     key={t.place_id}
                     href={mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="min-w-[200px] bg-white rounded-2xl shadow-lg overflow-hidden flex-shrink-0 h-full"
+                    className="bg-white rounded-xl shadow-md hover:shadow-lg transition flex flex-col h-full"
                   >
-                    <div className="p-4 flex flex-col h-full">
-                      <h3 className="font-semibold text-lg">{t.name}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{t.vicinity}</p>
+                    <div className="p-4 flex flex-col flex-1">
+                      <h3 className="text-lg font-semibold line-clamp-2">{t.name}</h3>
+                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">{t.vicinity}</p>
                       {t.rating != null && (
                         <p className="text-sm text-gray-700 mt-2">
                           ★ {t.rating} ({t.user_ratings_total})
@@ -101,15 +84,18 @@ export default function TheaterList({ location }: Props) {
               })}
             </div>
 
-            {/* Right arrow (always visible) */}
-            <button
-              onClick={() => scrollBy(300)}
-              className="flex absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow"
-              aria-label="Scroll right"
-            >
-              ›
-            </button>
-          </div>
+            {/* “View All Theaters” Link */}
+            <div className="mt-6 flex justify-end">
+              <Link
+                href={`/theaters?city=${encodeURIComponent(cityName)}&stateCode=${encodeURIComponent(
+                  stateCode
+                )}`}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                View All Theaters
+              </Link>
+            </div>
+          </>
         )}
       </div>
     </section>

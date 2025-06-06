@@ -1,7 +1,6 @@
-// src/app/components/Navbar.tsx
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import NavButton from './NavButton';
 import MegaDropdown from './MegaDropdown';
@@ -20,6 +19,10 @@ interface NavbarProps {
   onSelectGenre: (genre: string) => void;
 }
 
+interface TMEventsResponse {
+  events?: Array<{ title: string }>;
+}
+
 export default function Navbar({
   selectedLocation,
   onSelectLocation,
@@ -36,6 +39,18 @@ export default function Navbar({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSubmenu, setMobileSubmenu] = useState<string | null>(null);
   const [showAllCities, setShowAllCities] = useState(false);
+
+  const genreList = [
+    'Rock',
+    'Pop',
+    'Jazz',
+    'Country',
+    'Hip Hop',
+    'Electronic',
+    'Classical',
+    'R&B',
+  ];
+
   const [theaterItems, setTheaterItems] = useState<string[]>([]);
 
   // 1) Fetch cities once
@@ -46,7 +61,7 @@ export default function Navbar({
       .catch(console.error);
   }, []);
 
-  // 2) Show “Search + City” after hero scroll under nav
+  // 2) Show “Search + City” after hero scrolls under nav
   useEffect(() => {
     const onScroll = () => {
       const hero = document.getElementById('hero-section');
@@ -83,7 +98,7 @@ export default function Navbar({
   // 5) Fetch theater events when hovering “THEATER”
   useEffect(() => {
     if (openMenu === 'theater') {
-      const [cityName, stateCode] = selectedLocation.split(', ').map((s) => s.trim());
+      const [cityName, stateCode] = selectedLocation.split(', ');
       if (cityName && stateCode) {
         fetch(
           `/api/events?category=theater&city=${encodeURIComponent(
@@ -91,12 +106,15 @@ export default function Navbar({
           )}&state=${encodeURIComponent(stateCode)}`
         )
           .then((r) => r.json())
-          .then((data: { events?: Array<{ title: string }> }) => {
+          .then((data: unknown) => {
             let rawArray: Array<{ title: string }> = [];
             if (Array.isArray(data)) {
               rawArray = data as Array<{ title: string }>;
-            } else if (Array.isArray(data.events)) {
-              rawArray = data.events;
+            } else {
+              const resp = data as TMEventsResponse;
+              if (Array.isArray(resp.events)) {
+                rawArray = resp.events;
+              }
             }
             setTheaterItems(rawArray.map((evt) => evt.title));
           })
@@ -111,9 +129,9 @@ export default function Navbar({
 
   // Helper to build “&city=…&state=…” query
   const baseQueryFromLocation = (): string => {
-    const [cityName, stateCode] = selectedLocation.split(', ').map((s) => s.trim());
+    const [cityName, stateCode] = selectedLocation.split(', ');
     return cityName && stateCode
-      ? `?city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(stateCode)}`
+      ? `&city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(stateCode)}`
       : '';
   };
 
@@ -138,7 +156,7 @@ export default function Navbar({
   // When desktop user picks a city
   const handleCityPick = (cityLabel: string) => {
     onSelectLocation(cityLabel);
-    const [cityName, stateCode] = cityLabel.split(', ').map((s) => s.trim());
+    const [cityName, stateCode] = cityLabel.split(', ');
     router.push(
       `/events?city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(stateCode)}`
     );
@@ -178,31 +196,29 @@ export default function Navbar({
             </NavButton>
 
             {openMenu === 'cities' && (
-              <div className="absolute left-0 top-full w-full bg-white text-black shadow-lg z-50">
-                <div className="max-w-7xl mx-auto px-6 py-4">
-                  <ul className="flex flex-col gap-1">
-                    {(showAllCities ? cities : cities.slice(0, 15)).map((c) => (
-                      <li key={c.label}>
-                        <button
-                          className="w-full text-left px-2 py-1 hover:bg-gray-100 text-sm"
-                          onClick={() => handleCityPick(c.label)}
-                        >
-                          {c.name}, {c.abbreviation}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                  {cities.length > 15 && !showAllCities && (
-                    <div className="border-t border-gray-200 px-4 py-2 flex justify-end">
+              <div className="absolute right-0 top-full mt-0 w-96 bg-white text-black shadow-lg z-50 rounded-none">
+                <ul className="flex flex-col gap-1 p-4">
+                  {(showAllCities ? cities : cities.slice(0, 15)).map((c) => (
+                    <li key={c.label}>
                       <button
-                        className="text-sm text-blue-600 hover:underline"
-                        onClick={() => setShowAllCities(true)}
+                        className="w-full text-left px-2 py-1 hover:bg-gray-100 text-sm"
+                        onClick={() => handleCityPick(c.label)}
                       >
-                        View All Cities
+                        {c.name}, {c.abbreviation}
                       </button>
-                    </div>
-                  )}
-                </div>
+                    </li>
+                  ))}
+                </ul>
+                {cities.length > 15 && !showAllCities && (
+                  <div className="border-t border-gray-200 px-4 py-2 flex justify-end">
+                    <button
+                      className="text-sm text-blue-600 hover:underline"
+                      onClick={() => setShowAllCities(true)}
+                    >
+                      View All Cities
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </li>
@@ -253,18 +269,7 @@ export default function Navbar({
             {openMenu === 'concerts' && (
               <MegaDropdown
                 menuKey="concerts"
-                dataMap={{
-                  'All Genres': [
-                    'Rock',
-                    'Pop',
-                    'Jazz',
-                    'Country',
-                    'Hip Hop',
-                    'Electronic',
-                    'Classical',
-                    'R&B',
-                  ],
-                }}
+                dataMap={{ 'All Genres': genreList }}
                 baseQuery={baseQueryFromLocation()}
               />
             )}
@@ -290,7 +295,7 @@ export default function Navbar({
             {openMenu === 'theater' && (
               <MegaDropdown
                 menuKey="theater"
-                dataMap={{ 'All Theater': theaterItems }}
+                dataMap={{ 'All Theater': theaterItems }}
                 baseQuery={baseQueryFromLocation()}
               />
             )}
@@ -314,9 +319,7 @@ export default function Navbar({
             <div
               className="relative"
               onMouseEnter={() => setOpenMenu('nav-city')}
-              onMouseLeave={() =>
-                setOpenMenu((prev) => (prev === 'nav-city' ? null : prev))
-              }
+              onMouseLeave={() => setOpenMenu((prev) => (prev === 'nav-city' ? null : prev))}
             >
               <NavButton
                 ariaHasPopup
@@ -340,19 +343,17 @@ export default function Navbar({
               </NavButton>
 
               {openMenu === 'nav-city' && (
-                <ul className="absolute right-0 top-full mt-0 w-full bg-white text-black shadow-lg z-50">
-                  <div className="max-w-7xl mx-auto px-6 py-4">
-                    {cities.map((c) => (
-                      <li key={c.label}>
-                        <button
-                          className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                          onClick={() => handleCityPick(c.label)}
-                        >
-                          {c.name}, {c.abbreviation}
-                        </button>
-                      </li>
-                    ))}
-                  </div>
+                <ul className="absolute right-0 top-full mt-0 w-48 bg-white text-black shadow-lg z-50 rounded-none">
+                  {cities.map((c) => (
+                    <li key={c.label}>
+                      <button
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                        onClick={() => handleCityPick(c.label)}
+                      >
+                        {c.name}, {c.abbreviation}
+                      </button>
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>
@@ -405,9 +406,11 @@ export default function Navbar({
                   className="block w-full text-left py-1 text-white hover:underline text-sm"
                   onClick={() => {
                     onSelectLocation(c.label);
-                    const [cn, sc] = c.label.split(', ').map((s) => s.trim());
+                    const [cityName, stateCode] = c.label.split(', ');
                     router.push(
-                      `/events?city=${encodeURIComponent(cn)}&state=${encodeURIComponent(sc)}`
+                      `/events?city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(
+                        stateCode
+                      )}`
                     );
                     setMobileOpen(false);
                     setMobileSubmenu(null);
@@ -471,26 +474,15 @@ export default function Navbar({
           </NavButton>
           {mobileSubmenu === 'concerts' && (
             <div className="pl-4 space-y-1 max-h-60 overflow-auto">
-              <h4 className="text-gray-300 font-semibold mb-1">All Genres</h4>
-              {[
-                'Rock',
-                'Pop',
-                'Jazz',
-                'Country',
-                'Hip Hop',
-                'Electronic',
-                'Classical',
-                'R&B',
-              ].map((g) => (
+              <h4 className="text-gray-300 font-semibold mb-1">All Genres</h4>
+              {genreList.map((g) => (
                 <button
                   key={g}
                   className="block w-full text-left py-1 text-white hover:underline text-sm"
                   onClick={() => {
                     onSelectGenre(g);
                     router.push(
-                      `/events?category=music&genre=${encodeURIComponent(
-                        g
-                      )}${baseQueryFromLocation()}`
+                      `/events?category=music&genre=${encodeURIComponent(g)}${baseQueryFromLocation()}`
                     );
                     setMobileOpen(false);
                     setMobileSubmenu(null);
@@ -514,7 +506,7 @@ export default function Navbar({
           </NavButton>
           {mobileSubmenu === 'theater' && (
             <div className="pl-4 space-y-1 max-h-60 overflow-auto">
-              <h4 className="text-gray-300 font-semibold mb-1">All Theater</h4>
+              <h4 className="text-gray-300 font-semibold mb-1">All Theater</h4>
               {theaterItems.map((show) => {
                 const genreKey = show.toLowerCase().replace(/\s+/g, '');
                 return (

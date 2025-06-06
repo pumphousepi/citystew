@@ -2,8 +2,7 @@
 'use client';
 
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRef } from 'react';
+import Link from 'next/link';
 
 const sponsors = [
   {
@@ -27,58 +26,47 @@ const sponsors = [
 ];
 
 export default function Sponsors() {
-  const scrollerRef = useRef<HTMLDivElement>(null);
-
-  const scrollBy = (dx: number) => {
-    scrollerRef.current?.scrollBy({ left: dx, behavior: 'smooth' });
-  };
-
   return (
     <section id="sponsors" className="py-12 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 relative">
-        {/* Left arrow */}
-        <button
-          onClick={() => scrollBy(-200)}
-          className="flex absolute left-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
-          aria-label="Scroll sponsors left"
-        >
-          <ChevronLeft className="w-6 h-6 text-gray-700" />
-        </button>
+      <div className="max-w-7xl mx-auto px-4">
+        {/* ─── Header ─── */}
+        <h2 className="text-2xl font-bold mb-6 text-center">Our Sponsors</h2>
 
-        {/* Scrollable sponsor cards */}
-        <div
-          ref={scrollerRef}
-          className="flex justify-center space-x-4 overflow-x-auto no-scrollbar py-4"
-        >
+        {/* ─── Responsive Grid of Sponsor Cards ─── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {sponsors.map(({ img, title, desc, url }) => (
             <a
               key={title}
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="min-w-[180px] bg-white shadow rounded p-4 text-center flex-shrink-0"
+              className="bg-white shadow rounded-xl p-6 flex flex-col items-center hover:shadow-lg transition h-full"
             >
+              {/* Replace the <Image> src as needed */}
               <Image
                 src={`/assets/images/${img}`}
                 alt={title}
                 width={100}
                 height={100}
-                className="mx-auto"
+                className="mb-4"
               />
-              <div className="font-bold mt-2">{title}</div>
-              <div className="text-sm text-gray-600 mt-1">{desc}</div>
+              <h3 className="font-semibold text-lg text-center">{title}</h3>
+              <p className="text-sm text-gray-600 mt-2 text-center line-clamp-3">{desc}</p>
             </a>
           ))}
         </div>
 
-        {/* Right arrow */}
-        <button
-          onClick={() => scrollBy(200)}
-          className="flex absolute right-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow z-10"
-          aria-label="Scroll sponsors right"
-        >
-          <ChevronRight className="w-6 h-6 text-gray-700" />
-        </button>
+        {/* ─── Optional “View All Sponsors” Button (uncomment if you have a page) ─── */}
+        {/*
+        <div className="mt-6 flex justify-center">
+          <Link
+            href="/sponsors"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          >
+            View All Sponsors
+          </Link>
+        </div>
+        */}
       </div>
     </section>
   );
