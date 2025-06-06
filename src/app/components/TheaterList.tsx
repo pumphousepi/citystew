@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import NavButton from './NavButton'; // used to display the location
+import NavButton from './NavButton'; // still used to display the location
 
 interface Theater {
   place_id: string;

@@ -113,7 +113,7 @@ export default function Navbar({
   const baseQueryFromLocation = (): string => {
     const [cityName, stateCode] = selectedLocation.split(', ').map((s) => s.trim());
     return cityName && stateCode
-      ? `&city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(stateCode)}`
+      ? `?city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(stateCode)}`
       : '';
   };
 
@@ -253,16 +253,18 @@ export default function Navbar({
             {openMenu === 'concerts' && (
               <MegaDropdown
                 menuKey="concerts"
-                dataMap={{ 'All Genres': [
-                  'Rock',
-                  'Pop',
-                  'Jazz',
-                  'Country',
-                  'Hip Hop',
-                  'Electronic',
-                  'Classical',
-                  'R&B',
-                ]}}
+                dataMap={{
+                  'All Genres': [
+                    'Rock',
+                    'Pop',
+                    'Jazz',
+                    'Country',
+                    'Hip Hop',
+                    'Electronic',
+                    'Classical',
+                    'R&B',
+                  ],
+                }}
                 baseQuery={baseQueryFromLocation()}
               />
             )}
@@ -312,7 +314,9 @@ export default function Navbar({
             <div
               className="relative"
               onMouseEnter={() => setOpenMenu('nav-city')}
-              onMouseLeave={() => setOpenMenu((prev) => (prev === 'nav-city' ? null : prev))}
+              onMouseLeave={() =>
+                setOpenMenu((prev) => (prev === 'nav-city' ? null : prev))
+              }
             >
               <NavButton
                 ariaHasPopup

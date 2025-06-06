@@ -77,7 +77,7 @@ export default function EventCard({
   const cardContent = (
     <div className="flex flex-col bg-white rounded-xl shadow-md overflow-hidden h-full">
       {/* 
-        Responsive aspect‐ratio for the image:
+        Responsive “image wrapper”:
         - aspect-[1/1] on mobile (square)
         - sm:aspect-[4/3] on ≥640px
         - lg:aspect-[16/9] on ≥1024px
