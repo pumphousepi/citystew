@@ -1,25 +1,37 @@
-/* Navbar.module.css */
-
-.navButton {
-  @apply font-semibold text-[#999] hover:text-[#777] transition-colors duration-300;
-}
-
-.navButtonActive {
-  @apply font-semibold text-[#333] hover:text-[#111] transition-colors duration-300;
-}
-
+/* Full‐width wrappers under the navbar */
 .dropdownContainer {
-  @apply absolute left-0 mt-1 w-[600px] bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 z-50;
+  @apply hidden md:block absolute top-full left-0 right-0 w-full bg-white shadow-lg z-50;
+}
+/* Centered inner container */
+.dropdownInner {
+  @apply max-w-7xl mx-auto px-6 py-4;
 }
 
-.dropdownTabs {
-  @apply flex border-b border-gray-200 px-6 py-2 space-x-6 font-semibold text-sm;
+/* Mega‐menu (Sports/Concerts/Theater) */
+.megaWrapper {
+  @apply hidden md:block absolute top-full left-0 right-0 w-full bg-white shadow-lg z-50;
 }
-
-.dropdownLinks {
-  @apply px-6 py-4 grid grid-cols-3 gap-y-2 gap-x-8 text-blue-600 text-sm font-normal;
+.megaInner {
+  @apply max-w-7xl mx-auto px-6 py-4;
 }
-
-.viewAllLink {
-  @apply px-6 py-2 border-t border-gray-200 text-right text-blue-600 font-semibold hover:underline;
+.megaTabs {
+  @apply flex space-x-6 border-b border-gray-200 mb-4;
+}
+.megaTabButton {
+  @apply pb-2 text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors;
+}
+.megaTabButtonActive {
+  @apply pb-2 text-sm font-semibold text-blue-600 border-b-2 border-blue-600;
+}
+.megaGrid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+.megaItem {
+  @apply text-sm text-gray-700 hover:text-blue-600 transition-colors;
+}
+.megaFooter {
+  @apply border-t border-gray-200 mt-4 pt-2 flex justify-end;
+}
+.megaViewAll {
+  @apply text-sm text-blue-600 hover:underline;
 }
