@@ -2,6 +2,7 @@
 'use client';
 
 import React, { ReactNode } from 'react';
+import styles from './Navbar.module.css';
 
 interface NavButtonProps {
   children: ReactNode;
@@ -9,6 +10,12 @@ interface NavButtonProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   ariaHasPopup?: boolean;
+  /**
+   * If true, apply the “active” variant (blue text, dark bg).
+   * Otherwise apply the default white‐on‐dark link style.
+   */
+  active?: boolean;
+  /** Extra classes you might want to pass on top of the defaults */
   className?: string;
 }
 
@@ -18,6 +25,7 @@ export default function NavButton({
   onMouseEnter,
   onMouseLeave,
   ariaHasPopup = false,
+  active = false,
   className = '',
 }: NavButtonProps) {
   return (
@@ -27,17 +35,8 @@ export default function NavButton({
       onMouseLeave={onMouseLeave}
       aria-haspopup={ariaHasPopup}
       className={`
+        ${active ? styles.navItemActive : styles.navItem}
         ${className}
-        w-full
-        text-left
-        font-semibold
-        cursor-pointer
-        px-2
-        py-2
-        hover:text-[#999]
-        focus:outline-none
-        transition-colors
-        duration-300
       `}
     >
       {children}

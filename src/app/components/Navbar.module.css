@@ -1,19 +1,11 @@
 /* Full‐width wrappers under the navbar */
-.dropdownContainer {
-  @apply hidden md:block absolute top-full left-0 right-0 w-full bg-white shadow-lg z-50;
-}
-/* Centered inner container */
-.dropdownInner {
-  @apply max-w-7xl mx-auto px-6 py-4;
-}
+.dropdownContainer { @apply absolute top-full left-0 right-0 w-full bg-white shadow-lg z-30; }
+.dropdownInner { @apply max-w-7xl mx-auto px-6 py-4; }
 
 /* Mega‐menu (Sports/Concerts/Theater) */
-.megaWrapper {
-  @apply hidden md:block absolute top-full left-0 right-0 w-full bg-white shadow-lg z-50;
-}
-.megaInner {
-  @apply max-w-7xl mx-auto px-6 py-4;
-}
+.megaWrapper { @apply dropdownContainer; }
+.megaInner { @apply dropdownInner; }
+
 .megaTabs {
   @apply flex space-x-6 border-b border-gray-200 mb-4;
 }
@@ -35,3 +27,16 @@
 .megaViewAll {
   @apply text-sm text-blue-600 hover:underline;
 }
+/* Navbar.module.css */
+
+/* Base style for every nav link */
+.navItem {
+  @apply px-4 py-2 font-medium text-white hover:text-blue-400 hover:bg-gray-800 rounded transition-colors duration-200;
+}
+
+/* Style applied when that link is active/open */
+.navItemActive {
+  @apply px-4 py-2 font-medium text-blue-400 bg-gray-900 rounded;
+}
+.navCityContainer { @apply dropdownContainer; }
+.navCityInner { @apply dropdownInner; }
