@@ -18,16 +18,17 @@ interface SectionConfig {
 }
 
 const SECTIONS: SectionConfig[] = [
-  { title: 'Sports Near You',   category: 'sports',  imageUrl: '/assets/images/sports.jpg' },
-  { title: 'Concerts Near You', category: 'music',   imageUrl: '/assets/images/concert_card_002.jpg' },
+  { title: 'Sports Near You', category: 'sports', imageUrl: '/assets/images/sports.jpg' },
+  { title: 'Concerts Near You', category: 'music',  imageUrl: '/assets/images/concert_card_002.jpg' },
   { title: 'Theater Near You',  category: 'theater', imageUrl: '/assets/images/theater.jpg' },
 ];
 
 export default function ThreeColumnSection({ location }: { location: string }) {
   const [lists, setLists]     = useState<ApiEvent[][]>(SECTIONS.map(() => []));
   const [loading, setLoading] = useState(true);
+  const [rateLimited, setRateLimited] = useState(false);
 
-  // Split “City, ST” into [city, stateCode]
+  // Split “City, ST” into city and stateCode
   const [city, stateCode] = location.includes(',')
     ? location.split(',').map((s) => s.trim())
     : ['', ''];
@@ -41,33 +42,45 @@ export default function ThreeColumnSection({ location }: { location: string }) {
 
     (async () => {
       setLoading(true);
-      try {
-        const results = await Promise.all(
-          SECTIONS.map(async ({ category }) => {
-            const params = new URLSearchParams({
-              city,
-              stateCode,
-              category,
-              size: '5',           // fetch only 5 items
-              sort: 'date,asc',    // sort by date ascending
-            });
-            const res  = await fetch(`/api/events?${params}`);
+      setRateLimited(false);
+
+      const results = await Promise.all(
+        SECTIONS.map(async ({ category }) => {
+          // Skip TicketMaster fetch for theater
+          if (category === 'theater') return [];
+
+          const params = new URLSearchParams({
+            city,
+            stateCode,
+            category,
+            size: '5',
+            sort: 'date,asc',
+          });
+
+          try {
+            const res  = await fetch(`/api/events?${params.toString()}`);
             const data = await res.json();
-            if (!res.ok) {
-              console.error(`TicketMaster error [${category}]:`, data.error || data);
+
+            if (res.status === 429) {
+              setRateLimited(true);
               return [];
             }
-            // Some TM endpoints return { _embedded: { events: [...] } }
+            if (!res.ok) {
+              console.warn(`TicketMaster warning [${category}]:`, data.error || data);
+              return [];
+            }
+
+            // Some endpoints return { _embedded: { events: [...] } }
             return (data._embedded?.events as ApiEvent[]) || [];
-          })
-        );
-        setLists(results);
-      } catch (err) {
-        console.error('ThreeColumnSection fetch error:', err);
-        setLists(SECTIONS.map(() => []));
-      } finally {
-        setLoading(false);
-      }
+          } catch (err) {
+            console.warn(`Fetch error [${category}]:`, err);
+            return [];
+          }
+        })
+      );
+
+      setLists(results);
+      setLoading(false);
     })();
   }, [city, stateCode]);
 
@@ -94,6 +107,8 @@ export default function ThreeColumnSection({ location }: { location: string }) {
                 <div className="flex-1 flex items-center justify-center">
                   <p>Loading…</p>
                 </div>
+              ) : rateLimited ? (
+                <p className="text-red-600">Rate limit exceeded, please wait a moment.</p>
               ) : lists[idx].length === 0 ? (
                 <p className="text-gray-600">No events found.</p>
               ) : (
