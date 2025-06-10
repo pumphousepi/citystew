@@ -1,4 +1,3 @@
-// src/app/components/Navbar.tsx
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -35,19 +34,19 @@ export default function Navbar({
   const [theaterItems, setTheaterItems] = useState<string[]>([]);
   const [mobileOpen, setMobileOpen]     = useState(false);
 
-  // Load cities once
+  // 1) Load cities once
   useEffect(() => {
     fetch('/api/locations/cities')
-      .then(r => r.json())
+      .then(res => res.json())
       .then((data: CityOption[]) => setCities(data))
       .catch(console.error);
   }, []);
 
-  // Sticky search + small-city once hero scrolls under nav
+  // 2) Sticky search+city on scroll
   useEffect(() => {
     const onScroll = () => {
       const hero = document.getElementById('hero-section');
-      const navH = navRef.current?.offsetHeight || 0;
+      const navH = navRef.current?.offsetHeight ?? 0;
       if (hero) {
         setShowInputs(hero.getBoundingClientRect().bottom <= navH + 5);
       }
@@ -57,7 +56,7 @@ export default function Navbar({
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close menus on outside click
+  // 3) Close all menus on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (navRef.current && !navRef.current.contains(e.target as Node)) {
@@ -69,7 +68,7 @@ export default function Navbar({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Fetch theater items when “THEATER” opens
+  // 4) Fetch theater items when "THEATER" opens
   useEffect(() => {
     if (openMenu === 'theater') {
       const [city, state] = selectedLocation.split(',').map(s => s.trim());
@@ -77,21 +76,22 @@ export default function Navbar({
         setTheaterItems([]);
         return;
       }
-      fetch(
-        `/api/events?category=theater&city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}`
-      )
-        .then(r => r.json())
-        .then((data: any) => {
-          const arr: Array<{ title: string }> = Array.isArray(data)
-            ? data
-            : Array.isArray(data.events) ? data.events : [];
-          setTheaterItems(arr.map(evt => evt.title));
+      fetch(`/api/events?category=theater&city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}`)
+        .then(res => res.json())
+        .then((data) => {
+          let list: Array<{ title: string }> = [];
+          if (Array.isArray(data)) {
+            list = data;
+          } else if (data && Array.isArray((data as any).events)) {
+            list = (data as { events: Array<{ title: string }> }).events;
+          }
+          setTheaterItems(list.map(evt => evt.title));
         })
         .catch(() => setTheaterItems([]));
     }
   }, [openMenu, selectedLocation]);
 
-  // Build base query string for Megadropdown
+  // Base query string for mega menus
   const baseQuery = () => {
     const [city, state] = selectedLocation.split(',').map(s => s.trim());
     return city && state
@@ -99,7 +99,7 @@ export default function Navbar({
       : '';
   };
 
-  // Handle SEARCH on Enter
+  // Handle search on Enter
   const onSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchTerm.trim()) {
       router.push(`/search?query=${encodeURIComponent(searchTerm.trim())}`);
@@ -107,7 +107,7 @@ export default function Navbar({
     }
   };
 
-  // Handle city selection without navigation
+  // Select a city (no navigation)
   const pickCity = (label: string) => {
     onSelectLocation(label);
     setOpenMenu(null);
@@ -117,32 +117,27 @@ export default function Navbar({
     <nav
       ref={navRef}
       onMouseLeave={() => setOpenMenu(null)}
-      className={`sticky top-0 z-50 w-full transition-colors duration-200 ${
+      className={`sticky top-0 w-full z-50 transition-colors duration-200 ${
         showInputs ? 'bg-black bg-opacity-90 text-white' : 'bg-transparent text-white'
       }`}
     >
-      {/* Header */}
+      {/* HEADER */}
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
         {/* Logo */}
-        <button
-          onClick={() => router.push('/')}
-          className="text-2xl font-bold"
-        >
+        <button onClick={() => router.push('/')} className="text-2xl font-bold">
           CityStew
         </button>
 
         {/* Desktop Nav */}
         <ul className="hidden md:flex items-center space-x-8">
-          {(['cities', 'sports', 'concerts', 'theater'] as const).map(key => (
-            <li
-              key={key}
-              onMouseEnter={() => setOpenMenu(key)}
-            >
+          {(['cities','sports','concerts','theater'] as const).map(key => (
+            <li key={key} onMouseEnter={() => setOpenMenu(key)}>
               <NavButton
                 active={openMenu === key}
                 onClick={() => {
-                  if (key === 'cities') pickCity(selectedLocation);
-                  else {
+                  if (key === 'cities') {
+                    pickCity(selectedLocation);
+                  } else {
                     onSelectCategory(key === 'concerts' ? 'music' : key);
                     setOpenMenu(key);
                   }
@@ -154,7 +149,7 @@ export default function Navbar({
           ))}
         </ul>
 
-        {/* Search + small city on scroll */}
+        {/* Sticky search + small city selector */}
         {showInputs && (
           <div className="hidden md:flex items-center space-x-4">
             <input
@@ -171,11 +166,7 @@ export default function Navbar({
             >
               <NavButton active={openMenu === 'cities'}>
                 <span className="text-blue-400">{selectedLocation}</span>
-                <svg
-                  className="w-4 h-4 text-blue-400"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     clipRule="evenodd"
@@ -186,14 +177,16 @@ export default function Navbar({
                   />
                 </svg>
               </NavButton>
+
+              {/* Small-city dropdown */}
               {openMenu === 'cities' && (
                 <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg z-40">
-                  <ul className="grid grid-cols-2 gap-2 max-h-60 overflow-auto">
+                  <ul className="grid grid-cols-2 gap-2 max-h-60 overflow-auto p-2">
                     {cities.map(c => (
                       <li key={c.label}>
                         <button
-                          className="block w-full text-left px-2 py-1 text-gray-800 hover:bg-gray-100 text-sm"
                           onClick={() => pickCity(c.label)}
+                          className="block w-full text-left px-2 py-1 text-gray-800 hover:bg-gray-100 text-sm"
                         >
                           {c.name}, {c.abbreviation}
                         </button>
@@ -206,7 +199,7 @@ export default function Navbar({
           </div>
         )}
 
-        {/* Mobile Toggle */}
+        {/* Mobile toggle */}
         <button
           className="md:hidden p-2 focus:outline-none"
           onClick={() => setMobileOpen(v => !v)}
@@ -216,15 +209,15 @@ export default function Navbar({
             <span className="text-2xl">&times;</span>
           ) : (
             <div className="space-y-1">
-              <span className="block w-6 h-0.5 bg-white"></span>
-              <span className="block w-6 h-0.5 bg-white"></span>
-              <span className="block w-6 h-0.5 bg-white"></span>
+              <span className="block w-6 h-0.5 bg-white" />
+              <span className="block w-6 h-0.5 bg-white" />
+              <span className="block w-6 h-0.5 bg-white" />
             </div>
           )}
         </button>
       </div>
 
-      {/* Desktop dropdown panels */}
+      {/* Desktop Cities Dropdown */}
       {openMenu === 'cities' && (
         <div className="absolute top-full left-0 right-0 w-full bg-white shadow-lg z-30">
           <div className="max-w-7xl mx-auto px-6 py-4">
@@ -232,8 +225,8 @@ export default function Navbar({
               {(showAllCities ? cities : cities.slice(0, 15)).map(c => (
                 <button
                   key={c.label}
-                  className="text-left px-2 py-1 text-gray-800 hover:bg-gray-100 text-sm"
                   onClick={() => pickCity(c.label)}
+                  className="text-left px-2 py-1 text-gray-800 hover:bg-gray-100 text-sm rounded"
                 >
                   {c.name}, {c.abbreviation}
                 </button>
@@ -242,8 +235,8 @@ export default function Navbar({
             {cities.length > 15 && (
               <div className="mt-2 text-right">
                 <button
-                  className="text-sm text-blue-600 hover:underline"
                   onClick={() => setShowAllCities(v => !v)}
+                  className="text-sm text-blue-600 hover:underline"
                 >
                   {showAllCities ? 'Show Less' : 'View All Cities'}
                 </button>
@@ -253,6 +246,7 @@ export default function Navbar({
         </div>
       )}
 
+      {/* Desktop Mega Menus */}
       {openMenu && openMenu !== 'cities' && (
         <div className="absolute top-full left-0 right-0 w-full bg-white shadow-lg z-30">
           <div className="max-w-7xl mx-auto px-6 py-4">
