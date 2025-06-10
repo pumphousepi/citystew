@@ -17,12 +17,14 @@ interface NavbarProps {
   selectedLocation: string;
   onSelectLocation: (loc: string) => void;
   onSelectCategory: (cat: string) => void;
+  onSelectGenre: (genre: string) => void;
 }
 
 export default function Navbar({
   selectedLocation,
   onSelectLocation,
   onSelectCategory,
+  onSelectGenre,
 }: NavbarProps) {
   const router = useRouter();
   const navRef = useRef<HTMLElement>(null);
@@ -43,7 +45,7 @@ export default function Navbar({
       .catch(console.error);
   }, []);
 
-  // 2) Toggle search+city on scroll
+  // 2) Sticky search + city on scroll
   useEffect(() => {
     const onScroll = () => {
       const hero = document.getElementById('hero-section');
@@ -57,7 +59,7 @@ export default function Navbar({
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // 3) Close menus when clicking outside
+  // 3) Close menus on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (navRef.current && !navRef.current.contains(e.target as Node)) {
@@ -77,9 +79,7 @@ export default function Navbar({
         setTheaterItems([]);
         return;
       }
-      fetch(
-        `/api/events?category=theater&city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}`
-      )
+      fetch(`/api/events?category=theater&city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}`)
         .then(res => res.json())
         .then((json: unknown) => {
           let arr: Array<{ title: string }> = [];
@@ -88,7 +88,7 @@ export default function Navbar({
           } else if (
             typeof json === 'object' &&
             json !== null &&
-            Array.isArray((json as Record<string, unknown>).events)
+            Array.isArray((json as any).events)
           ) {
             arr = (json as { events: Array<{ title: string }> }).events;
           }
@@ -98,7 +98,7 @@ export default function Navbar({
     }
   }, [openMenu, selectedLocation]);
 
-  // Build query suffix for MegaDropdown
+  // Build “?city=…&state=…” for mega dropdown
   const baseQuery = () => {
     const [city, state] = selectedLocation.split(',').map(s => s.trim());
     return city && state
@@ -106,7 +106,7 @@ export default function Navbar({
       : '';
   };
 
-  // Handle ENTER in search box
+  // Search on Enter
   const onSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchTerm.trim()) {
       router.push(`/search?query=${encodeURIComponent(searchTerm.trim())}`);
@@ -114,7 +114,7 @@ export default function Navbar({
     }
   };
 
-  // Just updates selectedLocation, no navigation
+  // Pick city (updates parent state only)
   const pickCity = (label: string) => {
     onSelectLocation(label);
     setOpenMenu(null);
@@ -124,25 +124,26 @@ export default function Navbar({
     <nav
       ref={navRef}
       onMouseLeave={() => setOpenMenu(null)}
-      className={`sticky top-0 z-50 w-full transition-colors duration-200 ${
+      className={`sticky top-0 w-full z-50 transition-colors duration-200 ${
         showInputs ? 'bg-black bg-opacity-90 text-white' : 'bg-transparent text-white'
       }`}
     >
-      {/* Header */}
+      {/* Header bar */}
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
         <button onClick={() => router.push('/')} className="text-2xl font-bold">
           CityStew
         </button>
 
-        {/* Desktop Nav Links */}
+        {/* Desktop links */}
         <ul className="hidden md:flex items-center space-x-8">
           {(['cities','sports','concerts','theater'] as const).map(key => (
             <li key={key} onMouseEnter={() => setOpenMenu(key)}>
               <NavButton
                 active={openMenu === key}
                 onClick={() => {
-                  if (key === 'cities') pickCity(selectedLocation);
-                  else {
+                  if (key === 'cities') {
+                    pickCity(selectedLocation);
+                  } else {
                     onSelectCategory(key === 'concerts' ? 'music' : key);
                     setOpenMenu(key);
                   }
@@ -154,7 +155,7 @@ export default function Navbar({
           ))}
         </ul>
 
-        {/* Sticky Search + Small City on Scroll */}
+        {/* Sticky search + small city selector */}
         {showInputs && (
           <div className="hidden md:flex items-center space-x-4">
             <input
@@ -165,10 +166,7 @@ export default function Navbar({
               onChange={e => setSearchTerm(e.target.value)}
               onKeyDown={onSearchKey}
             />
-            <div
-              className="relative"
-              onMouseEnter={() => setOpenMenu('cities')}
-            >
+            <div className="relative" onMouseEnter={() => setOpenMenu('cities')}>
               <NavButton active={openMenu === 'cities'}>
                 <span className="text-blue-400">{selectedLocation}</span>
                 <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -176,9 +174,9 @@ export default function Navbar({
                     fillRule="evenodd"
                     clipRule="evenodd"
                     d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 
-                       0 111.06 1.06l-4.24 4.24a.75.75 0 
-                       01-1.06 0L5.21 8.27a.75.75 0 
-                       01.02-1.06z"
+                      0 111.06 1.06l-4.24 4.24a.75.75 0 
+                      01-1.06 0L5.21 8.27a.75.75 0 
+                      01.02-1.06z"
                   />
                 </svg>
               </NavButton>
@@ -212,15 +210,15 @@ export default function Navbar({
             <span className="text-2xl">&times;</span>
           ) : (
             <div className="space-y-1">
-              <span className="block w-6 h-0.5 bg-white"/>
-              <span className="block w-6 h-0.5 bg-white"/>
-              <span className="block w-6 h-0.5 bg-white"/>
+              <span className="block w-6 h-0.5 bg-white" />
+              <span className="block w-6 h-0.5 bg-white" />
+              <span className="block w-6 h-0.5 bg-white" />
             </div>
           )}
         </button>
       </div>
 
-      {/* Cities Dropdown */}
+      {/* Cities dropdown */}
       {openMenu === 'cities' && (
         <div className="absolute top-full left-0 right-0 w-full bg-white shadow-lg z-30">
           <div className="max-w-7xl mx-auto px-6 py-4">
@@ -238,8 +236,8 @@ export default function Navbar({
             {cities.length > 15 && (
               <div className="mt-2 text-right">
                 <button
-                  className="text-sm text-blue-600 hover:underline"
                   onClick={() => setShowAllCities(v => !v)}
+                  className="text-sm text-blue-600 hover:underline"
                 >
                   {showAllCities ? 'Show Less' : 'View All Cities'}
                 </button>
@@ -249,7 +247,7 @@ export default function Navbar({
         </div>
       )}
 
-      {/* MegaDropdown for Sports/Concerts/Theater */}
+      {/* Mega menus */}
       {openMenu && openMenu !== 'cities' && (
         <div className="absolute top-full left-0 right-0 w-full bg-white shadow-lg z-30">
           <div className="max-w-7xl mx-auto px-6 py-4">
