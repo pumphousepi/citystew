@@ -1,42 +1,27 @@
-/* Full‐width wrappers under the navbar */
-.dropdownContainer { @apply absolute top-full left-0 right-0 w-full bg-white shadow-lg z-30; }
-.dropdownInner { @apply max-w-7xl mx-auto px-6 py-4; }
+/* src/app/components/Navbar.module.css */
 
-/* Mega‐menu (Sports/Concerts/Theater) */
-.megaWrapper { @apply dropdownContainer; }
-.megaInner { @apply dropdownInner; }
+/* Navbar container (relative for dropdowns) */
+.navbar {
+  @apply relative sticky top-0 w-full z-50 text-white transition-colors duration-200;
+}
+.navbarScrolled {
+  @apply bg-black bg-opacity-90;
+}
 
-.megaTabs {
-  @apply flex space-x-6 border-b border-gray-200 mb-4;
-}
-.megaTabButton {
-  @apply pb-2 text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors;
-}
-.megaTabButtonActive {
-  @apply pb-2 text-sm font-semibold text-blue-600 border-b-2 border-blue-600;
-}
-.megaGrid {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
-}
-.megaItem {
-  @apply text-sm text-gray-700 hover:text-blue-600 transition-colors;
-}
-.megaFooter {
-  @apply border-t border-gray-200 mt-4 pt-2 flex justify-end;
-}
-.megaViewAll {
-  @apply text-sm text-blue-600 hover:underline;
-}
-/* Navbar.module.css */
-
-/* Base style for every nav link */
+/* Nav button base & active */
 .navItem {
-  @apply px-4 py-2 font-medium text-white hover:text-blue-400 hover:bg-gray-800 rounded transition-colors duration-200;
+  @apply px-4 py-2 font-medium text-white hover:text-blue-400 hover:bg-gray-800 rounded transition-colors cursor-pointer;
+}
+.navItemActive {
+  @apply px-4 py-2 font-semibold text-blue-400 bg-gray-900 rounded cursor-default;
 }
 
-/* Style applied when that link is active/open */
-.navItemActive {
-  @apply px-4 py-2 font-medium text-blue-400 bg-gray-900 rounded;
+/* Cities dropdown (two-column grid) */
+.navCityContainer {
+  @apply absolute top-full;         /* anchored under Cities button */
+  @apply left-1/2 transform -translate-x-1/2; /* center under button */
+  @apply bg-white rounded-md shadow-lg z-40;
 }
-.navCityContainer { @apply dropdownContainer; }
-.navCityInner { @apply dropdownInner; }
+.navCityInner {
+  @apply grid grid-cols-2 gap-4 p-4 max-h-60 overflow-auto text-black;
+}

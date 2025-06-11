@@ -1,0 +1,41 @@
+/* src/app/components/MegaDropdown.module.css */
+
+/* Auto-sizing panel under the active category */
+.megaWrapper {
+    @apply absolute top-full bg-white rounded-b-lg shadow-lg z-40;
+    width: max-content;    /* shrink-to-fit */
+    min-width: 16rem;      /* at least 256px */
+  }
+  
+  /* Inner padding */
+  .megaInner {
+    @apply p-6;
+  }
+  
+  /* Tabs for sports */
+  .megaTabs {
+    @apply flex space-x-6 border-b border-gray-200 pb-2 mb-4;
+  }
+  .megaTabButton {
+    @apply pb-1 text-sm font-medium text-gray-600 hover:text-blue-600 cursor-pointer;
+  }
+  .megaTabButtonActive {
+    @apply pb-1 text-sm font-semibold text-blue-600 border-b-2 border-blue-600 cursor-default;
+  }
+  
+  /* Grid of items */
+  .megaGrid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+  .megaItem {
+    @apply text-sm text-gray-700 hover:text-blue-600 transition-colors cursor-pointer;
+  }
+  
+  /* Footer link */
+  .megaFooter {
+    @apply border-t border-gray-200 mt-4 pt-4 flex justify-end;
+  }
+  .megaViewAll {
+    @apply text-sm text-blue-600 hover:underline cursor-pointer;
+  }
+  
