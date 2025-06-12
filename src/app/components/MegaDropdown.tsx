@@ -1,4 +1,3 @@
-// src/app/components/MegaDropdown.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -7,8 +6,8 @@ import styles from './MegaDropdown.module.css';
 
 export interface MegaDropdownProps {
   category: 'sports' | 'concerts' | 'theater';
-  dataMap: Record<string, string[]>;    // e.g. sportsData, concertData, theaterData
-  baseQuery: { city: string; state: string };
+  dataMap: Record<string,string[]>;
+  baseQuery: string;
 }
 
 export default function MegaDropdown({
@@ -16,56 +15,54 @@ export default function MegaDropdown({
   dataMap,
   baseQuery,
 }: MegaDropdownProps) {
-  const [activeTab, setActiveTab] = useState(Object.keys(dataMap)[0]);
+  const tabs = Object.keys(dataMap);
+  const [activeTab, setActiveTab] = useState(tabs[0]);
   const items = dataMap[activeTab] || [];
 
-  // Build each item’s link:
   const linkFor = (item: string) => {
-    const { city, state } = baseQuery;
-    const common = `city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}`;
     if (category === 'sports') {
-      return `/events?category=sports&league=${encodeURIComponent(activeTab)}&team=${encodeURIComponent(item)}&${common}`;
+      return `/events?category=sports&league=${encodeURIComponent(activeTab)}&team=${encodeURIComponent(item)}${baseQuery}`;
     }
     if (category === 'concerts') {
-      return `/events?category=concerts&genre=${encodeURIComponent(item)}&${common}`;
+      return `/events?category=concerts&artist=${encodeURIComponent(item)}${baseQuery}`;
     }
-    // theater
-    return `/events?category=theater&genre=${encodeURIComponent(item)}&${common}`;
+    return `/events?category=theater&show=${encodeURIComponent(item)}${baseQuery}`;
   };
-
-  // View All link:
-  const viewAllLink = `/events?category=${category}&city=${encodeURIComponent(baseQuery.city)}&state=${encodeURIComponent(baseQuery.state)}`;
 
   return (
     <div className={styles.megaWrapper}>
       <div className={styles.megaInner}>
-        {/* Tabs (only sports) */}
         {category === 'sports' && (
           <nav className={styles.megaTabs}>
-            {Object.keys(dataMap).map(tab => (
+            {tabs.map(tab => (
               <button
                 key={tab}
                 onMouseEnter={() => setActiveTab(tab)}
-                className={activeTab === tab ? styles.megaTabButtonActive : styles.megaTabButton}
+                className={activeTab === tab ? styles.megaTabActive : styles.megaTabInactive}
               >
-                {tab}
+                {tab.toUpperCase()}
               </button>
             ))}
           </nav>
         )}
 
-        {/* Grid */}
         <div className={styles.megaGrid}>
-          {items.map(item => (
-            <Link key={item} href={linkFor(item)} className={styles.megaItem}>
+          {items.map((item, idx) => (
+            <Link
+              key={`${activeTab}-${item}-${idx}`}
+              href={linkFor(item)}
+              className={styles.megaItem}
+            >
               {item}
             </Link>
           ))}
         </div>
 
-        {/* Footer */}
         <div className={styles.megaFooter}>
-          <Link href={viewAllLink} className={styles.megaViewAll}>
+          <Link
+            href={`/events?category=${category}${baseQuery}`}
+            className={styles.megaViewAll}
+          >
             View All {category.charAt(0).toUpperCase() + category.slice(1)}
           </Link>
         </div>

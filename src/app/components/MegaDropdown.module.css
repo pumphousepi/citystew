@@ -1,41 +1,79 @@
-/* src/app/components/MegaDropdown.module.css */
-
-/* Auto-sizing panel under the active category */
 .megaWrapper {
-    @apply absolute top-full bg-white rounded-b-lg shadow-lg z-40;
-    width: max-content;    /* shrink-to-fit */
-    min-width: 16rem;      /* at least 256px */
-  }
-  
-  /* Inner padding */
-  .megaInner {
-    @apply p-6;
-  }
-  
-  /* Tabs for sports */
-  .megaTabs {
-    @apply flex space-x-6 border-b border-gray-200 pb-2 mb-4;
-  }
-  .megaTabButton {
-    @apply pb-1 text-sm font-medium text-gray-600 hover:text-blue-600 cursor-pointer;
-  }
-  .megaTabButtonActive {
-    @apply pb-1 text-sm font-semibold text-blue-600 border-b-2 border-blue-600 cursor-default;
-  }
-  
-  /* Grid of items */
+  position: relative;
+}
+
+.megaInner {
+  /* full‐width white box with slight rounding + shadow */
+  inset: 0;
+  background-color: white;
+  border-radius: 0 0 0.5rem 0.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.megaTabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.5rem 1.5rem;
+  gap: 1rem;
+}
+
+.megaTabActive {
+  color: #1d4ed8; /* blue-600 */
+  border-bottom: 2px solid #1d4ed8;
+  padding-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.megaTabInactive {
+  color: #374151; /* gray-700 */
+  cursor: pointer;
+  padding-bottom: 0.25rem;
+}
+
+.megaGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+}
+
+@media (min-width: 640px) {
   .megaGrid {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .megaItem {
-    @apply text-sm text-gray-700 hover:text-blue-600 transition-colors cursor-pointer;
+}
+
+@media (min-width: 1024px) {
+  .megaGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  
-  /* Footer link */
-  .megaFooter {
-    @apply border-t border-gray-200 mt-4 pt-4 flex justify-end;
-  }
-  .megaViewAll {
-    @apply text-sm text-blue-600 hover:underline cursor-pointer;
-  }
-  
+}
+
+.megaItem {
+  display: block;
+  padding: 0.5rem 0;
+  color: #1d4ed8; /* blue-600 */
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.megaItem:hover {
+  text-decoration: underline;
+}
+
+.megaFooter {
+  border-top: 1px solid #e5e7eb;
+  padding: 0.5rem 1.5rem;
+  text-align: right;
+}
+
+.megaViewAll {
+  color: #1d4ed8; /* blue-600 */
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.megaViewAll:hover {
+  text-decoration: underline;
+}

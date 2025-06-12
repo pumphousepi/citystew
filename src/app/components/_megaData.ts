@@ -1,43 +1,72 @@
-// src/app/components/_megaData.ts
+// static mappings for the mega-menus
+export const sportsData: Record<string,string[]> = {
+  NHL: ['Lakers','Celtics','Rangers','Maple Leafs','Blackhawks','Flyers'],
+  NBA: ['Warriors','Lakers','Celtics','Bulls','Heat','Heat'],
+  NFL: ['Cowboys','Patriots','Packers','Chiefs','Giants','Bears'],
+  MLB: ['Yankees','Dodgers','Red Sox','Cubs','Giants','Cardinals'],
+  MLS: ['LA Galaxy','NYCFC','Seattle Sounders','Atlanta United','Portland Timbers'],
+  NCAAFB: ['Ohio State','Alabama','Clemson','Notre Dame','Oklahoma','Texas'],
+  NCAABB: ['Duke','Kentucky','UCLA','Kansas','Gonzaga','Michigan'],
+};
 
-// Static data for Sports, Concerts, Theater
-export const sportsData: Record<string, string[]> = {
-  NBA: [
-    'Atlanta Hawks','Boston Celtics','Brooklyn Nets','Charlotte Hornets',
-    'Chicago Bulls','Cleveland Cavaliers','Dallas Mavericks','Denver Nuggets',
-    'Detroit Pistons','Golden State Warriors','Houston Rockets','Indiana Pacers',
-    'LA Clippers','Los Angeles Lakers','Memphis Grizzlies','Miami Heat',
-    'Milwaukee Bucks','Minnesota Timberwolves','New Orleans Pelicans','New York Knicks',
-    'Oklahoma City Thunder','Orlando Magic','Philadelphia 76ers','Phoenix Suns',
-    'Portland Trail Blazers','Sacramento Kings','San Antonio Spurs','Toronto Raptors',
-    'Utah Jazz','Washington Wizards'
+export const concertData: Record<string,string[]> = {
+  'Top Concerts': [
+    'Taylor Swift',
+    'Bad Bunny',
+    'Beyoncé',
+    'Drake',
+    'Ed Sheeran',
+    'The Weeknd',
+    'Harry Styles',
+    'Billie Eilish',
+    'Coldplay',
+    'Post Malone',
+    'Adele',
+    'Bruno Mars',
+    'Kendrick Lamar',
+    'Eminem',
+    'Foo Fighters',
+    'Red Hot Chili Peppers',
+    'Dua Lipa',
+    'Lady Gaga',
+    'Justin Bieber',
+    'Shawn Mendes',
+    'Lorde',
+    'Imagine Dragons',
+    'Maroon 5',
+    'Ariana Grande',
+    'SZA',
+    'BTS',
+    'Blackpink',
   ],
-  MLB: ['…your MLB teams…'],
-  NFL: ['…your NFL teams…'],
-  CFB: ['…'],
-  MLS: ['…'],
-  NHL: ['…'],
-  Other: ['…']
 };
 
-export const concertData: Record<string, string[]> = {
-  'All Artists': [
-    'Coldplay','The Weeknd','The Eagles','Billie Eilish','Sleep Token',
-    'Marco Antonio Solís','Beyoncé','Oasis','Stray Kids','David Byrne',
-    'Morgan Wallen','Shakira','Post Malone','Metallica','Lady Gaga',
-    'Tate McRae','Benson Boone','Mumford & Sons','Kendrick Lamar','Zach Bryan',
-    'Kenny Chesney','Chris Brown','Chris Stapleton','Backstreet Boys','Riley Green',
-    'Dave Matthews Band','Wu-Tang Clan'
-  ]
-};
-
-export const theaterData: Record<string, string[]> = {
-  'All Shows': [
-    'The Sphere Experience','Hamilton','Wizard Of Oz At Sphere','Andrea Bocelli',
-    'Nate Bargatze','Kevin Bridges','Les Misérables','Wicked','Lion King',
-    'Radio City Christmas Spectacular','Jo Koy','Harry Potter And The Cursed Child',
-    'Book Of Mormon','Beauty And The Beast','Shane Gillis','A Beautiful Noise',
-    'Matt Rife','Phantom Of The Opera','Oh Mary','Outsiders','Cirque Du Soleil Ovo',
-    'Rick Mercer','MJ - The Musical','John Mulaney','Maybe Happy Ending'
-  ]
+export const theaterData: Record<string,string[]> = {
+  'Top Theater': [
+    'Hamilton',
+    'Wicked',
+    'The Lion King',
+    'Aladdin',
+    'Chicago',
+    'Phantom of the Opera',
+    'Mrs. Doubtfire',
+    'Moulin Rouge',
+    'MJ the Musical',
+    'Dear Evan Hansen',
+    'Hadestown',
+    'The Book of Mormon',
+    'Six',
+    'Come From Away',
+    'Kinky Boots',
+    'The Curious Incident',
+    'Mean Girls',
+    'Beetlejuice',
+    'Tina – The Tina Turner Musical',
+    'Funny Girl',
+    '& Juliet',
+    'Diana the Musical',
+    'Jagged Little Pill',
+    'Frozen – The Broadway Musical',
+    'Back to the Future',
+  ],
 };
