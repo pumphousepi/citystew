@@ -1,4 +1,3 @@
-// src/app/components/TrendingEvents.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -21,9 +20,9 @@ interface CityOption {
 }
 
 interface TrendingEventsProps {
-  location: string;                  // e.g. "Austin, TX"
-  category?: string;                 // e.g. "sports" or "music"
-  genre?: string;                    // e.g. "Rock"
+  location: string;
+  category?: string;
+  genre?: string;
   onSelectLocation: (loc: string) => void;
 }
 
@@ -33,15 +32,14 @@ export default function TrendingEvents({
   genre,
   onSelectLocation,
 }: TrendingEventsProps) {
-  const [events, setEvents]           = useState<ApiEvent[]>([]);
-  const [loading, setLoading]         = useState(true);
+  const [events, setEvents] = useState<ApiEvent[]>([]);
+  const [loading, setLoading] = useState(true);
   const [rateLimited, setRateLimited] = useState(false);
-  const [cities, setCities]           = useState<CityOption[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const activeCategory = category || 'music';
 
-  // 1) Load cities once
   useEffect(() => {
     fetch('/api/locations/cities')
       .then(res => res.json())
@@ -49,7 +47,6 @@ export default function TrendingEvents({
       .catch(err => console.error('[TrendingEvents] cities load error', err));
   }, []);
 
-  // 2) Fetch trending events whenever location/category/genre changes
   useEffect(() => {
     if (!location.includes(',')) {
       setEvents([]);
@@ -74,7 +71,7 @@ export default function TrendingEvents({
       const url = `/api/events?${params.toString()}`;
 
       try {
-        const res  = await fetch(url);
+        const res = await fetch(url);
         const json = await res.json();
 
         if (res.status === 429) {
@@ -95,14 +92,12 @@ export default function TrendingEvents({
     })();
   }, [location, activeCategory, genre]);
 
-  // Toggle city dropdown
   const toggleDropdown = () => setDropdownOpen(prev => !prev);
   const onSelectCity = (loc: string) => {
     onSelectLocation(loc);
     setDropdownOpen(false);
   };
 
-  // Build “&city=…&state=…” query
   const baseQueryFromLocation = (): string => {
     const [cityName, stateCode] = location.split(',').map(s => s.trim());
     return cityName && stateCode
@@ -110,13 +105,11 @@ export default function TrendingEvents({
       : '';
   };
 
-  // Limit to first 4
   const visibleEvents = events.slice(0, 4);
 
   return (
     <section className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
-        {/* ─── Header: “Trending [Category] in [City, ST]” ─── */}
         <div className="flex items-center mb-6">
           <h2 className="text-2xl font-bold mr-2">
             Trending {activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)} in
@@ -158,7 +151,6 @@ export default function TrendingEvents({
           </div>
         </div>
 
-        {/* ─── Content ─── */}
         {loading ? (
           <p>Loading trending {activeCategory}…</p>
         ) : rateLimited ? (
@@ -167,24 +159,19 @@ export default function TrendingEvents({
           <p>No {activeCategory} found.</p>
         ) : (
           <>
-            {/* ─── Responsive Grid of Four ─── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {visibleEvents.map(evt => {
-                const detailPath = `/event-details/${evt.id}`;
-                return (
-                  <EventCard
-                    key={evt.id}
-                    title={evt.name}
-                    image={evt.images?.[0]?.url}
-                    date={evt.dates?.start?.localDate}
-                    venue={evt._embedded?.venues?.[0]?.name}
-                    href={detailPath}
-                  />
-                );
-              })}
+              {visibleEvents.map(evt => (
+                <EventCard
+                  key={evt.id}
+                  title={evt.name}
+                  image={evt.images?.[0]?.url}
+                  date={evt.dates?.start?.localDate}
+                  venue={evt._embedded?.venues?.[0]?.name}
+                  href={`/events/${evt.id}`} // ✅ Updated here
+                />
+              ))}
             </div>
 
-            {/* ─── “View All Events” Link (aligned right) ─── */}
             <div className="mt-6 flex justify-end">
               <Link
                 href={`/events?category=${encodeURIComponent(activeCategory)}${baseQueryFromLocation()}`}

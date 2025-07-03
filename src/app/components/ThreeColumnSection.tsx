@@ -1,4 +1,3 @@
-// src/app/components/ThreeColumnSection.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -19,22 +18,20 @@ interface SectionConfig {
 
 const SECTIONS: SectionConfig[] = [
   { title: 'Sports Near You', category: 'sports', imageUrl: '/assets/images/sports.jpg' },
-  { title: 'Concerts Near You', category: 'music',  imageUrl: '/assets/images/concert_card_002.jpg' },
-  { title: 'Theater Near You',  category: 'theater', imageUrl: '/assets/images/theater.jpg' },
+  { title: 'Concerts Near You', category: 'music', imageUrl: '/assets/images/concert_card_002.jpg' },
+  { title: 'Theater Near You', category: 'theater', imageUrl: '/assets/images/theater.jpg' },
 ];
 
 export default function ThreeColumnSection({ location }: { location: string }) {
-  const [lists, setLists]     = useState<ApiEvent[][]>(SECTIONS.map(() => []));
+  const [lists, setLists] = useState<ApiEvent[][]>(SECTIONS.map(() => []));
   const [loading, setLoading] = useState(true);
   const [rateLimited, setRateLimited] = useState(false);
 
-  // Split “City, ST” into city and stateCode
   const [city, stateCode] = location.includes(',')
     ? location.split(',').map((s) => s.trim())
     : ['', ''];
 
   useEffect(() => {
-    // If location isn't valid, skip fetching
     if (!city || !stateCode) {
       setLoading(false);
       return;
@@ -46,7 +43,6 @@ export default function ThreeColumnSection({ location }: { location: string }) {
 
       const results = await Promise.all(
         SECTIONS.map(async ({ category }) => {
-          // Skip TicketMaster fetch for theater
           if (category === 'theater') return [];
 
           const params = new URLSearchParams({
@@ -58,7 +54,7 @@ export default function ThreeColumnSection({ location }: { location: string }) {
           });
 
           try {
-            const res  = await fetch(`/api/events?${params.toString()}`);
+            const res = await fetch(`/api/events?${params.toString()}`);
             const data = await res.json();
 
             if (res.status === 429) {
@@ -70,7 +66,6 @@ export default function ThreeColumnSection({ location }: { location: string }) {
               return [];
             }
 
-            // Some endpoints return { _embedded: { events: [...] } }
             return (data._embedded?.events as ApiEvent[]) || [];
           } catch (err) {
             console.warn(`Fetch error [${category}]:`, err);
@@ -84,7 +79,6 @@ export default function ThreeColumnSection({ location }: { location: string }) {
     })();
   }, [city, stateCode]);
 
-  // Do not render section at all if location is not “City, ST”
   if (!city || !stateCode) return null;
 
   return (
@@ -114,12 +108,12 @@ export default function ThreeColumnSection({ location }: { location: string }) {
               ) : (
                 <ul className="flex-1 overflow-y-auto space-y-2">
                   {lists[idx].map((event) => {
-                    const date  = event.dates?.start?.localDate || 'TBD';
+                    const date = event.dates?.start?.localDate || 'TBD';
                     const venue = event._embedded?.venues?.[0]?.name || '';
                     return (
                       <li key={event.id}>
                         <Link
-                          href={`/tickets/${event.id}`}
+                          href={`/events/${event.id}`}
                           className="block hover:bg-gray-100 rounded px-2 py-1"
                         >
                           <div className="font-medium">{event.name}</div>

@@ -1,4 +1,3 @@
-// src/app/components/EventCard.tsx
 'use client';
 
 import React from 'react';
@@ -38,7 +37,6 @@ export default function EventCard({
     />
   );
 
-  // ─── Horizontal layout (unchanged) ───────────────────────────────────────────
   if (isHorizontal) {
     return href ? (
       <Link href={href} className="block">
@@ -73,20 +71,12 @@ export default function EventCard({
     );
   }
 
-  // ─── Vertical layout (responsive) ────────────────────────────────────────────
   const cardContent = (
     <div className="flex flex-col bg-white rounded-xl shadow-md overflow-hidden h-full">
-      {/* 
-        Responsive “image wrapper”:
-        - aspect-[1/1] on mobile (square)
-        - sm:aspect-[4/3] on ≥640px
-        - lg:aspect-[16/9] on ≥1024px
-      */}
       <div className="relative w-full aspect-[1/1] sm:aspect-[4/3] lg:aspect-[16/9] bg-gray-200">
         {ImgElement}
       </div>
 
-      {/* Content area with responsive padding/text */}
       <div className="p-3 sm:p-4 lg:p-6 flex flex-col flex-1">
         <h3 className="text-base sm:text-lg lg:text-xl font-semibold mb-2 line-clamp-2">
           {title}
