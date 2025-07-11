@@ -1,13 +1,18 @@
 // src/app/category/[category]/page.tsx
 
-export default function CategoryPage({ params }: { params: { category: string } }) {
+interface CategoryPageProps {
+    params: {
+      category: string;
+    };
+  }
+  
+  export default function CategoryPage({ params }: CategoryPageProps) {
     const { category } = params;
   
     return (
-      <div className="p-8">
-        <h1 className="text-3xl font-bold mb-6">Category: {category}</h1>
-        {/* You can render event cards or filters for this category here */}
-      </div>
+      <main className="p-8">
+        <h1 className="text-3xl font-bold">Category: {category}</h1>
+      </main>
     );
   }
   
