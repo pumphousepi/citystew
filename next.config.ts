@@ -1,4 +1,3 @@
-// next.config.js
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
@@ -11,7 +10,7 @@ const nextConfig: NextConfig = {
     ],
   },
   eslint: {
-    // This allows production builds to succeed even if there are ESLint errors
+    // Ignore ESLint errors during production builds
     ignoreDuringBuilds: true,
   },
 };
