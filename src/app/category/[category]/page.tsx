@@ -12,7 +12,7 @@ interface CategoryPageProps {
     return (
       <main className="p-8">
         <h1 className="text-3xl font-bold">Events in Category: {category}</h1>
-        {/* You can fetch and list events here */}
+        {/* Add your content here */}
       </main>
     );
   }
