@@ -27,23 +27,33 @@ export default function EventDetailPage() {
   const { id } = useParams();
   const [event, setEvent] = useState<EventDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchEvent() {
+      setLoading(true);
+      setError(null);
+
       try {
         const res = await fetch(`/api/event-details/${id}`);
-        if (!res.ok) throw new Error('Failed to fetch event');
+        if (!res.ok) {
+          throw new Error(`API Error: ${res.status}`);
+        }
+
         const data = await res.json();
         setEvent(data);
-      } catch (err) {
-        console.error('Failed to load event:', err);
+      } catch (err: any) {
+        console.error('Fetch event failed:', err);
+        setError('Unable to load event. Please try again later.');
         setEvent(null);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchEvent();
+    if (id) {
+      fetchEvent();
+    }
   }, [id]);
 
   if (loading) {
@@ -60,8 +70,12 @@ export default function EventDetailPage() {
     );
   }
 
-  if (!event) {
-    return <div className="text-center py-20 text-red-600 text-lg">Event not found.</div>;
+  if (error || !event) {
+    return (
+      <div className="text-center py-20 text-red-600 text-lg">
+        {error || 'Event not found.'}
+      </div>
+    );
   }
 
   const image = event.images?.[0]?.url || '/assets/images/placeholder.jpg';
@@ -69,7 +83,7 @@ export default function EventDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
-      {/* ─── Hero Section ─── */}
+      {/* ─── Hero Banner ─── */}
       <div className="rounded-xl overflow-hidden shadow-lg mb-8">
         <img
           src={image}
@@ -92,9 +106,9 @@ export default function EventDetailPage() {
         </div>
       </div>
 
-      {/* ─── Tickets Section ─── */}
+      {/* ─── Tickets + Seating Chart ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left: Tickets List */}
+        {/* Left: Tickets */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold mb-2">Available Tickets</h2>
           {[...Array(5)].map((_, i) => (
@@ -122,7 +136,9 @@ export default function EventDetailPage() {
             alt="Seating Chart"
             className="w-full object-contain"
           />
-          <p className="text-sm text-gray-500 mt-2">Not all sections may apply to this event</p>
+          <p className="text-sm text-gray-500 mt-2">
+            Not all sections may apply to this event
+          </p>
         </div>
       </div>
     </div>
