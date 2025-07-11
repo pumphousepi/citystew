@@ -1,54 +1,45 @@
-'use client';
+// src/app/event-details/[id]/page.tsx
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { Metadata } from 'next';
+import EventHeader from '@/app/components/EventHeader';
 
-interface EventHeaderProps {
-  eventName: string;
-  eventDateTime?: string;
-  venueName?: string;
-  venueLocation?: string;
+interface EventPageProps {
+  params: {
+    id: string;
+  };
 }
 
-export default function EventHeader({
-  eventName,
-  eventDateTime,
-  venueName,
-  venueLocation,
-}: EventHeaderProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
+// Optional metadata
+export const generateMetadata = async ({ params }: EventPageProps): Promise<Metadata> => {
+  return {
+    title: `Event Details – ${params.id}`,
+    description: 'Event info, tickets, and venue location',
+  };
+};
+
+export default async function EventPage({ params }: EventPageProps) {
+  const eventId = params.id;
+
+  // Example fetch call to your backend or API route
+  const res = await fetch(`${process.env.API_BASE_URL}/api/event-details/${eventId}`);
+  const event = await res.json();
+
+  if (!event) return <div className="p-10 text-red-600">Event not found</div>;
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        {/* Logo and Event Info */}
-        <div className="flex items-start gap-4 w-full">
-          <Link href="/" className="flex-shrink-0">
-            <img
-              src="/assets/images/logo_blue.png"
-              alt="CityStew"
-              className="h-12 w-auto object-contain"
-            />
-          </Link>
-          <div className="text-left">
-            <h1 className="text-xl font-bold text-gray-900">{eventName}</h1>
-            {(eventDateTime || venueName || venueLocation) && (
-              <p className="text-sm text-gray-600 flex flex-wrap items-center gap-2">
-                {eventDateTime && (
-                  <span className="flex items-center gap-1">
-                    📅 {eventDateTime}
-                  </span>
-                )}
-                {venueName && venueLocation && (
-                  <span className="flex items-center gap-1">
-                    📍 {venueName} • {venueLocation}
-                  </span>
-                )}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-    </header>
+    <div className="min-h-screen">
+      <EventHeader
+        eventName={event.name}
+        eventDateTime={event.date}
+        venueName={event.venue}
+        venueLocation={`${event.city}, ${event.state}`}
+      />
+
+      {/* Your ticket list, accordion, seating map, etc. goes here */}
+      <section className="p-4">
+        <h2 className="text-xl font-semibold mb-2">Tickets</h2>
+        {/* Render event.tickets */}
+      </section>
+    </div>
   );
 }
