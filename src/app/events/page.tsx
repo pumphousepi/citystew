@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import EventHeader from '../components/EventHeader';
+import Footer from '../components/Footer';
 
 interface Event {
   id: string;
@@ -19,7 +21,7 @@ interface Event {
   }[];
 }
 
-export default function EventList() {
+export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,38 +41,48 @@ export default function EventList() {
     fetchEvents();
   }, []);
 
-  if (loading) return <p>Loading events...</p>;
-  if (events.length === 0) return <p>No events found.</p>;
-
   return (
-    <div
-      className="flex space-x-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 px-2"
-      style={{ scrollSnapType: 'x mandatory' }}
-    >
-      {events.map(event => (
-        <Link
-          key={event.id}
-          href={`/events/${event.id}`}
-          className="flex-shrink-0 w-60 rounded-lg border p-4 shadow-md hover:shadow-xl transition-shadow duration-300 scroll-snap-align-start"
-        >
-          {event.images && event.images.length > 0 && (
-            <div className="relative w-full h-36 mb-3 rounded-md overflow-hidden">
-              <Image
-                src={event.images[0].url}
-                alt={event.name}
-                fill
-                style={{ objectFit: 'cover' }}
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority={false}
-              />
-            </div>
-          )}
-          <h3 className="font-semibold text-lg">{event.name}</h3>
-          <p className="text-sm text-gray-500">
-            {event.dates?.start?.localDate || 'Date TBD'}
-          </p>
-        </Link>
-      ))}
+    <div className="bg-white text-black min-h-screen flex flex-col">
+      {/* Header */}
+      <EventHeader eventName="CityStew Events" />
+
+      {/* Content */}
+      <main className="flex-1 max-w-7xl mx-auto px-4 py-10">
+        {loading ? (
+          <p className="text-lg">Loading events...</p>
+        ) : events.length === 0 ? (
+          <p className="text-lg text-gray-600">No events found.</p>
+        ) : (
+          <div className="flex space-x-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 px-2">
+            {events.map(event => (
+              <Link
+                key={event.id}
+                href={`/events/${event.id}`}
+                className="flex-shrink-0 w-60 rounded-lg border p-4 shadow-md hover:shadow-xl transition-shadow duration-300 scroll-snap-align-start"
+              >
+                {event.images?.[0]?.url && (
+                  <div className="relative w-full h-36 mb-3 rounded-md overflow-hidden">
+                    <Image
+                      src={event.images[0].url}
+                      alt={event.name}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                  </div>
+                )}
+                <h3 className="font-semibold text-lg">{event.name}</h3>
+                <p className="text-sm text-gray-500">
+                  {event.dates?.start?.localDate || 'Date TBD'}
+                </p>
+              </Link>
+            ))}
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
