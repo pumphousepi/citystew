@@ -1,18 +1,18 @@
-import Footer from '../../components/Footer';
 import EventHeader from '../../components/EventHeader';
+import Footer from '../../components/Footer';
 import { notFound } from 'next/navigation';
 
-interface Props {
+interface PageProps {
   params: {
     category: string;
     genre: string;
   };
 }
 
-export default async function CategoryGenrePage({ params }: Props) {
+export default async function CategoryGenrePage({ params }: PageProps) {
   const { category, genre } = params;
 
-  // Fetch events based on category and genre
+  // Fetch events for the given category and genre
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/events?category=${category}&genre=${genre}`,
     { next: { revalidate: 3600 } }
@@ -23,9 +23,9 @@ export default async function CategoryGenrePage({ params }: Props) {
   const events = await res.json();
 
   return (
-    <>
+    <div className="bg-white min-h-screen text-black">
       <EventHeader
-        eventName={`${genre.toUpperCase()} ${category.toUpperCase()}`}
+        eventName={`${genre} ${category}`}
         eventDateTime=""
         venueName=""
         venueLocation=""
@@ -33,16 +33,17 @@ export default async function CategoryGenrePage({ params }: Props) {
 
       <main className="max-w-7xl mx-auto px-4 py-10">
         <h2 className="text-2xl font-semibold mb-6">
-          Showing results for {genre.toUpperCase()} in {category.toUpperCase()}
+          Showing results for <span className="capitalize">{genre}</span> in{' '}
+          <span className="capitalize">{category}</span>
         </h2>
 
         {Array.isArray(events) && events.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {events.map((event: any) => (
               <div key={event.id} className="border p-4 rounded shadow">
-                <h3 className="font-bold">{event.title}</h3>
-                <p>{event.date}</p>
-                <p>{event.venue}</p>
+                <h3 className="font-bold text-lg mb-1">{event.title}</h3>
+                <p className="text-sm text-gray-600">{event.date}</p>
+                <p className="text-sm text-gray-600">{event.venue}</p>
               </div>
             ))}
           </div>
@@ -52,6 +53,6 @@ export default async function CategoryGenrePage({ params }: Props) {
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 }
