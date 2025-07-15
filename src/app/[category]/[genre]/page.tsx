@@ -12,7 +12,6 @@ interface PageProps {
 export default async function CategoryGenrePage({ params }: PageProps) {
   const { category, genre } = params;
 
-  // Fetch events for the given category and genre
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/events?category=${category}&genre=${genre}`,
     { next: { revalidate: 3600 } }
