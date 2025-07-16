@@ -2,7 +2,7 @@ import Footer from '../../components/Footer';
 import EventHeader from '../../components/EventHeader';
 import { notFound } from 'next/navigation';
 
-export default async function CategoryGenrePage({
+export default async function Page({
   params,
 }: {
   params: { category: string; genre: string };
