@@ -1,23 +1,12 @@
-import { Metadata } from 'next';
 import Footer from '../../components/Footer';
 import EventHeader from '../../components/EventHeader';
 import { notFound } from 'next/navigation';
 
-type PageProps = {
-  params: {
-    category: string;
-    genre: string;
-  };
-};
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  return {
-    title: `${params.genre.toUpperCase()} ${params.category.toUpperCase()} | CityStew`,
-    description: `Discover ${params.genre} ${params.category} events near you!`,
-  };
-}
-
-export default async function CategoryGenrePage({ params }: PageProps) {
+export default async function CategoryGenrePage({
+  params,
+}: {
+  params: { category: string; genre: string };
+}) {
   const { category, genre } = params;
 
   const res = await fetch(
