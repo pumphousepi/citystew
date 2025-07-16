@@ -2,14 +2,11 @@ import Footer from '../../components/Footer';
 import EventHeader from '../../components/EventHeader';
 import { notFound } from 'next/navigation';
 
-interface PageProps {
-  params: {
-    category: string;
-    genre: string;
-  };
-}
-
-export default async function CategoryGenrePage({ params }: PageProps) {
+export default async function CategoryGenrePage({
+  params,
+}: {
+  params: { category: string; genre: string };
+}) {
   const { category, genre } = params;
 
   const res = await fetch(
