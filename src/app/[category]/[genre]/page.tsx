@@ -2,11 +2,14 @@ import Footer from '../../components/Footer';
 import EventHeader from '../../components/EventHeader';
 import { notFound } from 'next/navigation';
 
-export default async function CategoryGenrePage({
-  params,
-}: {
-  params: { category: string; genre: string };
-}) {
+interface PageProps {
+  params: {
+    category: string;
+    genre: string;
+  };
+}
+
+export default async function CategoryGenrePage({ params }: PageProps) {
   const { category, genre } = params;
 
   const res = await fetch(
@@ -19,7 +22,7 @@ export default async function CategoryGenrePage({
   const events = await res.json();
 
   return (
-    <>
+    <div className="bg-white text-black min-h-screen">
       <EventHeader
         eventName={`${genre.toUpperCase()} ${category.toUpperCase()}`}
         eventDateTime=""
@@ -36,9 +39,9 @@ export default async function CategoryGenrePage({
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {events.map((event: any) => (
               <div key={event.id} className="border p-4 rounded shadow">
-                <h3 className="font-bold">{event.title}</h3>
-                <p>{event.date}</p>
-                <p>{event.venue}</p>
+                <h3 className="font-bold">{event.title || event.name}</h3>
+                <p>{event.date || event.dates?.start?.localDate}</p>
+                <p>{event.venue || event._embedded?.venues?.[0]?.name}</p>
               </div>
             ))}
           </div>
@@ -48,6 +51,6 @@ export default async function CategoryGenrePage({
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 }
