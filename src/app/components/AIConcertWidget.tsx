@@ -1,8 +1,7 @@
-// ai-concert-widget.tsx
-import React, { useEffect, useState } from 'react';
-import { fetchYouTubeVideos } from '../lib/fetchYouTube';
+'use client';
 
-// Define a TypeScript type for the video objects
+import React, { useEffect, useState } from 'react';
+
 type Video = {
   id: string;
   title: string;
@@ -10,7 +9,6 @@ type Video = {
   channel: string;
   date: string;
 };
-console.log("🧪 TEST ENV:", process.env.NEXT_PUBLIC_YOUTUBE_API_KEY);
 
 const AIConcertWidget = () => {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -18,8 +16,10 @@ const AIConcertWidget = () => {
   useEffect(() => {
     const loadVideos = async () => {
       try {
-        const results = await fetchYouTubeVideos('live concert 2025 official');
-        setVideos(results);
+        const res = await fetch('/api/youtube?query=live concert 2025 official');
+        if (!res.ok) throw new Error('Failed to fetch videos');
+        const data = await res.json();
+        setVideos(data);
       } catch (error) {
         console.error(error);
       }
@@ -30,7 +30,7 @@ const AIConcertWidget = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-4 bg-white rounded-xl shadow-lg">
-      <h1 className="text-2xl font-bold mb-6">🔥 Top Concert Videos</h1>
+      <h1 className="text-2xl font-bold mb-6">Top Concert Videos</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {videos.map((video, idx) => (
           <div
