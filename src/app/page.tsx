@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
+import AIConcertWidget from './components/AIConcertWidget';
 import TrendingEvents from './components/TrendingEvents';
 import Categories from './components/Categories';
 import ThreeColumnSection from './components/ThreeColumnSection'; // now renders Sports/Concerts/Theater Near You
@@ -26,7 +27,7 @@ export default function HomePage() {
 
       <main className="bg-white text-gray-900 min-h-screen pt-16">
         <HeroSection />
-
+        <AIConcertWidget />
         <TrendingEvents
           location={selectedLocation}
           category={selectedCategory}
