@@ -27,22 +27,22 @@ export default function HomePage() {
 
       <main className="bg-white text-gray-900 min-h-screen pt-16">
         <HeroSection />
-        <AIConcertWidget />
+        
         <TrendingEvents
           location={selectedLocation}
           category={selectedCategory}
           genre={selectedGenre}
           onSelectLocation={setSelectedLocation}
         />
-
-        <Categories />
+        <AIConcertWidget />
+       
 
         {/* ThreeColumnSection now only needs location */}
         <ThreeColumnSection location={selectedLocation} />
 
         {/* New Movie Theaters section */}
         <TheaterList location={selectedLocation} />
-
+        <Categories />
         <Sponsors />
       </main>
 
