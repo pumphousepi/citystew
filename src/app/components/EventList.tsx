@@ -1,4 +1,3 @@
-// src/app/components/EventList.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -47,30 +46,26 @@ export default function EventList({ city, state }: EventListProps) {
   if (loading) return <p>Loading events...</p>;
   if (events.length === 0) return <p>No events found.</p>;
 
-  return (
-<div className="flex space-x-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 px-2">
-  {(() => {
-    const seen = new Set<string>();
-    return events.map((event) => {
-      const rawUrl = event.images?.[0]?.url;
-      let imageUrl: string | undefined;
-      if (rawUrl && !seen.has(rawUrl)) {
-        seen.add(rawUrl);
-        imageUrl = rawUrl;
-      }
-      return (
-        <EventCard
-          key={event.id}
-          title={event.name}
-          image={imageUrl}
-          date={event.dates?.start?.localDate}
-          venue={event._embedded?.venues?.[0]?.name}
-          href={`/events/${event.id}`}
-        />
-      );
-    });
-  })()}
-</div>
+  const seenImages = new Set<string>();
 
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-2">
+      {events.map((event) => {
+        const imageUrl = event.images?.[0]?.url;
+        if (!imageUrl || seenImages.has(imageUrl)) return null;
+        seenImages.add(imageUrl);
+
+        return (
+          <EventCard
+            key={event.id}
+            title={event.name}
+            image={imageUrl}
+            date={event.dates?.start?.localDate}
+            venue={event._embedded?.venues?.[0]?.name}
+            href={`/events/${event.id}`}
+          />
+        );
+      })}
+    </div>
   );
 }

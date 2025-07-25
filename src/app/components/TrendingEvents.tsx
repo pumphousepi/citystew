@@ -92,7 +92,6 @@ export default function TrendingEvents({
     })();
   }, [location, activeCategory, genre]);
 
-  const toggleDropdown = () => setDropdownOpen(prev => !prev);
   const onSelectCity = (loc: string) => {
     onSelectLocation(loc);
     setDropdownOpen(false);
@@ -105,7 +104,13 @@ export default function TrendingEvents({
       : '';
   };
 
-  const visibleEvents = events.slice(0, 4);
+  const seenImages = new Set<string>();
+  const filteredEvents = events.filter((e) => {
+    const url = e.images?.[0]?.url;
+    if (!url || seenImages.has(url)) return false;
+    seenImages.add(url);
+    return true;
+  }).slice(0, 4); // limit to 4
 
   return (
     <section className="py-12 bg-gray-50">
@@ -115,27 +120,27 @@ export default function TrendingEvents({
             Trending {activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)} in
           </h2>
 
-          <div className="relative">
-            <NavButton
-              onClick={toggleDropdown}
-              ariaHasPopup
-              className="flex items-center space-x-1"
-            >
+          <div
+            className="relative"
+            onMouseEnter={() => setDropdownOpen(true)}
+            onMouseLeave={() => setDropdownOpen(false)}
+          >
+            <NavButton ariaHasPopup className="flex items-center space-x-1">
               <span className="text-blue-500">{location}</span>
               <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   clipRule="evenodd"
                   d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 
-                     0 111.06 1.06l-4.24 4.24a.75.75 0 
-                     01-1.06 0L5.21 8.27a.75.75 0 
+                     0 111.06 1.06l-4.24 4.24a.75.75 
+                     0 01-1.06 0L5.21 8.27a.75.75 0 
                      01.02-1.06z"
                 />
               </svg>
             </NavButton>
 
             {dropdownOpen && (
-              <ul className="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg overflow-auto max-h-64">
+              <ul className="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg overflow-auto max-h-64 z-10">
                 {cities.map(c => (
                   <li key={c.label}>
                     <button
@@ -155,19 +160,19 @@ export default function TrendingEvents({
           <p>Loading trending {activeCategory}…</p>
         ) : rateLimited ? (
           <p className="text-red-600">Rate limit exceeded, please wait a moment.</p>
-        ) : events.length === 0 ? (
+        ) : filteredEvents.length === 0 ? (
           <p>No {activeCategory} found.</p>
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {visibleEvents.map(evt => (
+              {filteredEvents.map(evt => (
                 <EventCard
                   key={evt.id}
                   title={evt.name}
                   image={evt.images?.[0]?.url}
                   date={evt.dates?.start?.localDate}
                   venue={evt._embedded?.venues?.[0]?.name}
-                  href={`/events/${evt.id}`} // ✅ Updated here
+                  href={`/events/${evt.id}`}
                 />
               ))}
             </div>
