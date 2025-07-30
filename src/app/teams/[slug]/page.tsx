@@ -1,5 +1,5 @@
 // src/app/teams/[slug]/page.tsx
-import React from 'react';
+import React, { FC } from 'react';
 import { notFound } from 'next/navigation';
 import EventCard from '../../components/EventCard';
 import EventHeader from '../../components/EventHeader';
@@ -30,6 +30,12 @@ interface TicketmasterResponse {
   };
 }
 
+interface PageProps {
+  params: {
+    slug: string;
+  };
+}
+
 function slugToName(slug: string): string {
   return slug
     .split('-')
@@ -37,11 +43,7 @@ function slugToName(slug: string): string {
     .join(' ');
 }
 
-export default async function TeamEventsPage({
-  params,
-}: {
-  params: Record<string, string>;
-}) {
+const TeamEventsPage: FC<PageProps> = async ({ params }) => {
   const teamName = slugToName(params.slug);
 
   const res = await fetch(
@@ -101,4 +103,6 @@ export default async function TeamEventsPage({
       </main>
     </div>
   );
-}
+};
+
+export default TeamEventsPage;
