@@ -29,7 +29,7 @@ interface TicketmasterResponse {
   };
 }
 
-// Converts 'new-york-knicks' to 'New York Knicks'
+// Utility to convert slug like "san-antonio-spurs" → "San Antonio Spurs"
 function slugToName(slug: string): string {
   return slug
     .split('-')
@@ -37,14 +37,7 @@ function slugToName(slug: string): string {
     .join(' ');
 }
 
-// ✅ Use correct props type structure
-type PageProps = {
-  params: {
-    slug: string;
-  };
-};
-
-export default async function TeamEventsPage({ params }: PageProps) {
+export default async function Page({ params }: { params: { slug: string } }) {
   const teamName = slugToName(params.slug);
 
   const res = await fetch(
