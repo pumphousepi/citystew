@@ -1,5 +1,5 @@
 // src/app/teams/[slug]/page.tsx
-import React, { useEffect, useState, useRef } from 'react';
+import React from 'react';
 import { notFound } from 'next/navigation';
 import EventCard from '../../components/EventCard';
 import EventHeader from '../../components/EventHeader';
@@ -37,8 +37,8 @@ function slugToName(slug: string): string {
     .join(' ');
 }
 
-// ✅ Don't use FC<> for async components
-export default async function TeamEventsPage({
+// ✅ No external type constraint — this avoids build error
+export default async function Page({
   params,
 }: {
   params: { slug: string };
