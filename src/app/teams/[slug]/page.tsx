@@ -1,4 +1,5 @@
 // src/app/teams/[slug]/page.tsx
+
 import React from 'react';
 import { notFound } from 'next/navigation';
 import EventCard from '../../components/EventCard';
@@ -30,6 +31,14 @@ interface TicketmasterResponse {
   };
 }
 
+// ✅ STEP 1: Define the expected page props structure
+interface PageProps {
+  params: {
+    slug: string;
+  };
+}
+
+// ✅ STEP 2: Cleanly convert slug to readable name
 function slugToName(slug: string): string {
   return slug
     .split('-')
@@ -37,12 +46,8 @@ function slugToName(slug: string): string {
     .join(' ');
 }
 
-// ✅ No external type constraint — this avoids build error
-export default async function Page({
-  params,
-}: {
-  params: { slug: string };
-}) {
+// ✅ STEP 3: Use correct param typing in the component
+export default async function TeamEventsPage({ params }: PageProps) {
   const teamName = slugToName(params.slug);
 
   const res = await fetch(
