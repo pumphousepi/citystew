@@ -1,10 +1,13 @@
+// src/app/components/Navbar.tsx
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import NavButton from './NavButton';
 import MegaDropdown from './MegaDropdown';
-import { sportsData, concertData, theaterData } from './_megaData';
+import { sportsData } from '../../data/sportsData';
+import { concertData, theaterData } from './_megaData';
+
 
 interface CityOption {
   name: string;

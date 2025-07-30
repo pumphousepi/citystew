@@ -1,3 +1,4 @@
+// src/app/components/MegaDropdown.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -20,14 +21,24 @@ export default function MegaDropdown({
   const items = dataMap[activeTab] || [];
 
   const linkFor = (item: string) => {
+    const slug = item.toLowerCase().replace(/\s+/g, '-');
+    
     if (category === 'sports') {
-      return `/events?category=sports&league=${encodeURIComponent(activeTab)}&team=${encodeURIComponent(item)}${baseQuery}`;
+      return `/teams/${slug}`;
     }
+  
+    const params = new URLSearchParams(baseQuery.replace('?', ''));
+  
     if (category === 'concerts') {
-      return `/events?category=concerts&artist=${encodeURIComponent(item)}${baseQuery}`;
+      params.set('category', 'concerts');
+      params.set('artist', item);
+    } else {
+      params.set('category', 'theater');
+      params.set('show', item);
     }
-    return `/events?category=theater&show=${encodeURIComponent(item)}${baseQuery}`;
-  };
+  
+    return `/events?${params.toString()}`;
+  };   
 
   return (
     <div className={styles.megaWrapper}>

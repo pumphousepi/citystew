@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 
 interface EventCardProps {
+  id?: string;
   title: string;
   image?: string;
   date?: string;
@@ -78,7 +79,7 @@ export default function EventCard({
       </div>
 
       <div className="p-3 sm:p-4 lg:p-6 flex flex-col flex-1">
-        <h3 className="text-base sm:text-lg lg:text-xl font-semibold mb-2 line-clamp-2">
+        <h3 className="text-base sm:text-lg lg:text-xl font-semibold mb-2 line-clamp-2 text-black">
           {title}
         </h3>
         {date && <p className="text-sm sm:text-base text-gray-600">{date}</p>}
