@@ -30,12 +30,6 @@ interface TicketmasterResponse {
   };
 }
 
-interface TeamPageProps {
-  params: {
-    slug: string;
-  };
-}
-
 function slugToName(slug: string): string {
   return slug
     .split('-')
@@ -43,7 +37,11 @@ function slugToName(slug: string): string {
     .join(' ');
 }
 
-export default async function TeamEventsPage({ params }: TeamPageProps) {
+export default async function TeamEventsPage({
+  params,
+}: {
+  params: Record<string, string>;
+}) {
   const teamName = slugToName(params.slug);
 
   const res = await fetch(
