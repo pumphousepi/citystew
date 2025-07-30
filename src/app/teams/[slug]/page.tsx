@@ -1,5 +1,5 @@
 // src/app/teams/[slug]/page.tsx
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { notFound } from 'next/navigation';
 import EventCard from '../../components/EventCard';
 import EventHeader from '../../components/EventHeader';
