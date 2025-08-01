@@ -1,5 +1,4 @@
 // src/app/teams/[slug]/page.tsx
-import React from 'react';
 import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
 import EventCard from '../../components/EventCard';
@@ -40,19 +39,12 @@ function slugToName(slug: string): string {
     .join(' ');
 }
 
-// ✅ Properly typed props
-interface Props {
-  params: {
-    slug: string;
-  };
-}
-
-// ✅ This solves the type error
-export async function generateStaticParams() {
-  return []; // Or return your real slugs here
-}
-
-export default async function TeamEventsPage({ params }: Props) {
+// ✅ Correct typing for App Router async page
+export default async function TeamEventsPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const teamName = slugToName(params.slug);
 
   const res = await fetch(
