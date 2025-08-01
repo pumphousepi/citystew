@@ -1,21 +1,8 @@
 // src/app/teams/[slug]/page.tsx
-
 import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
 import EventCard from '../../components/EventCard';
 import EventHeader from '../../components/EventHeader';
-
-// ✅ Use this App Router type
-import type { Metadata, ResolvingMetadata } from 'next';
-
-// 👇 Needed to avoid dynamic build errors
-export const dynamic = 'force-dynamic';
-
-type Props = {
-  params: {
-    slug: string;
-  };
-};
 
 interface Event {
   id: string;
@@ -42,6 +29,7 @@ interface TicketmasterResponse {
   };
 }
 
+// Convert "los-angeles-lakers" to "Los Angeles Lakers"
 function slugToName(slug: string): string {
   return slug
     .split('-')
@@ -49,7 +37,12 @@ function slugToName(slug: string): string {
     .join(' ');
 }
 
-export default async function Page({ params }: Props) {
+// ✅ Correct typing for App Router dynamic route
+export default async function Page({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const teamName = slugToName(params.slug);
 
   const res = await fetch(
@@ -63,8 +56,10 @@ export default async function Page({ params }: Props) {
   const data: TicketmasterResponse = await res.json();
   const events = data._embedded?.events || [];
 
-  const futureEvents = events.filter(event => {
-    const date = new Date(event.dates.start.localDate);
+  const futureEvents = events.filter(e => {
+    const dateStr = e.dates?.start?.localDate;
+    if (!dateStr) return false;
+    const date = new Date(dateStr);
     return date >= new Date();
   });
 
