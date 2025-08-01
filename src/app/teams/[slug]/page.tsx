@@ -5,14 +5,17 @@ import { format } from 'date-fns';
 import EventCard from '../../components/EventCard';
 import EventHeader from '../../components/EventHeader';
 
-export const dynamic = 'force-dynamic'; // ✅ Add this to avoid static constraint
+// ✅ Use this App Router type
+import type { Metadata, ResolvingMetadata } from 'next';
 
-// ✅ Declare prop type separately (fixes Vercel TS issue)
-interface TeamEventsPageProps {
+// 👇 Needed to avoid dynamic build errors
+export const dynamic = 'force-dynamic';
+
+type Props = {
   params: {
     slug: string;
   };
-}
+};
 
 interface Event {
   id: string;
@@ -46,7 +49,7 @@ function slugToName(slug: string): string {
     .join(' ');
 }
 
-export default async function TeamEventsPage({ params }: TeamEventsPageProps) {
+export default async function Page({ params }: Props) {
   const teamName = slugToName(params.slug);
 
   const res = await fetch(
