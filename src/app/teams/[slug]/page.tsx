@@ -4,7 +4,6 @@ import { format } from 'date-fns';
 import EventCard from '../../components/EventCard';
 import EventHeader from '../../components/EventHeader';
 
-// Event type
 interface Event {
   id: string;
   name: string;
@@ -24,14 +23,12 @@ interface Event {
   };
 }
 
-// Ticketmaster API response shape
 interface TicketmasterResponse {
   _embedded?: {
     events: Event[];
   };
 }
 
-// Converts "san-antonio-spurs" -> "San Antonio Spurs"
 function slugToName(slug: string): string {
   return slug
     .split('-')
@@ -39,7 +36,7 @@ function slugToName(slug: string): string {
     .join(' ');
 }
 
-// ✅ Correct typing for App Router async page
+// ✅ Correct type format for App Router
 export default async function TeamEventsPage({
   params,
 }: {
