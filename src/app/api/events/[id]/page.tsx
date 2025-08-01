@@ -23,6 +23,52 @@ interface EventDetails {
   images?: { url: string }[];
 }
 
+function BannerAd() {
+  return (
+    <div className="w-full bg-blue-100 border border-blue-300 p-4 text-center my-6 rounded shadow">
+      <p className="text-sm text-gray-800 font-medium">
+        Sponsored by <span className="text-blue-700 font-semibold">Taco & Tequila Bar</span> — 2 blocks from this venue!
+      </p>
+    </div>
+  );
+}
+
+function SponsoredCard() {
+  return (
+    <div className="bg-white border border-yellow-300 p-4 rounded-lg shadow-md relative my-6">
+      <span className="absolute top-2 right-2 text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">Sponsored</span>
+      <h3 className="text-lg font-semibold">Happy Hour at Joe's Bar</h3>
+      <p className="text-sm text-gray-700">
+        Just across the street — get 2-for-1 drinks before the show!
+      </p>
+      <a
+        href="https://your-link.com"
+        target="_blank"
+        className="inline-block mt-2 text-sm text-blue-600 underline"
+      >
+        View Offer
+      </a>
+    </div>
+  );
+}
+
+function VideoAd() {
+  return (
+    <div className="mt-10">
+      <p className="text-sm text-gray-600 mb-2">Promotional Video</p>
+      <div className="aspect-w-16 aspect-h-9">
+        <iframe
+          className="w-full h-full rounded"
+          src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+          title="Promotional Video"
+          frameBorder="0"
+          allowFullScreen
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function EventDetailPage() {
   const { id } = useParams();
   const [event, setEvent] = useState<EventDetails | null>(null);
@@ -106,6 +152,8 @@ export default function EventDetailPage() {
         </div>
       </div>
 
+      <BannerAd />
+
       {/* ─── Tickets + Seating Chart ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left: Tickets */}
@@ -126,6 +174,8 @@ export default function EventDetailPage() {
               </div>
             </div>
           ))}
+
+          <SponsoredCard />
         </div>
 
         {/* Right: Seating Chart */}
@@ -139,6 +189,8 @@ export default function EventDetailPage() {
           <p className="text-sm text-gray-500 mt-2">
             Not all sections may apply to this event
           </p>
+
+          <VideoAd />
         </div>
       </div>
     </div>

@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 
 interface EventHeaderProps {
@@ -8,7 +7,6 @@ interface EventHeaderProps {
   eventDateTime?: string;
   venueName?: string;
   venueLocation?: string;
-  imageUrl?: string;
 }
 
 export default function EventHeader({
@@ -17,12 +15,10 @@ export default function EventHeader({
   venueName,
   venueLocation,
 }: EventHeaderProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
-
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
+    <header className="bg-white shadow sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        {/* Logo and Info */}
+        {/* Logo and Event Info */}
         <div className="flex gap-4 items-start md:items-center">
           <Link href="/" className="flex-shrink-0">
             <img

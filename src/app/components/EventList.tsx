@@ -14,9 +14,10 @@ interface ApiEvent {
 interface EventListProps {
   city?: string;
   state?: string;
+  category?: string; // ← New prop
 }
 
-export default function EventList({ city, state }: EventListProps) {
+export default function EventList({ city, state, category }: EventListProps) {
   const [events, setEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,6 +28,7 @@ export default function EventList({ city, state }: EventListProps) {
         const params = new URLSearchParams();
         if (city) params.append('city', city);
         if (state) params.append('stateCode', state);
+        if (category) params.append('category', category); // ← Use category in API request
 
         const res = await fetch(`/api/events?${params.toString()}`);
         if (!res.ok) throw new Error('Failed to fetch events');
@@ -41,7 +43,7 @@ export default function EventList({ city, state }: EventListProps) {
     }
 
     fetchEvents();
-  }, [city, state]);
+  }, [city, state, category]); // ← Add category to effect deps
 
   if (loading) return <p>Loading events...</p>;
   if (events.length === 0) return <p>No events found.</p>;
@@ -49,7 +51,7 @@ export default function EventList({ city, state }: EventListProps) {
   const seenImages = new Set<string>();
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
       {events.map((event) => {
         const imageUrl = event.images?.[0]?.url;
         if (!imageUrl || seenImages.has(imageUrl)) return null;

@@ -1,9 +1,11 @@
 // src/app/teams/[slug]/page.tsx
+import React from 'react';
 import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
 import EventCard from '../../components/EventCard';
 import EventHeader from '../../components/EventHeader';
 
+// Event type
 interface Event {
   id: string;
   name: string;
@@ -23,21 +25,35 @@ interface Event {
   };
 }
 
+// Ticketmaster API response shape
 interface TicketmasterResponse {
   _embedded?: {
     events: Event[];
   };
 }
 
-type Props = {
-  params: { slug: string };
-};
-
-export default async function TeamEventsPage({ params }: Props) {
-  const teamName = params.slug
+// Converts "san-antonio-spurs" -> "San Antonio Spurs"
+function slugToName(slug: string): string {
+  return slug
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+// ✅ Properly typed props
+interface Props {
+  params: {
+    slug: string;
+  };
+}
+
+// ✅ This solves the type error
+export async function generateStaticParams() {
+  return []; // Or return your real slugs here
+}
+
+export default async function TeamEventsPage({ params }: Props) {
+  const teamName = slugToName(params.slug);
 
   const res = await fetch(
     `https://app.ticketmaster.com/discovery/v2/events.json?keyword=${encodeURIComponent(
@@ -64,7 +80,9 @@ export default async function TeamEventsPage({ params }: Props) {
           eventName={`${teamName} Events`}
           eventDateTime={
             `${firstEvent.dates.start.localDate}` +
-            (firstEvent.dates.start.localTime ? ` at ${firstEvent.dates.start.localTime}` : '')
+            (firstEvent.dates.start.localTime
+              ? ` at ${firstEvent.dates.start.localTime}`
+              : '')
           }
           venueName={firstEvent._embedded?.venues?.[0]?.name || ''}
           venueLocation={
@@ -96,9 +114,4 @@ export default async function TeamEventsPage({ params }: Props) {
       </main>
     </div>
   );
-}
-
-// 👇 Add this to satisfy App Router build requirements
-export async function generateStaticParams() {
-  return [];
 }
