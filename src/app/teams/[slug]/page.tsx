@@ -1,8 +1,18 @@
 // src/app/teams/[slug]/page.tsx
+
 import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
 import EventCard from '../../components/EventCard';
 import EventHeader from '../../components/EventHeader';
+
+export const dynamic = 'force-dynamic'; // ✅ Add this to avoid static constraint
+
+// ✅ Declare prop type separately (fixes Vercel TS issue)
+interface TeamEventsPageProps {
+  params: {
+    slug: string;
+  };
+}
 
 interface Event {
   id: string;
@@ -36,12 +46,7 @@ function slugToName(slug: string): string {
     .join(' ');
 }
 
-// ✅ Correct type format for App Router
-export default async function TeamEventsPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default async function TeamEventsPage({ params }: TeamEventsPageProps) {
   const teamName = slugToName(params.slug);
 
   const res = await fetch(
