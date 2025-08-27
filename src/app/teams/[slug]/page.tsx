@@ -5,11 +5,8 @@ import EventCard from '../../components/EventCard';
 import EventHeader from '../../components/EventHeader';
 import type { Metadata, ResolvingMetadata } from 'next';
 
-interface PageProps {
-  params: {
-    slug: string;
-  };
-}
+type Params = { slug: string };
+type SearchParams = Record<string, string | string[] | undefined>;
 
 interface Event {
   id: string;
@@ -39,38 +36,60 @@ interface TicketmasterResponse {
 function slugToName(slug: string): string {
   return slug
     .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 }
 
-// Optional metadata
+// Optional metadata (Next 15: params is a Promise)
 export async function generateMetadata(
-  { params }: PageProps,
+  { params }: { params: Promise<Params> },
   _parent: ResolvingMetadata
 ): Promise<Metadata> {
+  const { slug } = await params;
+  const name = slugToName(slug);
   return {
-    title: `${slugToName(params.slug)} Events | CityStew`,
-    description: `Find upcoming events for ${slugToName(params.slug)} on CityStew.`,
+    title: `${name} Events | CityStew`,
+    description: `Find upcoming events for ${name} on CityStew.`,
   };
 }
 
-export default async function TeamEventsPage({ params }: PageProps) {
-  const teamName = slugToName(params.slug);
+export default async function TeamEventsPage(
+  {
+    params,
+    // keep searchParams in signature for Next 15 (even if unused today)
+    searchParams,
+  }: {
+    params: Promise<Params>;
+    searchParams: Promise<SearchParams>;
+  }
+) {
+  const { slug } = await params;
+  const _sp = await searchParams; // not used, but awaited for type correctness
 
-  const res = await fetch(
-    `https://app.ticketmaster.com/discovery/v2/events.json?keyword=${encodeURIComponent(
-      teamName
-    )}&sort=date,asc&apikey=${process.env.TICKETMASTER_API_KEY}`
-  );
+  const teamName = slugToName(slug);
 
+  const apiKey = process.env.TICKETMASTER_API_KEY;
+  if (!apiKey) {
+    // If the key is missing in prod, fail fast (prevents silent empty UI)
+    return notFound();
+  }
+
+  const tmUrl = `https://app.ticketmaster.com/discovery/v2/events.json?keyword=${encodeURIComponent(
+    teamName
+  )}&sort=date,asc&apikey=${apiKey}`;
+
+  // This is a server component; fetch runs server-side.
+  const res = await fetch(tmUrl, { cache: 'no-store' });
   if (!res.ok) return notFound();
 
   const data: TicketmasterResponse = await res.json();
   const events = data._embedded?.events || [];
 
-  const futureEvents = events.filter(event => {
+  // Only future events
+  const today = new Date();
+  const futureEvents = events.filter((event) => {
     const date = new Date(event.dates.start.localDate);
-    return date >= new Date();
+    return date >= today;
   });
 
   const firstEvent = futureEvents[0];
@@ -82,9 +101,7 @@ export default async function TeamEventsPage({ params }: PageProps) {
           eventName={`${teamName} Events`}
           eventDateTime={
             `${firstEvent.dates.start.localDate}` +
-            (firstEvent.dates.start.localTime
-              ? ` at ${firstEvent.dates.start.localTime}`
-              : '')
+            (firstEvent.dates.start.localTime ? ` at ${firstEvent.dates.start.localTime}` : '')
           }
           venueName={firstEvent._embedded?.venues?.[0]?.name || ''}
           venueLocation={
@@ -102,7 +119,7 @@ export default async function TeamEventsPage({ params }: PageProps) {
           <p className="text-gray-600">No upcoming events found.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {futureEvents.map(event => (
+            {futureEvents.map((event) => (
               <EventCard
                 key={event.id}
                 title={event.name}
