@@ -3,6 +3,13 @@ import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
 import EventCard from '../../components/EventCard';
 import EventHeader from '../../components/EventHeader';
+import type { Metadata, ResolvingMetadata } from 'next';
+
+interface PageProps {
+  params: {
+    slug: string;
+  };
+}
 
 interface Event {
   id: string;
@@ -29,7 +36,6 @@ interface TicketmasterResponse {
   };
 }
 
-// Convert "los-angeles-lakers" to "Los Angeles Lakers"
 function slugToName(slug: string): string {
   return slug
     .split('-')
@@ -37,12 +43,18 @@ function slugToName(slug: string): string {
     .join(' ');
 }
 
-// ✅ Correct typing for App Router dynamic route
-export default async function Page({
-  params,
-}: {
-  params: { slug: string };
-}) {
+// Optional metadata
+export async function generateMetadata(
+  { params }: PageProps,
+  _parent: ResolvingMetadata
+): Promise<Metadata> {
+  return {
+    title: `${slugToName(params.slug)} Events | CityStew`,
+    description: `Find upcoming events for ${slugToName(params.slug)} on CityStew.`,
+  };
+}
+
+export default async function TeamEventsPage({ params }: PageProps) {
   const teamName = slugToName(params.slug);
 
   const res = await fetch(
@@ -56,10 +68,8 @@ export default async function Page({
   const data: TicketmasterResponse = await res.json();
   const events = data._embedded?.events || [];
 
-  const futureEvents = events.filter(e => {
-    const dateStr = e.dates?.start?.localDate;
-    if (!dateStr) return false;
-    const date = new Date(dateStr);
+  const futureEvents = events.filter(event => {
+    const date = new Date(event.dates.start.localDate);
     return date >= new Date();
   });
 

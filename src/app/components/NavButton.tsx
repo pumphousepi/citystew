@@ -1,4 +1,3 @@
-// src/app/components/NavButton.tsx
 'use client';
 
 import React, { ReactNode } from 'react';
@@ -9,13 +8,14 @@ interface NavButtonProps {
   onClick?: () => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
-  ariaHasPopup?: boolean;
-  /**
-   * If true, apply the “active” variant (blue text, dark bg).
-   * Otherwise apply the default white‐on‐dark link style.
-   */
+
+  /** Use these neutral prop names on the custom component */
+  hasPopup?: boolean;          // maps to aria-haspopup
+  expanded?: boolean;          // maps to aria-expanded
+  controlsId?: string;         // maps to aria-controls
+
+  /** Visual state */
   active?: boolean;
-  /** Extra classes you might want to pass on top of the defaults */
   className?: string;
 }
 
@@ -24,20 +24,31 @@ export default function NavButton({
   onClick,
   onMouseEnter,
   onMouseLeave,
-  ariaHasPopup = false,
+  hasPopup,
+  expanded,
+  controlsId,
   active = false,
   className = '',
 }: NavButtonProps) {
+  const onKeyDown: React.KeyboardEventHandler<HTMLButtonElement> = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
+
   return (
     <button
+      type="button"
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      aria-haspopup={ariaHasPopup}
-      className={`
-        ${active ? styles.navItemActive : styles.navItem}
-        ${className}
-      `}
+      onKeyDown={onKeyDown}
+      aria-haspopup={hasPopup || undefined}
+      aria-expanded={expanded}
+      aria-controls={controlsId}
+      className={`${active ? styles.navItemActive : styles.navItem} ${className}`}
+      style={{ padding: '0.375rem 0.25rem' }}
     >
       {children}
     </button>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 
+
 interface EventDetails {
   name: string;
   url?: string;
