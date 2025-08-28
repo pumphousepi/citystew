@@ -241,14 +241,14 @@ export default function Navbar({
         </div>
       )}
 
-      {/* SPORTS / CONCERTS dropdowns (desktop) */}
+            {/* SPORTS / CONCERTS dropdowns (desktop) */}
       {openMenu && (openMenu === 'sports' || openMenu === 'concerts') && (
         <div
           id={`menu-${openMenu}`}
-          className="absolute top-full inset-x-0 bg-white text-black shadow border border-gray-200 z-[80]"
+          className="absolute top-full inset-x-0 z-[80]" // keep only positioning/z-index
           onMouseLeave={() => setOpenMenu(null)}
         >
-          <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="max-w-7xl mx-auto">
             <MegaDropdown
               category={openMenu}
               dataMap={openMenu === 'sports' ? sportsData : concertData}
