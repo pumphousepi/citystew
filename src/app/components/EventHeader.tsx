@@ -7,6 +7,7 @@ interface EventHeaderProps {
   eventDateTime?: string;
   venueName?: string;
   venueLocation?: string;
+  imageUrl?: string; // ⬅️ add this
 }
 
 export default function EventHeader({
@@ -14,11 +15,11 @@ export default function EventHeader({
   eventDateTime,
   venueName,
   venueLocation,
+  imageUrl, // ⬅️ accept it
 }: EventHeaderProps) {
   return (
     <header className="bg-white shadow sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        {/* Logo and Event Info */}
         <div className="flex gap-4 items-start md:items-center">
           <Link href="/" className="flex-shrink-0">
             <img
@@ -38,6 +39,15 @@ export default function EventHeader({
           </div>
         </div>
       </div>
+
+      {/* Optional hero image if provided */}
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt={eventName}
+          className="w-full h-64 object-cover"
+        />
+      )}
     </header>
   );
 }
