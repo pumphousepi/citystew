@@ -1,3 +1,4 @@
+// src/app/components/NavButton.tsx
 'use client';
 
 import React, { ReactNode } from 'react';
@@ -9,12 +10,16 @@ interface NavButtonProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
 
-  /** Use these neutral prop names on the custom component */
-  hasPopup?: boolean;          // maps to aria-haspopup
-  expanded?: boolean;          // maps to aria-expanded
-  controlsId?: string;         // maps to aria-controls
+  // New neutral props
+  hasPopup?: boolean;
+  expanded?: boolean;
+  controlsId?: string;
 
-  /** Visual state */
+  // Legacy props (still supported)
+  ariaHasPopup?: boolean;
+  ariaExpanded?: boolean;
+  ariaControls?: string;
+
   active?: boolean;
   className?: string;
 }
@@ -27,9 +32,17 @@ export default function NavButton({
   hasPopup,
   expanded,
   controlsId,
+  // legacy
+  ariaHasPopup,
+  ariaExpanded,
+  ariaControls,
   active = false,
   className = '',
 }: NavButtonProps) {
+  const computedHasPopup = hasPopup ?? ariaHasPopup;
+  const computedExpanded = expanded ?? ariaExpanded;
+  const computedControlsId = controlsId ?? ariaControls;
+
   const onKeyDown: React.KeyboardEventHandler<HTMLButtonElement> = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -44,9 +57,9 @@ export default function NavButton({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onKeyDown={onKeyDown}
-      aria-haspopup={hasPopup || undefined}
-      aria-expanded={expanded}
-      aria-controls={controlsId}
+      aria-haspopup={computedHasPopup || undefined}
+      aria-expanded={computedExpanded}
+      aria-controls={computedControlsId}
       className={`${active ? styles.navItemActive : styles.navItem} ${className}`}
       style={{ padding: '0.375rem 0.25rem' }}
     >

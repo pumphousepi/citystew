@@ -28,19 +28,17 @@ interface Event {
 }
 
 interface TicketmasterResponse {
-  _embedded?: {
-    events: Event[];
-  };
+  _embedded?: { events: Event[] };
 }
 
 function slugToName(slug: string): string {
   return slug
     .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ');
 }
 
-// Optional metadata (Next 15: params is a Promise)
+// Next 15: params is a Promise
 export async function generateMetadata(
   { params }: { params: Promise<Params> },
   _parent: ResolvingMetadata
@@ -53,44 +51,33 @@ export async function generateMetadata(
   };
 }
 
-export default async function TeamEventsPage(
-  {
-    params,
-    // keep searchParams in signature for Next 15 (even if unused today)
-    searchParams,
-  }: {
-    params: Promise<Params>;
-    searchParams: Promise<SearchParams>;
-  }
-) {
+export default async function TeamEventsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<Params>;
+  searchParams: Promise<SearchParams>;
+}) {
   const { slug } = await params;
-  const _sp = await searchParams; // not used, but awaited for type correctness
+  await searchParams; // not used, but await to satisfy types
 
   const teamName = slugToName(slug);
 
   const apiKey = process.env.TICKETMASTER_API_KEY;
-  if (!apiKey) {
-    // If the key is missing in prod, fail fast (prevents silent empty UI)
-    return notFound();
-  }
+  if (!apiKey) return notFound();
 
-  const tmUrl = `https://app.ticketmaster.com/discovery/v2/events.json?keyword=${encodeURIComponent(
+  const url = `https://app.ticketmaster.com/discovery/v2/events.json?keyword=${encodeURIComponent(
     teamName
   )}&sort=date,asc&apikey=${apiKey}`;
 
-  // This is a server component; fetch runs server-side.
-  const res = await fetch(tmUrl, { cache: 'no-store' });
+  const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) return notFound();
 
   const data: TicketmasterResponse = await res.json();
-  const events = data._embedded?.events || [];
+  const events = data._embedded?.events ?? [];
 
-  // Only future events
   const today = new Date();
-  const futureEvents = events.filter((event) => {
-    const date = new Date(event.dates.start.localDate);
-    return date >= today;
-  });
+  const futureEvents = events.filter((e) => new Date(e.dates.start.localDate) >= today);
 
   const firstEvent = futureEvents[0];
 
