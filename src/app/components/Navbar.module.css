@@ -1,6 +1,7 @@
 /* src/app/components/Navbar.module.css */
 
 /* Navbar container (relative for dropdowns) */
+@reference "../globals.css"
 .navbar {
   @apply relative sticky top-0 w-full z-50 text-white transition-colors duration-200;
 }

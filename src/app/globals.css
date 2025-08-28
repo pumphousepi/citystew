@@ -1,5 +1,5 @@
 /* src/app/globals.css */
-@reference "./globals.css";
+
 
 @import "tailwindcss";
 
@@ -144,3 +144,4 @@ body {
   -ms-overflow-style: none;  /* IE & Edge */
   scrollbar-width: none;     /* Firefox */
 }
+

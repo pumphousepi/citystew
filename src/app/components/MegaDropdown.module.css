@@ -1,3 +1,5 @@
+@reference "./globals.css";
+
 .megaWrapper {
   position: relative;
 }
