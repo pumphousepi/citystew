@@ -1,5 +1,5 @@
 /* src/app/globals.css */
-@reference "../globals.css";
+@reference "./globals.css";
 
 @import "tailwindcss";
 
