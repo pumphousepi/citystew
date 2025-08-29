@@ -8,7 +8,7 @@ import { slugify } from '../../utils/slugify';
 export interface MegaDropdownProps {
   category: 'sports' | 'concerts' | 'theater';
   dataMap: Record<string, string[]>;
-  baseQuery: string;
+  baseQuery: string; // expected to be like "?city=...&state=..."
 }
 
 export default function MegaDropdown({
@@ -17,14 +17,15 @@ export default function MegaDropdown({
   baseQuery,
 }: MegaDropdownProps) {
   const tabs = Object.keys(dataMap);
-  const [activeTab, setActiveTab] = useState(tabs[0]);
-  const items = dataMap[activeTab]?.slice(0, 30) || [];
+  const [activeTab, setActiveTab] = useState<string>(tabs[0] ?? '');
+  const items = (activeTab ? dataMap[activeTab] : [])?.slice(0, 30) || [];
 
   const linkFor = (item: string) => {
     if (category === 'sports') {
       const slug = slugify ? slugify(item) : item.toLowerCase().replace(/\s+/g, '-');
       return `/teams/${slug}`;
     }
+    // copy base query (strip leading '?'), then add category-specific params
     const params = new URLSearchParams(baseQuery.replace('?', ''));
     if (category === 'concerts') {
       params.set('category', 'concerts');
@@ -39,13 +40,15 @@ export default function MegaDropdown({
   return (
     <div className={styles.megaWrapper}>
       <div className={styles.megaInner}>
-        {category === 'sports' && (
+        {category === 'sports' && tabs.length > 0 && (
           <div className={styles.megaTabs}>
-            {tabs.map(tab => (
+            {tabs.map((tab) => (
               <button
                 key={tab}
                 className={tab === activeTab ? styles.megaTabActive : styles.megaTabInactive}
                 onMouseEnter={() => setActiveTab(tab)}
+                onFocus={() => setActiveTab(tab)}
+                type="button"
               >
                 {tab.toUpperCase()}
               </button>
@@ -55,7 +58,11 @@ export default function MegaDropdown({
 
         <div className={styles.megaGrid}>
           {items.map((item, idx) => (
-            <Link key={`${activeTab}-${item}-${idx}`} href={linkFor(item)} className={styles.megaItem}>
+            <Link
+              key={`${activeTab}-${item}-${idx}`}
+              href={linkFor(item)}
+              className={styles.megaItem}
+            >
               {item}
             </Link>
           ))}

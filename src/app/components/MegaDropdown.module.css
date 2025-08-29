@@ -1,52 +1,61 @@
-@reference "./globals.css";
+/* No @reference needed here because this file doesn't use @apply */
+/* If you later add @apply in this module, add:
+   @reference "../globals.css";
+*/
 
 .megaWrapper {
   position: relative;
+  width: 100%;
 }
 
+/* Full-width white panel with subtle rounding + shadow */
 .megaInner {
-  /* full‐width white box with slight rounding + shadow */
-  inset: 0;
-  background-color: white;
-  border-radius: 0 0 0.5rem 0.5rem;
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;         /* gray-200 */
+  border-top: none;                   /* sits right under navbar */
+  border-radius: 0 0 0.5rem 0.5rem;   /* rounded bottom corners */
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  padding: 1rem 1.5rem;               /* inner spacing */
 }
 
+/* Tabs (sports only) */
 .megaTabs {
   display: flex;
   border-bottom: 1px solid #e5e7eb;
-  padding: 0.5rem 1.5rem;
+  padding: 0.5rem 0;                  /* inner X padding covered by .megaInner */
   gap: 1rem;
 }
 
 .megaTabActive {
-  color: #1d4ed8; /* blue-600 */
+  color: #1d4ed8;                     /* blue-600 */
   border-bottom: 2px solid #1d4ed8;
   padding-bottom: 0.25rem;
   font-weight: 600;
 }
 
 .megaTabInactive {
-  color: #374151; /* gray-700 */
+  color: #374151;                     /* gray-700 */
   cursor: pointer;
   padding-bottom: 0.25rem;
 }
 
+/* Grid of links */
 .megaGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.25rem 2rem;
-  max-height: 22rem; /* ~10 rows based on tight spacing */
+  max-height: 22rem;                  /* ~10 rows */
   overflow-y: auto;
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 0;                 /* vertical rhythm inside panel */
 }
 
-
+/* Match Cities link style */
 .megaItem {
   display: block;
-  font-size: 0.82rem;
+  font-size: 0.875rem;                /* ~14px */
   line-height: 1.25rem;
-  color: #1d4ed8;
+  color: #1d4ed8;                     /* blue-600 */
   padding: 0.15rem 0;
   text-decoration: none;
   white-space: nowrap;
@@ -56,20 +65,14 @@
   text-decoration: underline;
 }
 
-
-
-.megaItem:hover {
-  text-decoration: underline;
-}
-
 .megaFooter {
   border-top: 1px solid #e5e7eb;
-  padding: 0.5rem 1.5rem;
+  padding-top: 0.5rem;
   text-align: right;
 }
 
 .megaViewAll {
-  color: #1d4ed8; /* blue-600 */
+  color: #1d4ed8;                     /* blue-600 */
   font-weight: 600;
   font-size: 0.875rem;
   text-decoration: none;
