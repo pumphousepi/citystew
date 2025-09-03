@@ -19,6 +19,8 @@ interface NavbarProps {
   onSelectLocation: (loc: string) => void;
   onSelectCategory: (cat: string) => void;
   onSelectGenre: (genre: string) => void; // kept for compatibility
+  /** Force the search/location inputs to render (e.g., on /events) */
+  forceShowInputs?: boolean;
 }
 
 type MenuKey = 'cities' | 'sports' | 'concerts' | 'entertainment' | null;
@@ -28,6 +30,7 @@ export default function Navbar({
   selectedLocation,
   onSelectLocation,
   onSelectCategory,
+  forceShowInputs = false,
 }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -42,7 +45,7 @@ export default function Navbar({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSubmenu, setMobileSubmenu] = useState<NonNullMenuKey | null>(null);
 
-  // Extract city/state from selectedLocation
+  // Extract city/state
   const [city, state] = selectedLocation.split(',').map((s) => s.trim());
 
   // Base query for location-aware links
@@ -68,7 +71,7 @@ export default function Navbar({
       .catch(console.error);
   }, []);
 
-  // Show search/location inputs after scrolling past hero
+  // Show search/location inputs after scrolling past hero (home)
   useEffect(() => {
     const onScroll = () => {
       const hero = document.getElementById('hero-section');
@@ -127,6 +130,9 @@ export default function Navbar({
   const toggleMobileSubmenu = (key: NonNullMenuKey) =>
     setMobileSubmenu((prev) => (prev === key ? null : key));
 
+  // Use this for rendering the search row
+  const inputVisible = forceShowInputs || showInputs;
+
   return (
     <nav ref={navRef} className="sticky top-0 inset-x-0 bg-black text-white z-50 relative">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -163,8 +169,8 @@ export default function Navbar({
           )}
         </ul>
 
-        {/* Search + Location pill (desktop after scroll) */}
-        {showInputs && (
+        {/* Search + Location pill (desktop) */}
+        {inputVisible && (
           <div className="hidden md:flex items-center space-x-4">
             <input
               type="text"
@@ -241,11 +247,11 @@ export default function Navbar({
         </div>
       )}
 
-            {/* SPORTS / CONCERTS dropdowns (desktop) */}
+      {/* SPORTS / CONCERTS dropdowns (desktop) */}
       {openMenu && (openMenu === 'sports' || openMenu === 'concerts') && (
         <div
           id={`menu-${openMenu}`}
-          className="absolute top-full inset-x-0 z-[80]" // keep only positioning/z-index
+          className="absolute top-full inset-x-0 z-[80]"
           onMouseLeave={() => setOpenMenu(null)}
         >
           <div className="max-w-7xl mx-auto">

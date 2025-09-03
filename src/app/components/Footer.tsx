@@ -40,7 +40,7 @@ export default function Footer() {
             <li><Link href="/events" className="hover:text-white">Events</Link></li>
             <li><Link href="/categories" className="hover:text-white">Categories</Link></li>
             <li><Link href="/top-sellers" className="hover:text-white">Top Sellers</Link></li>
-            <li><Link href="/family" className="hover:text-white">Family Events</Link></li>
+            <li><Link href="/family-events" className="hover:text-white">Family Events</Link></li>
           </ul>
         </div>
 
@@ -48,7 +48,7 @@ export default function Footer() {
         <div>
           <h3 className="text-white font-semibold mb-4">Support</h3>
           <ul className="space-y-2">
-            <li><Link href="/help" className="hover:text-white">Help Center</Link></li>
+            <li><Link href="/help-center" className="hover:text-white">Help Center</Link></li>
             <li><Link href="/contact" className="hover:text-white">Contact Us</Link></li>
             <li><Link href="/privacy" className="hover:text-white">Privacy Policy</Link></li>
             <li><Link href="/terms" className="hover:text-white">Terms of Service</Link></li>
